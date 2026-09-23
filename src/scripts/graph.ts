@@ -179,15 +179,18 @@ export class MotionScope {
 }
 
 /**
- * Move a packet (an SVG circle) along a path once. The path length is read once per flight
- * (several packets run concurrently, so no per-frame length queries); layout only changes on
- * resize, and a packet lasts well under a second. Resolves at the sink port or on cancel.
+ * Move a packet along a path once. A circle packet is placed by its center (cx/cy); any other
+ * shape (e.g. a tiny thumbnail rect drawn around its own origin) is placed with a translate. The
+ * path length is read once per flight (several packets run concurrently, so no per-frame length
+ * queries); layout only changes on resize, and a packet lasts well under a second. Resolves at
+ * the sink port or on cancel.
  */
-export function sendPacket(scope: MotionScope, path: SVGPathElement, dot: SVGCircleElement, duration = 900): Promise<void> {
+export function sendPacket(scope: MotionScope, path: SVGPathElement, dot: SVGGraphicsElement, duration = 900): Promise<void> {
   if (!path.getAttribute('d')) return Promise.resolve();
   const len = path.getTotalLength();
   const state = { t: 0 };
   const hide = () => dot.setAttribute('opacity', '0');
+  const circle = dot instanceof SVGCircleElement;
   return scope
     .animate(
       state,
@@ -197,8 +200,12 @@ export function sendPacket(scope: MotionScope, path: SVGPathElement, dot: SVGCir
         ease: 'linear',
         onUpdate: () => {
           const pt = path.getPointAtLength(state.t * len);
-          dot.setAttribute('cx', pt.x.toFixed(1));
-          dot.setAttribute('cy', pt.y.toFixed(1));
+          if (circle) {
+            dot.setAttribute('cx', pt.x.toFixed(1));
+            dot.setAttribute('cy', pt.y.toFixed(1));
+          } else {
+            dot.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)})`);
+          }
           // Fade in at the source port, out at the sink.
           dot.setAttribute('opacity', Math.min(1, state.t * 8, (1 - state.t) * 8).toFixed(2));
         },

@@ -13,7 +13,7 @@ import Slot from '../Slot.astro';
 >
   <div class="grid gap-4 lg:grid-cols-2">
     <Spec label=".btn .btn-primary / .btn-ghost / .btn-sm" note="Pills, one height scale: 44px, 36px small. Hover shifts fill in 120ms; press nudges 1px.">
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-4">
         <button type="button" class="btn btn-primary">Get in touch</button>
         <button type="button" class="btn btn-ghost">See the work <Icon name="ph:arrow-right" size={16} class="btn-arrow" aria-hidden="true" /></button>
         <button type="button" class="btn btn-primary btn-sm">Get in touch</button>
@@ -22,7 +22,7 @@ import Slot from '../Slot.astro';
       <p class="mt-4 text-small text-muted">Focus draws the global 2px graphic-deep ring at 3px offset. There is no disabled variant; remove the action instead.</p>
     </Spec>
     <Spec label=".btn-invert / .btn-outline-invert" note="Only on ink bands (closing CTA). White pill leads; outline follows." class="grid-canvas-ink">
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-4">
         <button type="button" class="btn btn-invert">Get in touch</button>
         <button type="button" class="btn btn-outline-invert">Download resume</button>
       </div>
@@ -57,7 +57,7 @@ import Slot from '../Slot.astro';
         </div>
         <div>
           <p class="text-stat tabular-nums text-dash-ink">000</p>
-          <p class="mt-1 flex flex-wrap items-center gap-1.5 text-small text-muted">hours saved per year <span class="ph-chip">Add number</span></p>
+          <p class="mt-1 flex flex-wrap items-center gap-2 text-small text-muted">hours saved per year <span class="ph-chip">Add number</span></p>
         </div>
       </div>
     </Spec>
@@ -79,29 +79,29 @@ import Slot from '../Slot.astro';
     <Spec label=".node + .node-head" note="1.5px border, one padded card, sentence-case title row, ports only where wired." class="grid-canvas">
       <div class="node relative inline-block w-[170px]">
         <div class="node-head">Rename and tag <Icon name="ph:check" size={14} class="node-check ml-auto" aria-hidden="true" /></div>
-        <div class="px-3.5 pt-1 pb-3 text-[0.75rem] text-muted">312 files</div>
+        <div class="px-4 pt-1 pb-4 text-[0.75rem] text-muted">312 files</div>
       </div>
     </Spec>
   </div>
 
   <div class="grid gap-4 lg:grid-cols-2">
     <Spec label="input + label + helper" note="Label above, always. Helper below. No placeholder-as-label.">
-      <div class="grid max-w-[360px] gap-1.5">
+      <div class="grid max-w-[360px] gap-2">
         <label class="text-small font-semibold" for="spec-email">Email</label>
         <input class="field" type="email" id="spec-email" autocomplete="off" />
         <p class="text-small text-muted">Replies within two business days.</p>
       </div>
-      <div class="mt-5 grid max-w-[360px] gap-1.5">
+      <div class="mt-4 grid max-w-[360px] gap-2">
         <label class="text-small font-semibold" for="spec-email-err">Email</label>
         <input class="field field-error" type="email" id="spec-email-err" autocomplete="off" aria-invalid="true" aria-describedby="spec-email-err-msg" />
-        <p id="spec-email-err-msg" class="flex items-center gap-1.5 text-small font-medium text-danger">
+        <p id="spec-email-err-msg" class="flex items-center gap-2 text-small font-medium text-danger">
           <Icon name="ph:warning-circle" size={16} aria-hidden="true" /> Enter an email address.
         </p>
       </div>
     </Spec>
     <Spec label=".window" note="App frame for pipeline stages: card radius, 1px line border, sentence-case sans title or no title." pad={false}>
       <div class="window">
-        <div class="meta flex h-9 items-center border-b border-line bg-surface px-3.5 text-muted">Photo intake</div>
+        <div class="meta flex h-9 items-center border-b border-line bg-surface px-4 text-muted">Photo intake</div>
         <div class="grid-canvas h-20"></div>
       </div>
     </Spec>
@@ -111,7 +111,7 @@ import Slot from '../Slot.astro';
 <style>
   .field {
     height: 44px;
-    padding-inline: 0.75rem;
+    padding-inline: 1rem;
     border-radius: var(--radius-inset);
     border: 1.5px solid var(--color-line);
     background: var(--color-bg);

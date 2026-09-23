@@ -7,20 +7,26 @@ import { person } from '../data/site';
 <section class="pb-8" aria-labelledby="cta-title">
   <div class="shell">
     <div class="cta grid-canvas-ink relative overflow-hidden rounded-media px-6 py-16 text-center md:px-12 md:py-24" data-cta>
-      <!-- The wire enters from the left edge and terminates behind the primary button. On desktop the
-           page wire (PageWire.astro) arrives at this edge, so this line is its final segment. -->
+      <!-- The panel's line runs from its left edge into the primary button. On desktop the page wire
+           (PageWire.astro) arrives at that edge; its ball follows this line into the button, and the
+           fill line completes behind it on the same scroll timeline. -->
       <svg class="cta-wire pointer-events-none absolute inset-0 size-full" aria-hidden="true">
         <line class="cta-line" x1="0" y1="0" x2="0" y2="0" />
+        <line class="cta-line-fill" x1="0" y1="0" x2="0" y2="0" />
       </svg>
       <h2 id="cta-title" class="relative mx-auto max-w-[18ch] text-h2 text-white">Let's build something reusable</h2>
       <p class="relative mx-auto mt-4 max-w-[44ch] text-body text-on-ink-muted">If you're hiring for brand, web, or creative direction, I'd like to hear about it.</p>
-      <div class="relative mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <a href={href('/contact')} class="btn btn-invert" data-cta-sink>Get in touch <Icon name="ph:arrow-right" size={16} class="btn-arrow" aria-hidden="true" /></a>
+      <div class="relative mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <a href={href('/contact')} class="btn btn-invert cta-sink" data-cta-sink>
+          Get in touch <Icon name="ph:arrow-right" size={16} class="btn-arrow" aria-hidden="true" />
+          <span class="cta-ring" aria-hidden="true"></span>
+          <span class="cta-center" aria-hidden="true" data-cta-center></span>
+        </a>
         <a href={href(person.resume)} class="btn btn-outline-invert" download>
           <Icon name="ph:download-simple" size={16} aria-hidden="true" /> Download resume
         </a>
       </div>
-      <a href={`mailto:${person.email}`} class="relative mt-7 inline-block font-mono text-small text-on-ink-muted underline-offset-4 hover:text-white hover:underline">{person.email}</a>
+      <a href={`mailto:${person.email}`} class="relative mt-8 inline-block font-mono text-small text-on-ink-muted underline-offset-4 hover:text-white hover:underline">{person.email}</a>
     </div>
   </div>
 </section>
@@ -28,22 +34,101 @@ import { person } from '../data/site';
 <style>
   .cta-wire { display: none; }
   @media (min-width: 40rem) { .cta-wire { display: block; } }
-  .cta-line { stroke: oklch(0.72 0.1 188 / 0.55); stroke-width: 1.5; }
+  .cta-line, .cta-line-fill { stroke-width: 1.5; stroke-linecap: round; }
+  .cta-line { stroke: oklch(0.72 0.1 188 / 0.4); }
+  .cta-line-fill { stroke: var(--color-graphic); opacity: 0; }
+  [data-cta][data-wire-live] .cta-line-fill { opacity: 1; }
+  .cta-sink { position: relative; }
+  /* The arrival pulse: one ring that expands off the button and fades. Never loops. */
+  .cta-ring {
+    position: absolute;
+    inset: -2px;
+    border: 1.5px solid var(--color-graphic);
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cta-center { position: absolute; left: 50%; top: 50%; width: 1px; height: 1px; pointer-events: none; }
 </style>
 
 <script>
-  // Keep the panel's wire at the primary button's midline; it is the end of the page wire.
+  import { reducedMotion } from '../scripts/graph';
+
   const cta = document.querySelector<HTMLElement>('[data-cta]');
   const sink = cta?.querySelector<HTMLElement>('[data-cta-sink]');
-  const line = cta?.querySelector<SVGLineElement>('.cta-line');
-  if (cta && sink && line) {
+  const lines = cta ? [...cta.querySelectorAll<SVGLineElement>('.cta-line, .cta-line-fill')] : [];
+  const marker = cta?.querySelector<HTMLElement>('[data-cta-center]');
+  const ring = cta?.querySelector<HTMLElement>('.cta-ring');
+  if (cta && sink && marker && ring) {
+    // Keep the panel's line at the primary button's midline, from the panel edge to its center.
     new ResizeObserver(() => {
       const c = cta.getBoundingClientRect();
       const b = sink.getBoundingClientRect();
       const y = (b.top - c.top + b.height / 2).toFixed(1);
-      line.setAttribute('y1', y);
-      line.setAttribute('y2', y);
-      line.setAttribute('x2', (b.left - c.left + b.width / 2).toFixed(1));
+      const x2 = (b.left - c.left + b.width / 2).toFixed(1);
+      for (const l of lines) {
+        l.setAttribute('y1', y);
+        l.setAttribute('y2', y);
+        l.setAttribute('x2', x2);
+      }
     }).observe(cta);
+
+    /* Arrival: the button's center has reached the middle of the viewport (or scrolled above it).
+       The root is extended far above the viewport and cut off at its midline, so "intersecting"
+       means "at or above center", and a fast scroll can't skip the moment. Pixel margins, since
+       percentage margins resolve against the width; rebuilt when the viewport height changes.
+       PageWire's ball reaches the button at exactly this line and docks on `data-arrived`. */
+    let pulse: Animation | null = null;
+    let io: IntersectionObserver | null = null;
+    const stopPulse = () => {
+      pulse?.cancel();
+      pulse = null;
+    };
+    const observe = () => {
+      io?.disconnect();
+      io = null;
+      if (reducedMotion.matches) {
+        stopPulse();
+        cta.removeAttribute('data-arrived');
+        return;
+      }
+      let first = true;
+      io = new IntersectionObserver(
+        ([e]) => {
+          const arrived = e.isIntersecting;
+          const was = cta.hasAttribute('data-arrived');
+          cta.toggleAttribute('data-arrived', arrived);
+          // Pulse on arrival from below, and only while the button is actually on screen (the
+          // extended root also reports jumps far past the CTA). A load or jump that lands past
+          // the CTA just shows it docked.
+          const fromBelow = first ? false : !was;
+          first = false;
+          const r = e.boundingClientRect;
+          const onScreen = r.bottom > 0 && r.top < innerHeight;
+          if (!arrived || !fromBelow || !onScreen || document.hidden) return;
+          stopPulse();
+          pulse = ring.animate(
+            [
+              { opacity: 0.9, transform: 'scale(1)' },
+              { opacity: 0, transform: 'scale(1.18, 1.5)' },
+            ],
+            { duration: 600, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' },
+          );
+        },
+        { rootMargin: `${innerHeight * 20}px 0px ${-Math.round(innerHeight / 2)}px 0px` },
+      );
+      io.observe(marker);
+    };
+    let height = innerHeight;
+    addEventListener('resize', () => {
+      if (innerHeight === height) return;
+      height = innerHeight;
+      observe();
+    });
+    // A pulse never plays unseen: leaving the real viewport or hiding the tab cancels it.
+    new IntersectionObserver(([e]) => e.isIntersecting || stopPulse()).observe(sink);
+    document.addEventListener('visibilitychange', () => document.hidden && stopPulse());
+    reducedMotion.addEventListener('change', observe);
+    observe();
   }
 </script>

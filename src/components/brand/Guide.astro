@@ -10,7 +10,7 @@ const { id, title, intro } = Astro.props;
 
 <section id={id} data-guide-section aria-labelledby={`${id}-title`}>
   <h2 id={`${id}-title`} class="text-h2">{title}</h2>
-  {intro && <p class="mt-3 max-w-[65ch] text-body text-muted">{intro}</p>}
+  {intro && <p class="mt-4 max-w-[65ch] text-body text-muted">{intro}</p>}
   <div class="mt-8 grid gap-10">
     <slot />
   </div>

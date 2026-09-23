@@ -1,14 +1,17 @@
 ---
 /**
  * One continuous wire for the whole home page (desktop gutters only, >= 1360px).
- * It starts under the proof rail, runs down a gutter beside each [data-wire-section], and in the
- * whitespace between sections sweeps across to the opposite gutter, ending at the closing CTA
- * panel where it meets the panel's own wire into "Get in touch".
+ * It starts under the proof rail, runs down a gutter beside each [data-wire-section], crosses to
+ * the opposite gutter in the whitespace between sections, and turns into the closing CTA panel.
  *
- * A ball rides the wire level with ~55% of the viewport and the wire fills teal behind it. Both are
- * driven by a native ScrollTimeline (WAAPI); there are no scroll listeners. Geometry is rebuilt
- * only when layout changes (ResizeObserver, fonts). Without ScrollTimeline, or with reduced motion,
- * the wire is static and there is no ball.
+ * Every bend meets its straight runs with zero curvature (doubled control points keep the first
+ * three control points collinear with the run), so a line never visibly "kinks" into a curve.
+ *
+ * A ball rides the route level with 55% of the viewport and the wire fills teal behind it; on the
+ * final approach it leaves the page wire, crosses the ink panel along the panel's own line, and
+ * reaches the "Get in touch" button exactly as the button reaches the middle of the viewport,
+ * where ClosingCta docks it and pulses the button. All of it runs on one native ScrollTimeline
+ * (WAAPI); there are no scroll listeners. Reduced motion or no support: static wire, no ball.
  */
 ---
 
@@ -16,13 +19,15 @@
   <svg class="page-wire-svg" focusable="false">
     <path class="pw-base" data-pw-base />
     <path class="pw-fill" data-pw-fill />
+    <path class="pw-route" data-pw-route />
     <g data-pw-ports></g>
   </svg>
-  <span class="pw-ball" data-pw-ball></span>
 </div>
+<!-- The ball is its own layer above content: only it may cross into the CTA panel. -->
+<span class="pw-ball" aria-hidden="true" data-pw-ball></span>
 
 <style>
-  .page-wire { display: none; }
+  .page-wire, .pw-ball { display: none; }
   @media (min-width: 85rem) {
     .page-wire {
       display: block;
@@ -32,51 +37,92 @@
       pointer-events: none;
       overflow: hidden;
     }
+    .pw-ball { display: block; }
   }
   .page-wire-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .pw-base { fill: none; stroke: var(--color-line); stroke-width: 2; }
-  .pw-fill { fill: none; stroke: var(--color-graphic-deep); stroke-width: 2; opacity: 0; }
+  .pw-base, .pw-fill { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pw-base { stroke: var(--color-line); }
+  .pw-fill { stroke: var(--color-graphic-deep); opacity: 0; }
+  .pw-route { fill: none; stroke: none; }
   .page-wire[data-live] .pw-fill { opacity: 1; }
   .page-wire :global(.pw-port) { fill: var(--color-bg); stroke: var(--color-graphic-deep); stroke-width: 1.5; }
+  /* The ball box only rides the offset path; its look lives on ::before, so docking can scale the
+     dot without mixing `scale` into the offset-path transform. */
   .pw-ball {
     position: absolute;
+    z-index: 2;
     top: 0;
     left: 0;
     width: 12px;
     height: 12px;
+    offset-rotate: 0deg;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .pw-ball::before {
+    content: "";
+    position: absolute;
+    inset: 0;
     border-radius: 999px;
     background: var(--color-graphic-deep);
     box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 4.5px oklch(0.6 0.09 188 / 0.25);
-    offset-rotate: 0deg;
-    opacity: 0;
+    transition: scale 250ms var(--ease-in), opacity 250ms var(--ease-in);
   }
-  .page-wire[data-live] .pw-ball { opacity: 1; }
+  .pw-ball[data-live] { opacity: 1; }
+  /* Docked: the button's center reached the middle of the viewport, where the ball arrives; it is
+     absorbed into the button (ClosingCta sets `data-arrived`). */
+  :global(main:has([data-cta][data-arrived])) .pw-ball::before { scale: 0.3; opacity: 0; }
 </style>
 
 <script>
   import { reducedMotion } from '../scripts/graph';
 
   const wire = document.querySelector<HTMLElement>('[data-page-wire]');
+  const ball = document.querySelector<HTMLElement>('[data-pw-ball]');
   const main = wire?.parentElement;
-  if (wire && main) {
+  if (wire && ball && main) {
     const base = wire.querySelector<SVGPathElement>('[data-pw-base]')!;
     const fill = wire.querySelector<SVGPathElement>('[data-pw-fill]')!;
+    const route = wire.querySelector<SVGPathElement>('[data-pw-route]')!;
     const ports = wire.querySelector<SVGGElement>('[data-pw-ports]')!;
-    const ball = wire.querySelector<HTMLElement>('[data-pw-ball]')!;
     const desktop = matchMedia('(min-width: 85rem)');
     const GUTTER = 40; // px outside the content column
+    const TURN = 40; // side of the eased quarter turn into the CTA panel (= the gutter)
     const TRACK = 0.55; // the ball sits level with this fraction of the viewport
-    const SAMPLES = 360;
+    const DOCK = 0.5; // ...and reaches the button when the button is at this fraction
+    const SAMPLES = 400;
     // ScrollTimeline is not in every TS DOM lib yet; feature-detect the exact combination we need.
     const ScrollTimelineCtor = (globalThis as { ScrollTimeline?: new (o: { source: Element; axis: string }) => AnimationTimeline }).ScrollTimeline;
     const supported = typeof ScrollTimelineCtor === 'function' && CSS.supports('offset-path', 'path("M0 0L1 1")');
     let anims: Animation[] = [];
 
     const f = (n: number) => n.toFixed(1);
+    /**
+     * Gutter-to-gutter crossing between two vertical runs: two cubics, each with its control points
+     * doubled on the adjoining run, so curvature is exactly zero where it leaves and rejoins the
+     * vertical and where the two halves meet. Monotone in x and y.
+     */
+    const cross = (x0: number, y0: number, x1: number, y1: number) => {
+      const q = (y1 - y0) / 4;
+      const xm = (x0 + x1) / 2;
+      const ym = (y0 + y1) / 2;
+      return `C${f(x0)} ${f(y0 + q)} ${f(x0)} ${f(y0 + q)} ${f(xm)} ${f(ym)}C${f(x1)} ${f(y1 - q)} ${f(x1)} ${f(y1 - q)} ${f(x1)} ${f(y1)}`;
+    };
+    /**
+     * Quarter turn from a downward vertical run at x into a rightward horizontal at yL, inside an
+     * r x r box. Symmetric about the 45 degree axis: the midpoint sits 0.3r in from the corner (a
+     * circle would be 0.293r), and doubled control points give zero curvature at both ends.
+     */
+    const turn = (x: number, yL: number, r: number) =>
+      `V${f(yL - r)}C${f(x)} ${f(yL - 0.6 * r)} ${f(x)} ${f(yL - 0.6 * r)} ${f(x + 0.3 * r)} ${f(yL - 0.3 * r)}` +
+      `C${f(x + 0.6 * r)} ${f(yL)} ${f(x + 0.6 * r)} ${f(yL)} ${f(x + r)} ${f(yL)}`;
+
     const cancel = () => {
       anims.forEach((a) => a.cancel());
       anims = [];
       wire.removeAttribute('data-live');
+      ball.removeAttribute('data-live');
+      main.querySelector('[data-cta]')?.removeAttribute('data-wire-live');
     };
 
     /** Measure everything first, then write. Runs only on layout changes, never per scroll frame. */
@@ -94,41 +140,43 @@
       const sink = cta?.querySelector<HTMLElement>('[data-cta-sink]');
       if (!sections.length || !proof || !cta || !sink) return;
 
-
       const startY = bottom(proof) + 32;
       const heads = sections.map((s) => top(s.querySelector('h2') ?? s));
       const ends = sections.map((s) => bottom(s.querySelector('.shell') ?? s));
+      const panel = cta.getBoundingClientRect();
+      const b = sink.getBoundingClientRect();
+      const lineY = b.top - m.top + b.height / 2; // the CTA's own line runs at the button's midline
+      const px = panel.left - m.left;
+      const buttonX = b.left - m.left + b.width / 2;
+
       let side = 0;
       let d = `M${f(xs[0])} ${f(startY)}`;
       const portAt: [number, number][] = [[xs[0], startY]];
+      const panelTop = panel.top - m.top;
       sections.forEach((_, i) => {
-        const x = xs[side];
         d += `V${f(heads[i])}`;
-        portAt.push([x, heads[i] + 14]);
-        const next = heads[i + 1];
-        if (next === undefined) return;
+        portAt.push([xs[side], heads[i] + 14]);
+        const last = i + 1 === sections.length;
+        // A section marked `data-wire-stay` continues its predecessor's gutter (a pair of related
+        // sections reads as one run); every other boundary crosses to the other gutter inside the
+        // empty band before the next heading.
+        if (!last && sections[i + 1].hasAttribute('data-wire-stay')) return;
         d += `V${f(ends[i])}`;
-        // Cross to the other gutter inside the empty gap between this section and the next.
-        const nx = xs[1 - side];
-        const mid = (ends[i] + next) / 2;
-        d += `C${f(x)} ${f(mid)} ${f(nx)} ${f(mid)} ${f(nx)} ${f(next)}`;
-        side = 1 - side;
+        if (!last) {
+          d += cross(xs[side], ends[i], xs[1 - side], heads[i + 1]);
+          side = 1 - side;
+        } else if (side === 1) {
+          // Ending on the right: cross back above the CTA panel (never behind it).
+          d += cross(xs[1], ends[i], xs[0], Math.min(panelTop - 16, lineY - TURN));
+          side = 0;
+        }
       });
-      // Final approach: come back to the left gutter if needed, then turn into the CTA panel wire.
-      const panel = cta.getBoundingClientRect();
-      const s = sink.getBoundingClientRect();
-      const lineY = s.top - m.top + s.height / 2; // the CTA's own wire runs at the button's midline
-      const px = panel.left - m.left;
-      const last = ends.at(-1)!;
-      if (side === 1) {
-        const mid = (last + lineY) / 2;
-        d += `V${f(last)}C${f(xs[1])} ${f(mid)} ${f(xs[0])} ${f(mid)} ${f(xs[0])} ${f(lineY - 24)}`;
-      }
-      const r = 16;
-      d += `V${f(lineY - r)}Q${f(xs[0])} ${f(lineY)} ${f(xs[0] + r)} ${f(lineY)}H${f(px)}`;
+      d += `${turn(xs[0], lineY, TURN)}H${f(px)}`;
 
       base.setAttribute('d', d);
       fill.setAttribute('d', d);
+      // The ball's route continues across the panel into the button center.
+      route.setAttribute('d', `${d}H${f(buttonX)}`);
       ports.replaceChildren(
         ...portAt.map(([x, y]) => {
           const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -141,57 +189,61 @@
       );
 
       if (!supported || reducedMotion.matches) return;
-      animate(d, m);
+      animate(cta, m, lineY);
     };
 
     /**
-     * Keyframes map scroll offset to path distance so the ball tracks a fixed viewport line, even
-     * on sideways crossings: sample the path, convert each sample's y to the scroll position that
-     * puts it at TRACK * viewport, and keep offsets strictly increasing so crossings still take a
-     * little scroll instead of teleporting.
+     * Keyframes map scroll offset to route distance so the ball tracks a fixed viewport line: sample
+     * the route, convert each sample's y to the scroll position that puts it at TRACK * viewport,
+     * and keep offsets increasing. The in-panel run is horizontal, so it gets its own mapping: from
+     * the panel edge at the TRACK line to the button center at the DOCK line.
      */
-    const animate = (d: string, m: DOMRect) => {
-      const total = base.getTotalLength();
+    const animate = (cta: HTMLElement, m: DOMRect, lineY: number) => {
+      const wireLen = base.getTotalLength();
+      const total = route.getTotalLength();
+      const inner = cta.querySelector<SVGLineElement>('.cta-line-fill');
       const docTop = m.top + scrollY;
       const maxScroll = document.documentElement.scrollHeight - innerHeight;
-      if (!total || maxScroll <= 0) return;
-      const raw: number[] = [];
+      if (!wireLen || !total || maxScroll <= 0) return;
+      const at = (y: number, track: number) => (docTop + y - innerHeight * track) / maxScroll;
+      const panelFrom = at(lineY, TRACK);
+      const panelTo = at(lineY, DOCK);
       const lens: number[] = [];
+      const offsets: number[] = [];
       for (let i = 0; i <= SAMPLES; i++) {
         const len = (total * i) / SAMPLES;
-        const y = base.getPointAtLength(len).y;
+        const raw = len <= wireLen ? at(route.getPointAtLength(len).y, TRACK) : panelFrom + ((len - wireLen) / (total - wireLen)) * (panelTo - panelFrom);
+        const clamped = Math.min(Math.max(raw, 0), 1);
         lens.push(len);
-        raw.push((docTop + y - innerHeight * TRACK) / maxScroll);
+        offsets.push(i ? Math.max(offsets[i - 1] + 1e-5, clamped) : clamped);
       }
-      const minStep = 0.35 / SAMPLES;
-      const offsets: number[] = [];
-      raw.forEach((o, i) => {
-        const clamped = Math.min(Math.max(o, 0), 1);
-        offsets.push(i ? Math.max(offsets[i - 1] + minStep, clamped) : clamped);
-      });
       // If the tail runs past the bottom of the page, compress after the start so the end is
       // reachable; the start keeps its measured offset.
       const o0 = offsets[0];
       const peak = offsets.at(-1)!;
       const norm = peak > 1 ? offsets.map((o) => o0 + ((o - o0) / (peak - o0)) * (1 - o0)) : offsets;
-      // Outside the route the ball holds still at its ends instead of stretching the first and last
-      // intervals: stationary keyframes pin 0 and 1.
+      // Outside the route everything holds still at its ends: stationary keyframes pin 0 and 1.
       const frames = (value: (len: number) => Keyframe): Keyframe[] => [
         ...(norm[0] > 0 ? [{ ...value(0), offset: 0 }] : []),
         ...lens.map((l, i) => ({ ...value(l), offset: norm[i] })),
         ...(norm.at(-1)! < 1 ? [{ ...value(total), offset: 1 }] : []),
       ];
 
-      ball.style.offsetPath = `path("${d}")`;
-      fill.style.strokeDasharray = `${total}`;
+      ball.style.offsetPath = `path("${route.getAttribute('d')}")`;
+      fill.style.strokeDasharray = `${wireLen}`;
+      const innerLen = total - wireLen;
+      if (inner) inner.style.strokeDasharray = `${innerLen}`;
       try {
         const timeline = new ScrollTimelineCtor!({ source: document.documentElement, axis: 'block' });
         const options = { timeline, fill: 'both', easing: 'linear' } as KeyframeAnimationOptions;
         // Register each animation as soon as it exists, so a later failure still cancels it.
         anims.push(ball.animate(frames((l) => ({ offsetDistance: `${((l / total) * 100).toFixed(3)}%` })), options));
-        anims.push(fill.animate(frames((l) => ({ strokeDashoffset: `${total - l}` })), options));
+        anims.push(fill.animate(frames((l) => ({ strokeDashoffset: `${Math.max(0, wireLen - l)}` })), options));
+        if (inner) anims.push(inner.animate(frames((l) => ({ strokeDashoffset: `${innerLen - Math.min(Math.max(l - wireLen, 0), innerLen)}` })), options));
         if (anims.some((a) => a.timeline !== timeline)) throw new Error('scroll timeline not attached');
         wire.setAttribute('data-live', '');
+        ball.setAttribute('data-live', '');
+        cta.setAttribute('data-wire-live', '');
       } catch {
         cancel(); // keep the static wire
       }

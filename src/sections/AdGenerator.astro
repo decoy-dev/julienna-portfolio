@@ -1,0 +1,1105 @@
+---
+/**
+ * Ad generator (#systems). Copy above, then a full-width window: four decision gates in a row
+ * (persona deck, brand-kit deck, template library, content picks with an assembled preview)
+ * wired into Render, which fans out into the 8-file matrix. Choreography lives in
+ * src/scripts/ad-generator.ts on the shared lane runner; edges are routed by
+ * src/scripts/graph.ts. Ships in the finished state (no JS, reduced motion).
+ *
+ * Layout modes (container queries on the window): wide >= 1100px puts the gates in one row and
+ * Render + output in a second; 640 to 1099px is a 2x2 gate grid (the kit -> template hop swaps
+ * to a dedicated twin path that runs down the row gap); under 640px everything stacks on the
+ * compact vertical edge set (--graph-compact).
+ */
+import { Icon } from 'astro-icon/components';
+import AdFrame from '../components/AdFrame.astro';
+import { personas, templates } from '../data/site';
+
+const client = 'SamplePractice';
+const chosen = personas[0]; // Dr. V. Frizzle: the shipped and first-run persona
+// Deck alternates stay visible behind the chosen card so the pick reads as a real choice.
+// data-ready / data-done are the card's stack slots before and after a run (2 = front).
+const personaCards = [
+  { ...personas[7], ready: '2', done: '1' },
+  { ...personas[6], ready: '1', done: '0' },
+];
+const kitCards = [
+  { name: 'Sample kit A', ready: '2', done: '1' },
+  { name: 'Sample kit B', ready: '1', done: '0' },
+];
+// Real deliverable matrix: V1/V2 x Story/Post x Image/Video = 8 files per practice per campaign.
+const deliverables = (['V1', 'V2'] as const).flatMap((v) =>
+  (['Story', 'Post'] as const).flatMap((size) =>
+    (['Image', 'Video'] as const).map((type) => ({ v, size, type, name: `Seasonal_Summer-2026_${type}_${v}_${size}_${client}` })),
+  ),
+);
+const lastAd = deliverables.at(-1)!.name;
+const personaData = JSON.stringify(personas);
+const slots: { id: string; label: string; win: string; rest: string[]; row?: boolean }[] = [
+  {
+    id: 'headline',
+    label: 'Headline',
+    win: 'A straighter smile starts here',
+    rest: ['New patients welcome this season', 'Braces that fit your schedule'],
+  },
+  { id: 'subhead', label: 'Subhead', win: 'Clear aligners and braces for every age.', rest: ['Book a consult in minutes.'] },
+  { id: 'cta', label: 'Call to action', win: 'Book a consult', rest: ['See pricing'], row: true },
+];
+---
+
+<section id="systems" class="section-y relative" data-wire-section aria-labelledby="systems-title">
+  <div class="shell">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <h2 id="systems-title" class="max-w-[20ch] text-h2 text-ink">One brief becomes a whole campaign</h2>
+      <button type="button" class="btn btn-ghost btn-sm" data-replay hidden>
+        <Icon name="ph:arrow-counter-clockwise" size={16} class="mr-2" aria-hidden="true" />Replay pipeline
+      </button>
+    </div>
+    <p class="mt-4 max-w-[58ch] text-body text-muted">
+      Around 40 practices each need 8 ad files per campaign, so I built a generator that renders every version from rules instead of a
+      blank artboard.
+    </p>
+
+    <div class="mt-8 grid gap-x-12 gap-y-6 lg:grid-cols-2">
+      <div class="space-y-4 text-body text-muted">
+        <p class="max-w-[58ch]">
+          The tool walks five gated steps: persona, brand kit, template, content, render. A gate stays shut until the step before it is
+          set.
+        </p>
+        <p class="max-w-[58ch]">Claude helps me draft new templates, but fixed rules render the ads. No LLM touches the render path.</p>
+      </div>
+      <div>
+        <ul role="list" class="space-y-2 text-small text-ink">
+          <li class="flex gap-2">
+            <Icon name="ph:check" size={16} class="mt-1 shrink-0 text-primary" aria-hidden="true" />
+            <span>8 files per practice: V1 and V2, Story and Post, static and animated.</span>
+          </li>
+          <li class="flex gap-2">
+            <Icon name="ph:check" size={16} class="mt-1 shrink-0 text-primary" aria-hidden="true" />
+            <span>A matching site template ships alongside: nav, hero, footer.</span>
+          </li>
+        </ul>
+        <p class="mt-4 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span class="text-stat text-ink">About 320</span>
+          <span class="text-small text-muted">files per campaign across around 40 practices.</span>
+          <span class="ph-chip" data-todo="verify">Estimate, verify</span>
+        </p>
+        <p class="mt-4 max-w-[58ch] text-small text-muted">
+          The steps match the tool I use at OrthoBoost. Practice names, file names, and the sample copy are stand-ins, because client
+          work stays private.
+        </p>
+      </div>
+    </div>
+
+    <div class="window ad-window mt-10" data-lane data-personas={personaData}>
+      <p class="sr-only">
+        A demonstration of the generator. I pick a persona from the stack of {personas.length}, load the practice brand kit, choose the
+        Split Stack template from the {templates.length} in the library, then pick one headline, one subhead, one call to action, and
+        one photo. Fixed rules render 8 files for one practice: V1 and V2, Story and Post, static and animated. A ticker streams each
+        file name, such as {lastAd}.
+      </p>
+
+      <div class="ad-graph grid-canvas" data-graph aria-hidden="true">
+        <svg class="ad-edges" data-edges>
+          <path
+            class="edge"
+            data-id="e1"
+            data-from="ad-persona:out"
+            data-to="ad-kit:in"
+            data-from-compact="ad-persona:down"
+            data-to-compact="ad-kit:up"
+            data-state="done"></path>
+          <path
+            class="edge edge-w2"
+            data-id="e2"
+            data-from="ad-kit:out"
+            data-to="ad-template:in"
+            data-from-compact="ad-kit:down"
+            data-to-compact="ad-template:up"
+            data-state="done"></path>
+          <path class="edge edge-m2" data-id="e2" data-from="ad-kit:down" data-to="ad-template:up" data-state="done"></path>
+          <path
+            class="edge"
+            data-id="e3"
+            data-from="ad-template:out"
+            data-to="ad-content:in"
+            data-from-compact="ad-template:down"
+            data-to-compact="ad-content:up"
+            data-state="done"></path>
+          <path class="edge" data-id="e4" data-from="ad-content:down" data-to="ad-render:up" data-state="done"></path>
+          <path
+            class="edge"
+            data-id="e5"
+            data-from="ad-render:in"
+            data-to="ad-out:out"
+            data-from-compact="ad-render:down"
+            data-to-compact="ad-out:up"
+            data-state="done"></path>
+          {Array.from({ length: 5 }).map(() => <circle class="packet" r="5" opacity="0" />)}
+        </svg>
+
+        <div class="ad-gates">
+          <div class="gate" data-node="ad-persona">
+            <p class="gate-label meta text-muted">Persona · stack of {personas.length}</p>
+            <div class="gate-deck gate-main" data-deck="persona" data-stage data-state="done">
+              {
+                personaCards.map((p) => (
+                  <div class="deck-card" data-card data-ready={p.ready} data-done={p.done} data-slot={p.done}>
+                    <Icon name="ph:user-circle" size={18} class="deck-ico" />
+                    <span class="deck-name" data-alt-name>{p.name}</span>
+                    <span class="deck-sub" data-alt-type>{p.archetype}</span>
+                  </div>
+                ))
+              }
+              <div class="deck-card deck-chosen" data-card data-ready="0" data-done="2" data-slot="2">
+                <Icon name="ph:user-circle" size={18} class="deck-ico" />
+                <span class="deck-name" data-persona-name>{chosen.name}</span>
+                <span class="deck-sub" data-persona-type>{chosen.archetype}</span>
+                <span class="deck-check"><Icon name="ph:check-bold" size={12} /></span>
+              </div>
+            </div>
+            <span class="port pwm" data-side="out"></span>
+            <span class="port pn" data-side="down"></span>
+          </div>
+
+          <div class="gate" data-node="ad-kit">
+            <p class="gate-label meta text-muted">Brand kit · stack of ~40</p>
+            <div class="gate-deck gate-main" data-deck="kit" data-stage data-state="done">
+              {
+                kitCards.map((k) => (
+                  <div class="deck-card" data-card data-ready={k.ready} data-done={k.done} data-slot={k.done}>
+                    <Icon name="ph:swatches" size={18} class="deck-ico" />
+                    <span class="deck-name">{k.name}</span>
+                    <span class="deck-swatches">
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                  </div>
+                ))
+              }
+              <div class="deck-card deck-chosen" data-card data-ready="0" data-done="2" data-slot="2">
+                <Icon name="ph:swatches" size={18} class="deck-ico" />
+                <span class="deck-name">{client}</span>
+                <span class="deck-swatches">
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span class="deck-check"><Icon name="ph:check-bold" size={12} /></span>
+              </div>
+            </div>
+            <span class="port pwm" data-side="in"></span>
+            <span class="port pw" data-side="out"></span>
+            <span class="port pn" data-side="up"></span>
+            <span class="port pmn" data-side="down"></span>
+          </div>
+
+          <div class="gate" data-node="ad-template">
+            <p class="gate-label meta text-muted">Template · {templates.length} in the library</p>
+            <div class="gate-tpls gate-main" data-templates data-stage data-state="done">
+              <div class="tpl" data-tpl>
+                <span class="tpl-art art-badge"><i></i><i></i><i></i></span>
+                <span class="tpl-name">{templates[0]}</span>
+              </div>
+              <div class="tpl" data-tpl>
+                <span class="tpl-art art-hero"><i></i><i></i></span>
+                <span class="tpl-name">{templates[1]}</span>
+              </div>
+              <div class="tpl" data-tpl>
+                <span class="tpl-art art-offer"><i></i><i></i><i></i></span>
+                <span class="tpl-name">{templates[2]}</span>
+              </div>
+              <div class="tpl" data-tpl data-win>
+                <span class="tpl-art art-split"><i></i><i></i><i></i><i></i></span>
+                <span class="tpl-check"><Icon name="ph:check-bold" size={12} /></span>
+                <span class="tpl-name">{templates[3]}</span>
+              </div>
+              <div class="tpl" data-tpl>
+                <span class="tpl-art art-quote"><i></i><i></i><i></i></span>
+                <span class="tpl-name">{templates[4]}</span>
+              </div>
+            </div>
+            <span class="port pw" data-side="in"></span>
+            <span class="port pwm" data-side="out"></span>
+            <span class="port pmn" data-side="up"></span>
+            <span class="port pn" data-side="down"></span>
+          </div>
+
+          <div class="gate gate-content" data-node="ad-content">
+            <p class="gate-label meta text-muted"><span>Content · one pick per slot</span><span class="ph-chip">Sample copy</span></p>
+            <div class="gate-main" data-content data-stage data-state="done">
+              <div class="slots">
+                {
+                  slots.map((s) => (
+                    <div class="slot" data-slot-pick={s.id} data-pick>
+                      <span class="slot-name">{s.label}</span>
+                      <span class:list={['cands', { 'cands-row': s.row }]}>
+                        <span class="cand" data-win>
+                          {s.win}
+                          <Icon name="ph:check-bold" size={12} class="cand-check" />
+                        </span>
+                        {s.rest.map((r) => (
+                          <span class="cand">{r}</span>
+                        ))}
+                      </span>
+                    </div>
+                  ))
+                }
+                <div class="slot" data-slot-pick="photo" data-pick>
+                  <span class="slot-name">Photo</span>
+                  <span class="cands cands-row">
+                    <span class="cand cand-thumb"><Icon name="ph:image" size={14} /></span>
+                    <span class="cand cand-thumb" data-win
+                      ><Icon name="ph:image" size={14} /><Icon name="ph:check-bold" size={12} class="cand-check" /></span
+                    >
+                    <span class="cand cand-thumb"><Icon name="ph:image" size={14} /></span>
+                  </span>
+                </div>
+                <div class="slot slot-logo">
+                  <span class="slot-name">Logo</span>
+                  <span class="slot-fixed"><i class="logo-mark"></i>From the brand kit</span>
+                </div>
+                <div class="pv">
+                  <span class="pv-frame">
+                    <span class="pv-zone pv-photo" data-zone="photo" data-fill><Icon name="ph:image" size={14} /></span>
+                    <span class="pv-zone pv-headline" data-zone="headline" data-fill></span>
+                    <span class="pv-zone pv-subhead" data-zone="subhead" data-fill></span>
+                    <span class="pv-zone pv-cta" data-zone="cta" data-fill></span>
+                    <span class="pv-logo"></span>
+                  </span>
+                  <span class="pv-cap">Split Stack</span>
+                </div>
+              </div>
+            </div>
+            <span class="port pwm" data-side="in"></span>
+            <span class="port pn" data-side="up"></span>
+            <span class="port" data-side="down"></span>
+          </div>
+        </div>
+
+        <div class="ad-flow">
+          <div class="node ad-render" data-node="ad-render" data-render data-stage data-state="done">
+            <Icon name="ph:cpu" size={20} class="rd-ico" />
+            <span class="rd-text">
+              <span class="rd-title">Render</span>
+              <span class="rd-sub">Fixed rules only</span>
+            </span>
+            <span class="node-check"><Icon name="ph:check-bold" size={14} /></span>
+            <span class="port" data-side="up"></span>
+            <span class="port pwm" data-side="in"></span>
+            <span class="port pn" data-side="down"></span>
+          </div>
+
+          <div class="node ad-out" data-node="ad-out" data-output data-state="done" style={`--persona: ${chosen.color}`}>
+            <p class="node-head">8 files for one practice</p>
+            <div class="out-body">
+              <div class="out-frames">
+                {
+                  (['V1', 'V2'] as const).map((v) => (
+                    <div class="out-group">
+                      <span class="out-v">{v}</span>
+                      <div class="out-row">
+                        {deliverables
+                          .filter((d) => d.v === v)
+                          .map((d) => (
+                            <div class="out-item" data-item data-state="done" data-name={d.name}>
+                              <AdFrame size={d.size} color={chosen.color} />
+                              <Icon name={d.type === 'Video' ? 'ph:film-strip' : 'ph:image'} size={11} class="out-ico" />
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+              <p class="out-ticker">
+                <span class="tick" data-ticker data-idle="Waiting for render" data-final={lastAd}>{lastAd}</span>
+                <span class="ph-chip">Illustrative</span>
+              </p>
+            </div>
+            <span class="port pwm" data-side="out"></span>
+            <span class="port pn" data-side="up"></span>
+          </div>
+        </div>
+      </div>
+
+      <p class="sr-only" role="status" data-status></p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ad-window {
+    container-type: inline-size;
+  }
+  .ad-graph {
+    position: relative;
+    padding: 16px;
+    --graph-compact: 1;
+  }
+  .ad-edges {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  /* Wells and the flow row paint above the wires, so long sweeps read as running underneath. */
+  .ad-gates,
+  .ad-flow {
+    position: relative;
+    z-index: 1;
+  }
+  .edge-m2 {
+    display: none;
+  }
+
+  /* ── Gate wells ─────────────────────────────────────────── */
+  .ad-gates {
+    display: grid;
+    gap: 40px;
+  }
+  .gate {
+    --port-off: -5px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-inset);
+    background: color-mix(in oklab, var(--color-surface) 72%, transparent);
+  }
+  .gate-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px 8px;
+    margin-bottom: 16px;
+  }
+  .gate-main {
+    margin-block: auto;
+  }
+
+  /* ── Decks: three stacked cards, every name readable ────── */
+  .gate-deck {
+    position: relative;
+    height: 128px;
+    width: 100%;
+    max-width: 224px;
+    margin-inline: auto;
+  }
+  .deck-card {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 64px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 8px;
+    align-content: start;
+    background: var(--color-bg);
+    border: 1.5px solid var(--color-line);
+    border-radius: var(--radius-inset);
+    transition:
+      transform var(--d2) var(--ease-std),
+      border-color var(--d2) var(--ease-std),
+      box-shadow var(--d2) var(--ease-std);
+  }
+  .deck-card[data-slot='0'] {
+    transform: translateY(0);
+    z-index: 1;
+  }
+  .deck-card[data-slot='1'] {
+    transform: translateY(32px);
+    z-index: 2;
+  }
+  .deck-card[data-slot='2'] {
+    transform: translateY(64px);
+    z-index: 3;
+  }
+  .deck-ico {
+    grid-row: span 2;
+    align-self: start;
+    color: var(--color-primary);
+  }
+  .deck-name {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .deck-sub {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--color-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity var(--d2) var(--ease-std);
+  }
+  .deck-swatches {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding-top: 4px;
+    transition: opacity var(--d2) var(--ease-std);
+  }
+  /* Behind the front card only the name row peeks; second lines fade in as a card surfaces. */
+  .deck-card:not([data-slot='2']) :is(.deck-sub, .deck-swatches) {
+    opacity: 0;
+  }
+  .deck-swatches i {
+    width: 24px;
+    height: 8px;
+    border-radius: 2px;
+  }
+  .deck-swatches i:nth-child(1) {
+    background: var(--color-surface-2);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+  .deck-swatches i:nth-child(2) {
+    background: oklch(0.205 0.018 222 / 0.18);
+  }
+  .deck-swatches i:nth-child(3) {
+    background: oklch(0.47 0.02 215 / 0.3);
+  }
+  .deck-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    background: var(--color-graphic-tint);
+    color: var(--color-primary);
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity var(--d2) var(--ease-out),
+      transform var(--d2) var(--ease-out);
+  }
+  .gate-deck[data-state='active'] .deck-card[data-slot='2'] {
+    border-color: var(--color-graphic);
+  }
+  .gate-deck[data-state='done'] .deck-chosen {
+    border-color: var(--color-graphic-deep);
+    box-shadow: 0 0 0 3px var(--color-graphic-tint);
+  }
+  .gate-deck[data-state='done'] .deck-chosen .deck-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ── Template library: five labelled wireframes ─────────── */
+  .gate-tpls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .tpl {
+    position: relative;
+    width: 62px;
+    text-align: center;
+  }
+  .tpl-art {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 44px;
+    height: 52px;
+    margin-inline: auto;
+    padding: 4px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    transition:
+      border-color var(--d1) var(--ease-std),
+      box-shadow var(--d1) var(--ease-std);
+  }
+  .tpl-art i {
+    flex: none;
+    border-radius: 2px;
+    background: oklch(0.205 0.018 222 / 0.14);
+  }
+  .art-badge i:nth-child(1) {
+    width: 14px;
+    height: 14px;
+    margin: 4px auto 2px;
+    border-radius: var(--radius-full);
+    background: oklch(0.205 0.018 222 / 0.2);
+  }
+  .art-badge i:nth-child(2) {
+    width: 26px;
+    height: 4px;
+    margin-inline: auto;
+  }
+  .art-badge i:nth-child(3) {
+    width: 18px;
+    height: 4px;
+    margin-inline: auto;
+  }
+  .art-hero i:nth-child(1) {
+    width: 100%;
+    height: 14px;
+    background: var(--color-surface-2);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+  .art-hero i:nth-child(2) {
+    width: 16px;
+    height: 6px;
+    margin-top: auto;
+    align-self: flex-end;
+    border-radius: var(--radius-full);
+    background: oklch(0.205 0.018 222 / 0.2);
+  }
+  .art-offer {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 4px;
+    align-content: center;
+  }
+  .art-offer i:nth-child(1) {
+    grid-row: span 2;
+    height: 24px;
+    background: var(--color-surface-2);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+  .art-offer i:nth-child(2) {
+    height: 4px;
+    align-self: end;
+  }
+  .art-offer i:nth-child(3) {
+    height: 4px;
+    width: 70%;
+  }
+  .art-split i:nth-child(1) {
+    width: 100%;
+    height: 18px;
+    background: var(--color-surface-2);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+  .art-split i:nth-child(2) {
+    width: 80%;
+    height: 4px;
+  }
+  .art-split i:nth-child(3) {
+    width: 55%;
+    height: 4px;
+  }
+  .art-split i:nth-child(4) {
+    width: 18px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: oklch(0.205 0.018 222 / 0.2);
+  }
+  .art-quote {
+    justify-content: center;
+  }
+  .art-quote i:nth-child(1) {
+    width: 90%;
+    height: 4px;
+  }
+  .art-quote i:nth-child(2) {
+    width: 65%;
+    height: 4px;
+  }
+  .art-quote i:nth-child(3) {
+    width: 10px;
+    height: 10px;
+    margin-top: 2px;
+    border-radius: var(--radius-full);
+    background: oklch(0.205 0.018 222 / 0.2);
+  }
+  .tpl-name {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.6875rem;
+    line-height: 1.25;
+    color: var(--color-muted);
+  }
+  .tpl[data-scan] .tpl-art {
+    border-color: var(--color-graphic-deep);
+    box-shadow: var(--shadow-raised);
+  }
+  .tpl-check {
+    position: absolute;
+    top: -6px;
+    right: 4px;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--radius-full);
+    background: var(--color-graphic-tint);
+    color: var(--color-primary);
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity var(--d2) var(--ease-out),
+      transform var(--d2) var(--ease-out);
+    z-index: 1;
+  }
+  [data-templates][data-state='done'] .tpl[data-win] .tpl-art {
+    border-color: var(--color-graphic-deep);
+    box-shadow: 0 0 0 3px var(--color-graphic-tint);
+  }
+  [data-templates][data-state='done'] .tpl[data-win] .tpl-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  /* ── Content: candidates per slot + assembled preview ───── */
+  .slots {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    justify-items: start;
+  }
+  .slot-name {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+  .cands {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .cands-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .cand {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-full);
+    background: var(--color-bg);
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--color-ink);
+    max-width: 100%;
+    text-align: left;
+    transition:
+      border-color var(--d2) var(--ease-std),
+      box-shadow var(--d2) var(--ease-std);
+  }
+  .cand-check {
+    color: var(--color-primary);
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity var(--d2) var(--ease-out),
+      transform var(--d2) var(--ease-out);
+  }
+  .cand-thumb {
+    width: 32px;
+    height: 24px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+  }
+  .cand-thumb .cand-check {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: var(--color-graphic-tint);
+    border-radius: var(--radius-full);
+  }
+  .cand-thumb[data-win] {
+    position: relative;
+  }
+  .slot[data-pick] .cand[data-win] {
+    border-color: var(--color-graphic-deep);
+    box-shadow: 0 0 0 2px var(--color-graphic-tint);
+  }
+  .slot[data-pick] .cand[data-win] .cand-check {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .slot-fixed {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.6875rem;
+    color: var(--color-muted);
+  }
+  .logo-mark {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: oklch(0.205 0.018 222 / 0.18);
+  }
+
+  .pv {
+    justify-self: center;
+    text-align: center;
+  }
+  .pv-frame {
+    position: relative;
+    display: block;
+    width: 96px;
+    height: 120px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+  }
+  .pv-zone,
+  .pv-logo {
+    position: absolute;
+    border-radius: 2px;
+  }
+  .pv-photo {
+    inset: 6px 6px auto;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+  }
+  .pv-headline {
+    left: 6px;
+    top: 62px;
+    width: 68px;
+    height: 8px;
+    background: oklch(0.205 0.018 222 / 0.6);
+  }
+  .pv-subhead {
+    left: 6px;
+    top: 76px;
+    width: 52px;
+    height: 6px;
+    background: oklch(0.47 0.02 215 / 0.4);
+  }
+  .pv-cta {
+    left: 6px;
+    bottom: 8px;
+    width: 36px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: oklch(0.205 0.018 222 / 0.2);
+  }
+  .pv-logo {
+    right: 6px;
+    bottom: 8px;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-full);
+    background: oklch(0.205 0.018 222 / 0.18);
+  }
+  .pv-zone {
+    opacity: 0.2;
+    transform: translateY(2px);
+    transition:
+      opacity var(--d3) var(--ease-std),
+      transform var(--d3) var(--ease-out);
+  }
+  .pv-zone[data-fill] {
+    opacity: 1;
+    transform: none;
+  }
+  .pv-cap {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.6875rem;
+    color: var(--color-muted);
+  }
+
+  /* ── Flow row: Render feeds the output matrix ───────────── */
+  .ad-flow {
+    margin-top: 40px;
+    display: grid;
+    justify-items: center;
+    gap: 40px;
+  }
+  .ad-render {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+  }
+  .rd-ico {
+    color: var(--color-primary);
+  }
+  .rd-text {
+    display: grid;
+  }
+  .rd-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .rd-sub {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+  .ad-render .node-check {
+    margin-left: 4px;
+    align-self: flex-start;
+  }
+
+  .ad-out {
+    width: 100%;
+    max-width: 640px;
+  }
+  .out-body {
+    padding: 8px 16px 16px;
+  }
+  .out-frames {
+    display: grid;
+    gap: 16px;
+    justify-content: center;
+  }
+  .out-group {
+    width: 272px;
+    max-width: 100%;
+  }
+  .out-v {
+    display: block;
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--color-line);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+  }
+  .out-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    align-items: end;
+  }
+  .out-item {
+    transition: transform var(--d3) var(--ease-out);
+  }
+  .out-item :global(:is(.ad-frame, svg)) {
+    transition: opacity var(--d3) var(--ease-std);
+  }
+  .out-item:not([data-state='done']) :global(:is(.ad-frame, svg)) {
+    opacity: 0.3;
+  }
+  .out-item:not([data-state='done']) {
+    transform: translateY(3px) scale(0.94);
+  }
+  .out-ico {
+    display: block;
+    margin: 4px auto 0;
+    color: var(--color-muted);
+  }
+  .out-ticker {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tick {
+    min-width: 0;
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    overflow-wrap: anywhere;
+    color: var(--color-ink);
+  }
+
+  /* ── Ports: shown per layout mode (w = wide, m = medium, n = narrow) ── */
+  .pw,
+  .pm,
+  .pwm {
+    display: none;
+  }
+
+  /* ── Medium: 2x2 gates; the kit -> template hop runs down the row gap ── */
+  @container (min-width: 640px) {
+    .ad-graph {
+      padding: 24px;
+      --graph-compact: 0;
+    }
+    .ad-gates {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 32px;
+      row-gap: 96px;
+    }
+    /* Serpentine second row: Render sits directly under Content at the right, feeding the
+       output to its left (render:in -> out:out), so no wire sweeps across the output node. */
+    .ad-flow {
+      margin-top: 64px;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 48px;
+    }
+    .ad-out {
+      width: auto;
+    }
+    .pn,
+    .pw {
+      display: none;
+    }
+    .pm,
+    .pwm,
+    .pmn {
+      display: block;
+    }
+  }
+  @container (min-width: 640px) and (max-width: 1099.9px) {
+    .edge-m2 {
+      display: inline;
+    }
+    .edge-w2 {
+      display: none;
+    }
+  }
+  /* Two-column content gate: candidates left, photo/logo/preview right. */
+  @container (min-width: 688px) {
+    .slots {
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 16px;
+      grid-template-areas: 'h p' 's v' 'c v' 'l v';
+    }
+    .slot[data-slot-pick='headline'] {
+      grid-area: h;
+    }
+    .slot[data-slot-pick='subhead'] {
+      grid-area: s;
+    }
+    .slot[data-slot-pick='cta'] {
+      grid-area: c;
+    }
+    .slot[data-slot-pick='photo'] {
+      grid-area: p;
+    }
+    .slot-logo {
+      grid-area: l;
+    }
+    .pv {
+      grid-area: v;
+      justify-self: start;
+      align-self: start;
+    }
+    .out-frames {
+      grid-template-columns: auto auto;
+      gap: 24px;
+    }
+  }
+
+  /* ── Wide: four gates in one row, Render + output below ── */
+  @container (min-width: 1100px) {
+    .ad-gates {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 240px minmax(0, 1.9fr);
+      gap: 32px;
+    }
+    .pm,
+    .pmn {
+      display: none;
+    }
+    .pw,
+    .pwm {
+      display: block;
+    }
+  }
+
+  /* Very narrow: the 4-frame rows pair up so frames stay legible. */
+  @container (max-width: 339px) {
+    .out-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .tick {
+      min-height: 2.8em;
+    }
+  }
+</style>
+
+<script>
+  import { layoutEdges, reducedMotion, watchVisibility } from '../scripts/graph';
+  import { createAdGenerator } from '../scripts/ad-generator';
+
+  const section = document.querySelector<HTMLElement>('#systems');
+  const lane = section?.querySelector<HTMLElement>('[data-lane]');
+  const replay = section?.querySelector<HTMLButtonElement>('[data-replay]');
+  if (section && lane && replay) {
+    const status = lane.querySelector<HTMLElement>('[data-status]')!;
+    const graph = lane.querySelector<HTMLElement>('[data-graph]')!;
+    const runner = createAdGenerator(lane);
+    const relayout = layoutEdges(graph);
+    let started = false;
+    let inView = false;
+    let runId = 0;
+
+    // The shipped finished state stays visible until a run actually starts (play resets first);
+    // an armed section plays the next time its graphic scrolls in.
+    const arm = () => {
+      runId++;
+      started = false;
+    };
+    const play = (announce = false) => {
+      const id = ++runId;
+      started = true;
+      relayout();
+      // Layout runs in the rAF queued by relayout; the run starts in the frame after it.
+      requestAnimationFrame(async () => {
+        if (id !== runId) return;
+        if (document.hidden || !inView) return arm();
+        if ((await runner.play()) && announce && id === runId) {
+          status.textContent = 'Ad generator finished: 8 files for one practice.';
+        }
+      });
+    };
+    const settle = () => {
+      if (!started) return;
+      runId++;
+      runner.finish();
+    };
+
+    replay.hidden = false;
+    replay.addEventListener('click', () => {
+      status.textContent = '';
+      if (inView && !document.hidden) play(true);
+      else arm();
+    });
+
+    // Autoplay sentinel: the graphic's top band, via a pixel rootMargin. A ratio threshold on the
+    // whole graphic is unreachable once the stacked layout grows taller than the viewport.
+    new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          inView = e.isIntersecting;
+          if (inView && !started && !document.hidden && !reducedMotion.matches) play();
+        }
+      },
+      { rootMargin: '0px 0px -160px 0px' },
+    ).observe(graph);
+    // Settle once the whole section is offscreen: the next visit starts clean, never mid-state.
+    watchVisibility(section, (onScreen) => onScreen || settle(), 0);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return settle();
+      // Back from a hidden tab: a run that came into view meanwhile starts now.
+      if (inView && !started && !reducedMotion.matches) play();
+    });
+  }
+</script>

@@ -31,7 +31,7 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
     <div class="node me-node" data-node="me" data-state="active">
       <span class="me-ring" aria-hidden="true" />
       <span class="port" data-side="in" />
-      <div class="flex items-center gap-3 px-4 py-3.5">
+      <div class="flex items-center gap-4 px-4 py-4">
         <Mark size={28} class="shrink-0 text-ink" />
         <div class="min-w-0">
           <p class="font-display font-semibold tracking-[-0.01em] text-ink">Julienna Batten</p>
@@ -46,8 +46,8 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
       <p class="node-head">
         Shipped work <Icon name="ph:check-bold" size={12} class="node-check ml-auto" aria-hidden="true" />
       </p>
-      <ul role="list" class="flex flex-wrap gap-1.5 p-3 pt-2.5" aria-label="Outputs">
-        {outputs.map((o) => <li class="chip out-chip h-6 px-2.5 text-[0.75rem]" data-out-chip>{o}</li>)}
+      <ul role="list" class="flex flex-wrap gap-2 p-4 pt-2" aria-label="Outputs">
+        {outputs.map((o) => <li class="chip out-chip h-6 px-2 text-[0.75rem]" data-out-chip>{o}</li>)}
       </ul>
     </div>
 
@@ -97,8 +97,8 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
     height: 44px;
     display: flex;
     align-items: center;
-    gap: 0.625rem;
-    padding-inline: 0.875rem;
+    gap: 0.5rem;
+    padding-inline: 1rem;
     font-size: var(--text-small);
     font-weight: 500;
     color: var(--color-ink);
@@ -142,11 +142,11 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
   /* Narrow containers keep the same topology with short labels, so every role stays named. */
   @container (max-width: 520px) {
     .hero-graph { height: 440px; }
-    .role-node { left: 4%; width: 40%; height: 38px; top: calc(6% + var(--i) * 14.6%); gap: 0.5rem; padding-inline: 0.625rem; font-size: 0.8125rem; }
+    .role-node { left: 4%; width: 40%; height: 38px; top: calc(6% + var(--i) * 14.6%); gap: 0.5rem; padding-inline: 0.5rem; font-size: 0.8125rem; }
     .role-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     .role-short { display: inline; }
     .me-node { left: 52%; width: 45%; top: 30%; }
-    .me-node .px-4 { padding-inline: 0.75rem; gap: 0.5rem; }
+    .me-node .px-4 { padding-inline: 1rem; gap: 0.5rem; }
     .me-sub { font-size: 0.75rem; line-height: 1.4; }
     .out-node { left: 52%; width: 45%; top: 64%; }
   }

@@ -16,8 +16,8 @@ import { Icon } from 'astro-icon/components';
 <style>
   .to-top {
     position: fixed;
-    right: clamp(20px, 3vw, 24px);
-    bottom: clamp(20px, 3vw, 24px);
+    right: var(--gutter);
+    bottom: var(--gutter);
     z-index: var(--z-chrome);
     display: grid;
     place-items: center;

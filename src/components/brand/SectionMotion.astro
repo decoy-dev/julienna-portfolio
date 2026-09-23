@@ -43,12 +43,12 @@ const easings = [
   </div>
 
   <figure class="m-0" data-ease-demo>
-    <div class="rounded-card border border-line p-5 sm:p-6">
+    <div class="rounded-card border border-line p-4 sm:p-6">
       <div class="flex items-center justify-between gap-4">
         <p class="text-small font-semibold">Each curve over 600ms</p>
         <button type="button" class="btn btn-ghost btn-sm" data-ease-replay>Replay</button>
       </div>
-      <div class="mt-4 grid gap-3">
+      <div class="mt-4 grid gap-4">
         {easings.map((e) => (
           <div class="ease-lane" style={`--lane-ease: ${e.value}`}>
             <code class="font-mono text-[0.6875rem] text-dash-ink">{e.name}</code>
@@ -76,8 +76,8 @@ const easings = [
 <style>
   .tok-row {
     display: grid;
-    gap: 0.25rem 1.25rem;
-    padding: 0.75rem 1.25rem;
+    gap: 0.25rem 1rem;
+    padding: 1rem 1rem;
     align-items: baseline;
   }
   .tok-row + .tok-row { border-top: 1px solid var(--color-line); }
@@ -88,7 +88,7 @@ const easings = [
   .rules {
     display: grid;
     gap: 0.5rem;
-    padding-left: 1.25rem;
+    padding-left: 1rem;
     list-style: disc;
     max-width: 70ch;
     font-size: var(--text-small);

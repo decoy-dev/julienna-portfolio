@@ -1,0 +1,449 @@
+---
+import { Icon } from 'astro-icon/components';
+
+/* Eight keepers; each keeps one neutral glyph from the raw scatter to its library thumb, so one
+   photo can be followed through every stage. Names follow {dest}_{subject}_{nn}.{ext}. */
+const clusters = [
+  { dir: 'web', keepers: [{ glyph: 'ph:mountains', file: 'web_hero_01.webp' }, { glyph: 'ph:user', file: 'web_team_02.webp' }] },
+  { dir: 'ads', keepers: [{ glyph: 'ph:storefront', file: 'ads_offer_01.jpg' }, { glyph: 'ph:sun', file: 'ads_story_02.jpg' }] },
+  { dir: 'social', keepers: [{ glyph: 'ph:smiley', file: 'social_smile_01.jpg' }, { glyph: 'ph:flower', file: 'social_tip_02.jpg' }] },
+  { dir: 'print', keepers: [{ glyph: 'ph:buildings', file: 'print_broch_01.tif' }, { glyph: 'ph:tree', file: 'print_card_02.tif' }] },
+];
+const keepers = clusters.flatMap((c) => c.keepers);
+const finalPath = `library/${clusters.at(-1)!.dir}/${clusters.at(-1)!.keepers.at(-1)!.file}`;
+
+/* Raw scatter: 15 jittered cells (5 x 3), seeded so every build renders the same field. The 7
+   indices in REJECTS are the discards; the other 8 are the keepers in cluster order. */
+const REJECTS = new Set([1, 3, 6, 8, 11, 13, 14]);
+const SHAPES = [
+  [34, 26],
+  [26, 34],
+  [30, 30],
+] as const;
+let seed = 7;
+const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+let kept = 0;
+let cut = 0;
+const rawTiles = Array.from({ length: 15 }, (_, i) => {
+  const [w, h] = SHAPES[Math.floor(rand() * 3)];
+  const reject = REJECTS.has(i);
+  const k = reject ? cut++ : kept++;
+  return {
+    x: (10 + ((i % 5) + 0.15 + rand() * 0.7) * 16).toFixed(1),
+    y: (14 + (Math.floor(i / 5) + 0.15 + rand() * 0.7) * 24).toFixed(1),
+    rot: (rand() * 8 - 4).toFixed(1),
+    w,
+    h,
+    reject,
+    k,
+    glyph: reject ? (k % 2 === 0 ? 'ph:image' : '') : keepers[k].glyph,
+  };
+});
+---
+
+<section id="intake" class="relative section-y" data-wire-section data-wire-stay aria-labelledby="intake-title">
+  <div class="shell">
+    <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+      <h2 id="intake-title" class="max-w-[20ch] text-h2">From raw shoot to production library</h2>
+      <button type="button" class="btn btn-ghost btn-sm" data-replay hidden>
+        <Icon name="ph:arrow-counter-clockwise" size={16} aria-hidden="true" /> Replay pipeline
+      </button>
+    </div>
+    <p class="mt-4 max-w-[58ch] text-body text-muted">
+      I built a pipeline that turns client shoots into organized, production-ready libraries.
+    </p>
+    <div class="mt-6 grid gap-x-8 gap-y-4 lg:grid-cols-2">
+      <p class="max-w-[58ch] text-body text-muted">
+        This example shows selection, sorting, and naming before files enter the library. The steps, folders, and images are illustrative.
+      </p>
+      <div>
+        <p class="max-w-[58ch] text-body text-muted">
+          This example library groups files for web, ads, social, and print.
+        </p>
+        <p class="mt-4"><span class="ph-chip">Example steps and folders</span></p>
+      </div>
+    </div>
+
+    <p class="sr-only">
+      A demonstration of the intake steps: fifteen example frames arrive from a shoot, I keep eight and discard seven, sort the keepers into web,
+      ads, social, and print folders, rename each file to one convention such as web_hero_01.webp, and file them in the production library. Example
+      final path: {finalPath}.
+    </p>
+
+    <!-- The window is the size container; the graph inside it switches layout. Everything in here
+         is a demonstration (no controls), described once by the sr-only paragraph above. -->
+    <div class="window pipe-frame mt-8" aria-hidden="true">
+      <div class="pipe grid-canvas" data-graph>
+        <svg data-edges class="pointer-events-none absolute inset-0 z-[1] size-full">
+          <path class="edge" data-state="done" data-from="ph-raw:out" data-to="ph-select:in" data-from-compact="ph-raw:down" data-to-compact="ph-select:up" />
+          <path class="edge" data-state="done" data-from="ph-select:out" data-to="ph-sort:in" data-from-compact="ph-select:down" data-to-compact="ph-sort:up" />
+          <path class="edge" data-state="done" data-from="ph-sort:out" data-to="ph-name:in" data-from-compact="ph-sort:down" data-to-compact="ph-name:up" />
+          <path class="edge" data-state="done" data-from="ph-name:out" data-to="ph-lib:in" data-from-compact="ph-name:down" data-to-compact="ph-lib:up" />
+          {Array.from({ length: 4 }, () => <rect class="packet" x="-6" y="-4.5" width="12" height="9" rx="2" opacity="0" />)}
+        </svg>
+
+        <div class="zone z-raw" data-node="ph-raw" data-stage data-state="done">
+          <p class="z-label meta">Raw shoot · 15 example frames <Icon name="ph:check-bold" size={12} class="zone-check" /></p>
+          <div class="raw-field">
+            {rawTiles.map((t) => (
+              <span
+                class="tile raw-tile"
+                data-reject={t.reject ? '' : undefined}
+                style={`--x:${t.x};--y:${t.y};--rt:${t.rot};--k:${t.k};width:${t.w}px;height:${t.h}px`}
+              >
+                {t.glyph && <Icon name={t.glyph} size={13} />}
+                {t.reject && <span class="x-badge"><Icon name="ph:x-bold" size={8} /></span>}
+              </span>
+            ))}
+          </div>
+          <div class="tray">
+            <span class="tray-label">Discarded · 7</span>
+            {Array.from({ length: 7 }, (_, k) => (
+              <span class="tray-tile" style={`--k:${k}`}><Icon name="ph:x-bold" size={8} /></span>
+            ))}
+          </div>
+          <span class="port zp-out"></span>
+        </div>
+
+        <div class="zone z-select" data-node="ph-select" data-stage data-state="done">
+          <p class="z-label meta">Select · 8 keepers <Icon name="ph:check-bold" size={12} class="zone-check" /></p>
+          <div class="sel-grid">
+            {keepers.map((kp, k) => (
+              <span class="tile sel-tile" style={`--k:${k}`}>
+                <Icon name={kp.glyph} size={13} />
+                <span class="sel-check"><Icon name="ph:check-bold" size={8} /></span>
+              </span>
+            ))}
+          </div>
+          <span class="port zp-in"></span>
+          <span class="port zp-out"></span>
+        </div>
+
+        <div class="zone z-sort" data-node="ph-sort" data-stage data-state="done">
+          <p class="z-label meta">Sort · by destination <Icon name="ph:check-bold" size={12} class="zone-check" /></p>
+          <div class="clusters">
+            {clusters.map((c, ci) => (
+              <div class="cluster" style={`--c:${ci}`}>
+                <span class="cl-label">/{c.dir}</span>
+                <span class="cl-thumbs">
+                  {c.keepers.map((kp) => (
+                    <span class="tile cl-tile"><Icon name={kp.glyph} size={11} /></span>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+          <span class="port zp-in"></span>
+          <span class="port zp-out"></span>
+        </div>
+
+        <div class="zone z-name" data-node="ph-name" data-stage data-state="done">
+          <p class="z-label meta">Name · one convention <Icon name="ph:check-bold" size={12} class="zone-check" /></p>
+          <div class="nm-rows">
+            {keepers.map((kp, k) => (
+              <span class="nm-row" style={`--k:${k}`}>
+                <span class="nm-thumb"><Icon name={kp.glyph} size={10} /></span>
+                <span class="nm-file">{kp.file}</span>
+              </span>
+            ))}
+          </div>
+          <span class="port zp-in"></span>
+          <span class="port zp-out"></span>
+        </div>
+
+        <div class="node z-lib" data-node="ph-lib" data-output data-state="done">
+          <span class="port zp-in"></span>
+          <p class="node-head">Production library <Icon name="ph:check-bold" size={12} class="node-check ml-auto" /></p>
+          <div class="px-4 pt-2 pb-4">
+            <!-- The ticker streams one path per folder; the print row carries the resting (final) name. -->
+            <div class="grid gap-2">
+              {clusters.map((c) => (
+                <span class="lib-row" data-item data-state="done" data-name={`library/${c.dir}/${(c.dir === 'print' ? c.keepers[1] : c.keepers[0]).file}`}>
+                  <Icon name="ph:folder-simple" size={16} class="shrink-0 text-primary" />
+                  <span class="lib-dir">/{c.dir}</span>
+                  <span class="lib-thumbs">
+                    {c.keepers.map((kp) => (
+                      <span class="tile lib-tile"><Icon name={kp.glyph} size={10} /></span>
+                    ))}
+                  </span>
+                </span>
+              ))}
+            </div>
+            <p class="mt-4 flex items-center gap-2">
+              <span class="min-w-0 flex-1 font-mono text-[0.6875rem] wrap-anywhere text-ink" data-ticker data-idle="Waiting for the shoot" data-final={finalPath}>{finalPath}</span>
+              <span class="ph-chip">Illustrative</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="sr-only" role="status" data-status></p>
+  </div>
+</section>
+
+<style>
+  /* The window is the size container; the graph inside switches layout (a container can't query
+     itself). Wide: five stage columns, left to right, sized in proportion to their content. */
+  .pipe-frame { container-type: inline-size; }
+  .pipe {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.3fr 0.62fr 1.05fr 1.15fr 1.26fr;
+    gap: 32px;
+    align-items: center;
+    padding: 24px;
+  }
+  .pipe > :not(svg) { position: relative; z-index: 2; }
+
+  /* Stage wells: surface-2 insets, one radius step below the window. */
+  .zone {
+    --port-off: -4px;
+    position: relative;
+    padding: 16px;
+    border-radius: var(--radius-inset);
+    background: var(--color-surface-2);
+    transition: box-shadow var(--d2) var(--ease-std);
+  }
+  .zone[data-state='active'] { box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep); }
+  .z-label { display: flex; align-items: center; gap: 0.5rem; color: var(--color-muted); }
+  .zone-check { flex: none; opacity: 0; color: var(--color-graphic-deep); transition: opacity var(--d2) var(--ease-std); }
+  .zone[data-state='done'] .zone-check { opacity: 1; }
+
+  .tile {
+    position: relative;
+    display: grid;
+    place-items: center;
+    background: var(--color-bg);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    color: var(--color-muted);
+  }
+
+  /* Raw shoot: a seeded scatter. The 7 rejects take an X cue, then leave into the Discarded
+     tray below (exit down and shrink while the matching tray slot fills). */
+  .z-raw { align-self: stretch; display: flex; flex-direction: column; }
+  .raw-field { position: relative; flex: 1; min-height: 148px; margin-top: 2px; }
+  .raw-tile {
+    position: absolute;
+    left: calc(var(--x) * 1%);
+    top: calc(var(--y) * 1%);
+    translate: -50% -50%;
+    rotate: calc(var(--rt) * 1deg);
+    transition: opacity var(--d2) var(--ease-in), scale var(--d2) var(--ease-in), translate var(--d2) var(--ease-in);
+  }
+  .x-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    display: grid;
+    place-items: center;
+    width: 13px;
+    height: 13px;
+    border-radius: var(--radius-full);
+    background: var(--color-muted);
+    color: var(--color-white);
+    opacity: 0;
+    transition: opacity var(--d1) var(--ease-std);
+  }
+  .z-raw:is([data-state='active'], [data-state='done']) .x-badge { opacity: 1; transition-delay: calc(var(--k) * 60ms); }
+  .z-raw:is([data-state='active'], [data-state='done']) .raw-tile[data-reject] {
+    opacity: 0;
+    scale: 0.5;
+    translate: -50% calc(-50% + 22px);
+    transition-delay: calc(var(--k) * 60ms + 150ms);
+  }
+  .tray {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding: 4px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-bg);
+  }
+  .tray-label { margin-right: 2px; font-size: 0.6875rem; font-weight: 500; color: var(--color-muted); }
+  .tray-tile {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 13px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background: var(--color-surface-2);
+    color: var(--color-muted);
+    opacity: 0;
+    translate: 0 -4px;
+    transition: opacity var(--d2) var(--ease-out), translate var(--d2) var(--ease-out);
+  }
+  .z-raw:is([data-state='active'], [data-state='done']) .tray-tile {
+    opacity: 1;
+    translate: 0 0;
+    transition-delay: calc(var(--k) * 60ms + 280ms);
+  }
+
+  /* Select: keepers straighten into a tidy grid, each with a ring and a check badge. */
+  .sel-grid { display: grid; grid-template-columns: repeat(2, 30px); gap: 8px; justify-content: center; margin-top: 8px; padding-bottom: 2px; }
+  .sel-tile {
+    width: 30px;
+    height: 23px;
+    opacity: 0.25;
+    translate: 0 6px;
+    transition: opacity var(--d2) var(--ease-out), translate var(--d2) var(--ease-out), box-shadow var(--d2) var(--ease-std);
+  }
+  .sel-check {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    display: grid;
+    place-items: center;
+    width: 13px;
+    height: 13px;
+    border-radius: var(--radius-full);
+    background: var(--color-graphic-deep);
+    color: var(--color-white);
+    opacity: 0;
+    scale: 0.6;
+    transition: opacity var(--d2) var(--ease-out), scale var(--d2) var(--ease-out);
+  }
+  .z-select:is([data-state='active'], [data-state='done']) .sel-tile {
+    opacity: 1;
+    translate: 0 0;
+    box-shadow: 0 0 0 1.5px var(--color-graphic-deep);
+    transition-delay: calc(var(--k) * 50ms);
+  }
+  .z-select:is([data-state='active'], [data-state='done']) .sel-check { opacity: 1; scale: 1; transition-delay: calc(var(--k) * 50ms + 90ms); }
+
+  /* Sort: four labelled destination clusters. */
+  .clusters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 8px; }
+  /* Labels stay at full contrast in every state; only the decorative thumbs dim until their stage. */
+  .cluster { translate: 0 6px; transition: translate var(--d2) var(--ease-out); }
+  .cl-thumbs { opacity: 0.25; transition: opacity var(--d2) var(--ease-out); }
+  .z-sort:is([data-state='active'], [data-state='done']) .cluster { translate: 0 0; transition-delay: calc(var(--c) * 110ms); }
+  .z-sort:is([data-state='active'], [data-state='done']) .cl-thumbs { opacity: 1; transition-delay: calc(var(--c) * 110ms); }
+  .cl-label { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--color-ink); }
+  .cl-thumbs { display: flex; gap: 4px; margin-top: 4px; }
+  .cl-tile { width: 26px; height: 20px; }
+
+  /* Name: eight file cards, thumb + literal file name, in cluster order. */
+  .nm-rows { display: grid; gap: 4px; margin-top: 8px; }
+  .nm-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 2px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-bg);
+    translate: 0 4px;
+    transition: translate var(--d2) var(--ease-out), border-color var(--d2) var(--ease-out);
+  }
+  .nm-row .nm-thumb { opacity: 0.25; transition: opacity var(--d2) var(--ease-out); }
+  .z-name:is([data-state='active'], [data-state='done']) .nm-row { translate: 0 0; border-color: var(--color-graphic); transition-delay: calc(var(--k) * 55ms); }
+  .z-name:is([data-state='active'], [data-state='done']) .nm-thumb { opacity: 1; transition-delay: calc(var(--k) * 55ms); }
+  .nm-thumb { flex: none; display: grid; place-items: center; width: 18px; height: 14px; border-radius: 3px; background: var(--color-surface-2); color: var(--color-muted); }
+  .nm-file { min-width: 0; overflow-wrap: anywhere; font-family: var(--font-mono); font-size: 0.625rem; line-height: 1.5; color: var(--color-ink); }
+
+  /* Production library: the output node's folder rows fill with the keepers' thumbs. */
+  .lib-row { display: flex; align-items: center; gap: 8px; min-width: 0; transition: translate var(--d3) var(--ease-out); }
+  .lib-row:not([data-state='done']) { translate: 0 3px; }
+  .lib-dir { font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-ink); }
+  .lib-thumbs { display: flex; gap: 4px; margin-left: auto; transition: opacity var(--d3) var(--ease-std); }
+  .lib-row:not([data-state='done']) .lib-thumbs { opacity: 0.25; }
+  .lib-tile { width: 24px; height: 17px; border-radius: 3px; }
+
+  .zp-in { left: var(--port-off); top: calc(50% - 4px); }
+  .zp-out { right: var(--port-off); top: calc(50% - 4px); }
+
+  /* Stacked: zones full width in process order, compact edges run down the middle. Shapes stay
+     distinct (scatter + tray, one checked row, cluster row, file-card columns, folder node). */
+  @container (max-width: 1099px) {
+    .pipe { --graph-compact: 1; grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 16px; }
+    .zp-in { left: calc(50% - 4px); right: auto; top: var(--port-off); }
+    .zp-out { left: calc(50% - 4px); right: auto; top: auto; bottom: var(--port-off); }
+    .raw-field { min-height: 170px; }
+    .sel-grid { grid-template-columns: repeat(8, 30px); }
+    .clusters { grid-template-columns: repeat(4, minmax(0, max-content)); column-gap: 16px; }
+    .nm-rows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  /* Below ~440px the longest file names no longer fit two columns without wrapping mid-name. */
+  @container (max-width: 439px) {
+    .nm-rows { grid-template-columns: minmax(0, 1fr); }
+    .sel-grid { grid-template-columns: repeat(4, 30px); }
+  }
+  @container (max-width: 340px) {
+    .sel-grid { grid-template-columns: repeat(4, 30px); }
+    .clusters { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; }
+    .tray-tile { width: 16px; }
+  }
+</style>
+
+<script>
+  import { layoutEdges, reducedMotion, watchVisibility } from '../scripts/graph';
+  import { createPhotoIntake } from '../scripts/photo-intake';
+
+  const section = document.querySelector<HTMLElement>('#intake');
+  const graph = section?.querySelector<HTMLElement>('[data-graph]');
+  const replay = section?.querySelector<HTMLButtonElement>('[data-replay]');
+  const sentinel = section?.querySelector<HTMLElement>('[data-node="ph-raw"]');
+  if (section && graph && replay && sentinel) {
+    const status = section.querySelector<HTMLElement>('[data-status]')!;
+    const runner = createPhotoIntake(graph);
+    const relayout = layoutEdges(graph);
+    let inView = false;
+    let started = false;
+    let runId = 0;
+
+    /** Re-arm: the next time the sentinel is seen, the run starts fresh. */
+    const arm = () => {
+      runId++;
+      started = false;
+    };
+    /** `announce` is for an explicit replay only; autoplay stays silent. */
+    const play = (announce = false) => {
+      const id = ++runId;
+      started = true;
+      relayout();
+      // Layout runs in the rAF queued by relayout; the run starts in the frame after it.
+      requestAnimationFrame(async () => {
+        if (id !== runId) return;
+        if (document.hidden || !inView) return arm();
+        if ((await runner.play()) && announce && id === runId) status.textContent = 'Photo intake finished: a production library from one shoot.';
+      });
+    };
+    /** Settle a run that left the viewport or lost the tab; an unstarted section keeps its shipped state. */
+    const settle = () => {
+      if (!started) return;
+      runId++;
+      runner.finish();
+    };
+
+    replay.hidden = false;
+    replay.addEventListener('click', () => {
+      status.textContent = '';
+      if (inView) play(true);
+      else arm();
+    });
+
+    watchVisibility(graph, (visible) => (inView = visible), 0);
+    watchVisibility(section, (onScreen) => onScreen || settle(), 0);
+    // Autoplay once from a reachable sentinel: the raw-shoot zone past a 96px bottom margin, never
+    // a ratio of the whole tall graphic. The shipped finished state stays visible until this
+    // actually starts (no eager reset at load); reduced motion re-asserts it via the runner.
+    new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) if (e.isIntersecting && !started && !document.hidden) play();
+      },
+      { rootMargin: '0px 0px -96px 0px' },
+    ).observe(sentinel);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) return settle();
+      // Back from a hidden tab: an unstarted section that came into view meanwhile starts now.
+      if (inView && !started) play();
+    });
+    // A live switch to reduced motion settles the lane (runner-owned) and must not restart it.
+    reducedMotion.addEventListener('change', () => reducedMotion.matches && (started = true));
+  }
+</script>

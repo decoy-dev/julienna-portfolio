@@ -53,7 +53,7 @@ const who = [
 ];
 ---
 
-<section class="py-[clamp(80px,12vh,128px)]" data-wire-section aria-labelledby="ai-title">
+<section class="section-y" data-wire-section aria-labelledby="ai-title">
   <div class="shell">
     <h2 id="ai-title" class="max-w-[18ch] text-h2">I use AI for the repetitive half</h2>
     <p class="mt-4 max-w-[56ch] text-body text-muted">
@@ -69,13 +69,13 @@ const who = [
             <Icon name="ph:arrow-counter-clockwise" size={16} aria-hidden="true" /> Run again
           </button>
         </div>
-        <h3 class="mt-5 text-h3 text-white">No LLM in the render path</h3>
+        <h3 class="mt-4 text-h3 text-white">No LLM in the render path</h3>
         <p class="mt-2 max-w-[44ch] text-small text-on-ink-muted">
           Claude helps me draft new templates. The ads themselves come from fixed rules applied to the chosen persona, brand kit, template, and content.
         </p>
         <!-- The moving copy is decorative; the sr-only block carries the same text, once. -->
         <pre class="code mt-6" aria-hidden="true" data-code><code>{lines.map((toks, i) => <span class="ln" data-line={i}>{toks.map((t) => <span class={`t-${t.role}`} data-t>{t.text}</span>)}</span>)}</code></pre>
-        <pre class="term mt-2.5" aria-hidden="true"><code><span class="tl" data-row data-state="done"><span class="t-com">$</span> node render-campaign.ts</span>{rows.map((r) => <span class="tl" data-row data-state="done" data-gate-at={r.gate} data-line-at={r.line}>{r.key.padEnd(11)}<span class="t-str">ok</span>  <span class="t-val">{r.value}</span></span>)}<span class="tl" data-row data-state="done">{' '.repeat(15)}<span class="t-com">{firstFile}, and 7 more</span></span></code></pre>
+        <pre class="term mt-2" aria-hidden="true"><code><span class="tl" data-row data-state="done"><span class="t-com">$</span> node render-campaign.ts</span>{rows.map((r) => <span class="tl" data-row data-state="done" data-gate-at={r.gate} data-line-at={r.line}>{r.key.padEnd(11)}<span class="t-str">ok</span>  <span class="t-val">{r.value}</span></span>)}<span class="tl" data-row data-state="done">{' '.repeat(15)}<span class="t-com">{firstFile}, and 7 more</span></span></code></pre>
         <pre class="sr-only">{plain}</pre>
         <p class="sr-only" role="status" data-render-status></p>
       </article>
@@ -83,7 +83,7 @@ const who = [
       <article class="cell cell-b bg-surface-2">
         <Icon name="ph:timer" size={22} class="text-primary" aria-hidden="true" />
         <p class="mt-6 text-display leading-none text-ink"><CountUp text="40%" /></p>
-        <h3 class="mt-3 text-h3">Less catalog production time</h3>
+        <h3 class="mt-4 text-h3">Less catalog production time</h3>
         <p class="mt-2 max-w-[40ch] text-small text-muted">
           I introduced AI tooling at Machine Communications that cut catalog and brochure production time by 40%.
         </p>
@@ -92,7 +92,7 @@ const who = [
       <article class="cell cell-c bg-bg shadow-raised">
         <h3 class="text-h3">Nothing renders half set up</h3>
         <p class="mt-2 text-small text-muted">I complete the persona, brand kit, template, and content steps before rendering.</p>
-        <ol class="mt-5 grid gap-2" aria-label="Render gates">
+        <ol class="mt-4 grid gap-2" aria-label="Render gates">
           {gates.map((g) => (
             <li class="gate" data-gate data-state="done">
               <span class="gate-dot"><Icon name="ph:check-bold" size={11} aria-hidden="true" /></span>
@@ -104,22 +104,32 @@ const who = [
 
       <article class="cell cell-e bg-surface">
         <h3 class="text-h3">Who does what</h3>
-        <div class="who mt-5" data-graph data-who>
+        <div class="who mt-4" data-graph data-who>
           <svg data-edges class="pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
             <path class="edge" data-state="done" data-from="who-decide:out" data-to="who-tools:in" data-from-compact="who-decide:down" data-to-compact="who-tools:up" />
             <path class="edge" data-state="done" data-from="who-tools:out" data-to="who-signoff:in" data-from-compact="who-tools:down" data-to-compact="who-signoff:up" />
             <circle class="packet" r="3" opacity="0" />
           </svg>
           {who.map((w, i) => (
-            <div class:list={['node who-node', { 'who-me': w.me }]} data-node={`who-${w.id}`}>
+            <div class:list={['node who-node', { 'who-me': w.me, 'who-signoff': w.id === 'signoff' }]} data-node={`who-${w.id}`}>
               {i > 0 && <span class="port w-in" />}
-              <p class="node-head">
-                <Icon name={w.icon} size={16} class={w.me ? 'text-primary' : 'text-muted'} aria-hidden="true" />
-                <span class={w.me ? 'text-primary' : 'text-muted'}>{w.title}</span>
-              </p>
-              <ul role="list" class="who-list">
-                {w.items.map((item) => <li>{item}</li>)}
-              </ul>
+              {w.id === 'signoff' ? (
+                <div class="signoff-inner">
+                  <Icon name={w.icon} size={44} class="signoff-icon text-primary" aria-hidden="true" data-signoff-icon />
+                  <p class="signoff-title">{w.title}</p>
+                  <p class="signoff-line">{w.items[0]}</p>
+                </div>
+              ) : (
+                <>
+                  <p class="node-head">
+                    <Icon name={w.icon} size={16} class={w.me ? 'text-primary' : 'text-muted'} aria-hidden="true" />
+                    <span class={w.me ? 'text-primary' : 'text-muted'}>{w.title}</span>
+                  </p>
+                  <ul role="list" class="who-list">
+                    {w.items.map((item) => <li>{item}</li>)}
+                  </ul>
+                </>
+              )}
               {i < who.length - 1 && <span class="port w-out" />}
             </div>
           ))}
@@ -135,7 +145,8 @@ const who = [
     gap: 16px;
     grid-template-columns: minmax(0, 1fr);
   }
-  .cell { border-radius: var(--radius-card); padding: clamp(1.25rem, 2.5vw, 2rem); min-width: 0; }
+  .cell { border-radius: var(--radius-card); padding: 24px; min-width: 0; }
+  @media (min-width: 64rem) { .cell { padding: 32px; } }
   @media (min-width: 64rem) {
     .bento { grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-rows: minmax(180px, auto); }
     .cell-a { grid-column: span 7; grid-row: span 2; }
@@ -156,7 +167,7 @@ const who = [
 
   .code, .term {
     margin: 0;
-    padding: 1rem 1.125rem;
+    padding: 1rem 1rem;
     border-radius: var(--radius-inset);
     font-family: var(--font-mono);
     font-size: 0.75rem;
@@ -168,7 +179,7 @@ const who = [
   .term { line-height: 1.7; background: oklch(0 0 0 / 0.28); box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.06); }
   .ln, .tl { display: block; min-height: 1lh; }
   /* A running row lights the code line it came from; the highlight bleeds to the pane edges. */
-  .ln { margin-inline: -1.125rem; padding-inline: 1.125rem; transition: background-color var(--d2) var(--ease-std); }
+  .ln { margin-inline: -1rem; padding-inline: 1rem; transition: background-color var(--d2) var(--ease-std); }
   .ln[data-state='active'] { background: oklch(0.72 0.1 188 / 0.12); }
   .tl { transition: opacity var(--d1) var(--ease-std); }
   .tl:not([data-state='done']) { opacity: 0; }
@@ -185,7 +196,7 @@ const who = [
     background: var(--color-graphic);
   }
 
-  .gate { display: flex; align-items: center; gap: 0.625rem; font-size: var(--text-small); font-weight: 500; color: var(--color-muted); transition: color var(--d2) var(--ease-std); }
+  .gate { display: flex; align-items: center; gap: 0.5rem; font-size: var(--text-small); font-weight: 500; color: var(--color-muted); transition: color var(--d2) var(--ease-std); }
   .gate-dot {
     display: grid;
     place-items: center;
@@ -210,10 +221,25 @@ const who = [
     row-gap: 40px;
     align-items: stretch;
   }
-  .who-node { position: relative; z-index: 2; padding-bottom: 0.875rem; }
+  .who-node { position: relative; z-index: 2; padding-bottom: 1rem; }
   .who-me { border-color: oklch(0.72 0.1 188 / 0.55); }
-  .who-list { display: grid; gap: 0.375rem; margin-top: 0.625rem; padding-inline: 0.875rem; font-size: var(--text-small); line-height: 1.45; color: var(--color-ink); }
+  .who-list { display: grid; gap: 0.5rem; margin-top: 0.5rem; padding-inline: 1rem; font-size: var(--text-small); line-height: 1.45; color: var(--color-ink); }
   .who-node:not(.who-me) .who-list { color: var(--color-muted); }
+  /* The last stage is the payoff: one large seal, then the role, then what it covers. */
+  .who-signoff { padding-bottom: 0; }
+  .signoff-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 100%;
+    padding: 1rem;
+    text-align: center;
+  }
+  .signoff-icon { margin-bottom: 0.25rem; }
+  .signoff-title { font-size: var(--text-meta); font-weight: 600; color: var(--color-primary); }
+  .signoff-line { max-width: 24ch; font-size: var(--text-small); color: var(--color-ink); }
   .w-in { left: var(--port-off); top: calc(50% - 4px); }
   .w-out { right: var(--port-off); top: calc(50% - 4px); }
   @media (max-width: 47.99rem) {
@@ -343,6 +369,7 @@ const who = [
     layoutEdges(who);
     const edges = [...who.querySelectorAll<SVGPathElement>('path.edge')];
     const dot = who.querySelector<SVGCircleElement>('circle.packet')!;
+    const seal = who.querySelector<SVGElement>('[data-signoff-icon]');
     let scope: MotionScope | null = null;
     let spent = false;
     const done = () => {
@@ -364,8 +391,10 @@ const who = [
           await sendPacket(s, edge, dot, 520);
           if (!s.alive) return;
           edge.dataset.state = 'done';
-          await s.wait(160);
+          await s.wait(120);
         }
+        // The stamp: one small press on the seal. Cancelling snaps it back to rest.
+        if (seal && s.alive) await s.animate(seal, { scale: [1, 1.14, 1], duration: 360, ease: 'inOutQuad' }, () => (seal.style.transform = ''));
       }, 0.6);
       document.addEventListener('visibilitychange', () => document.hidden && done());
       reducedMotion.addEventListener('change', () => reducedMotion.matches && done());

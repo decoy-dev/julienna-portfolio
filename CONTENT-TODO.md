@@ -13,16 +13,17 @@ grep -rn 'data-todo' src
 | Home, proof rail | Hours saved per year by her pipelines | `src/data/site.ts` → `stats` |
 | Home, proof rail | Production assets shipped since 2017 | `src/data/site.ts` → `stats` |
 | Home, proof rail | Revenue influenced by her campaigns | `src/data/site.ts` → `stats` |
-| Home, pipeline (ad generator) | Production time per campaign, before and after | `src/sections/Pipeline.astro` → results |
-| Home, pipeline (ad generator) | Verify the "~320 files per campaign" estimate (~40 practices x 8 deliverables) | `src/sections/Pipeline.astro` |
-| Home, pipeline (photo intake) | Hours per shoot, before and after | `src/sections/Pipeline.astro` → results |
+| Home, ad generator | Production time per campaign, before and after (not shown on the site yet; add it to the section copy once known) | `src/sections/AdGenerator.astro` |
+| Home, ad generator | Verify the "About 320 files per campaign" estimate (~40 practices x 8 deliverables) | `src/sections/AdGenerator.astro` |
+| Home, photo intake | Hours per shoot, before and after (not shown on the site yet; add it to the section copy once known) | `src/sections/PhotoIntake.astro` |
+| Footer, every page | Availability, typical response time, time zone | `src/components/Footer.astro` → `status` |
 
 To fill a stat, set `value` and remove `placeholder: true`.
 
 ## Facts to confirm
 
-- Photo intake steps and folders are examples; the lane shows an "Example steps and folders" chip. The lane is drawn as a raw field (24 frames, 8 rejects) feeding Cull and Name, then the `/web`, `/ads`, `/social`, `/print` bins. Replace the gates or folders in `src/sections/Pipeline.astro`, then update the chip and the footnote under the demo.
-- The ad generator's Brand kit input shows "SamplePractice" with a "Sample brand kit" chip. Client names stay private; keep it a stand-in.
+- Photo intake: the example shoot, its keepers and rejects, the file names, and the `/web`, `/ads`, `/social`, `/print` folders are illustrative (the section says so and carries an "Example steps and folders" chip). Replace them in `src/sections/PhotoIntake.astro` once the real steps can be shown.
+- Ad generator: the brand kits ("Sample kit A", "Sample kit B", "SamplePractice"), the candidate headlines and CTAs ("Sample copy" chip), and the file names are stand-ins; client work stays private. The personas and the five templates are real.
 - The render demo in `src/sections/AiBento.astro` is labelled "Illustrative render sequence". The code, `render-campaign.ts`, and the terminal rows are stand-ins built from real vocabulary (the persona slug, Split Stack's 5 slots, the 8 deliverables). Swap in a real excerpt if one can be shared.
 - The 40% cut in catalog and brochure production time is attributed to AI tooling at Machine Communications (`src/sections/AiBento.astro`). Confirm the wording.
 - OrthoBoost promotion month in 2026 (the copy currently says "in 2026").

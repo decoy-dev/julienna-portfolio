@@ -34,7 +34,7 @@ import Guide from './Guide.astro';
         <span class="stage-packet" aria-hidden="true"></span>
       </div>
     </div>
-    <figcaption class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+    <figcaption class="mt-4 flex flex-wrap gap-x-4 gap-y-2">
       <span class="legend"><span class="key key-line"></span> idle edge</span>
       <span class="legend"><span class="key key-active"></span> active edge</span>
       <span class="legend"><span class="key key-done"></span> done node</span>
@@ -52,7 +52,7 @@ import Guide from './Guide.astro';
       <li><strong class="text-ink">Packet</strong>: 6px graphic-deep dot with a 2px white ring, linear travel, one per active edge, staggered 600ms. Packets only move; a packet at rest is a bug.</li>
     </ul>
     <ul class="rules">
-      <li>The dot-grid canvas appears only behind genuine graph surfaces: hero graph, pipeline stage, footer sitemap, closing band. Never as texture elsewhere.</li>
+      <li>The dot-grid canvas appears only behind genuine graph surfaces: hero graph, pipeline stages, closing band. Never as texture elsewhere.</li>
       <li>Maximum six nodes per graph outside the pipeline demo.</li>
       <li>Every node title is literal and sentence case ("8 files for one practice", never "One practice, one campaign"). No lorem nodes, no slogan titles.</li>
       <li>Mono appears on a graph only when the content is a literal file name, path, or code. Titles, captions, and legends are sans.</li>
@@ -74,7 +74,7 @@ import Guide from './Guide.astro';
     pointer-events: none;
   }
   .node-body {
-    padding: 0.25rem 0.875rem 0.75rem;
+    padding: 0.25rem 1rem 1rem;
     font-size: 0.75rem;
     color: var(--color-muted);
     white-space: nowrap;
@@ -137,8 +137,8 @@ import Guide from './Guide.astro';
   }
   .rules {
     display: grid;
-    gap: 0.625rem;
-    padding-left: 1.25rem;
+    gap: 0.5rem;
+    padding-left: 1rem;
     list-style: disc;
     font-size: var(--text-small);
     color: var(--color-muted);

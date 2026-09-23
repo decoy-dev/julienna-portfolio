@@ -28,9 +28,9 @@ const set = [
 >
   <div class="grid gap-4 md:grid-cols-2">
     <Spec label='<Icon name="ph:..." />' note="The working set. Extend from Phosphor regular only.">
-      <div class="flex flex-wrap gap-x-5 gap-y-4 text-ink">
+      <div class="flex flex-wrap gap-x-4 gap-y-4 text-ink">
         {set.map((name) => (
-          <span class="grid justify-items-center gap-1.5">
+          <span class="grid justify-items-center gap-2">
             <Icon name={name} size={18} aria-hidden="true" />
             <code class="font-mono text-[0.625rem] text-dash-ink">{name.slice(3)}</code>
           </span>
@@ -39,20 +39,20 @@ const set = [
     </Spec>
     <Spec label="sizes 16 / 18 / 24" note="16 in chips and labels, 18 inline with text, 24 in slots and empty states.">
       <div class="flex items-end gap-8 text-ink">
-        <span class="grid justify-items-center gap-1.5">
+        <span class="grid justify-items-center gap-2">
           <Icon name="ph:flow-arrow" size={16} aria-hidden="true" />
           <code class="font-mono text-[0.6875rem] text-dash-ink">16</code>
         </span>
-        <span class="grid justify-items-center gap-1.5">
+        <span class="grid justify-items-center gap-2">
           <Icon name="ph:flow-arrow" size={18} aria-hidden="true" />
           <code class="font-mono text-[0.6875rem] text-dash-ink">18</code>
         </span>
-        <span class="grid justify-items-center gap-1.5">
+        <span class="grid justify-items-center gap-2">
           <Icon name="ph:flow-arrow" size={24} aria-hidden="true" />
           <code class="font-mono text-[0.6875rem] text-dash-ink">24</code>
         </span>
       </div>
-      <ul class="mt-5 grid gap-1 text-small text-muted">
+      <ul class="mt-4 grid gap-1 text-small text-muted">
         <li>Icons inherit currentColor; never a third hue.</li>
         <li>Decorative icons carry aria-hidden. An icon never replaces a visible label.</li>
         <li>No filled, duotone, or bold variants. Regular only, everywhere.</li>

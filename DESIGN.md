@@ -82,9 +82,16 @@ eight words max, `text-wrap: balance` (global). Sub-paragraphs 25 words max. Sta
 
 ## Layout
 
-- One container: `.shell` = `min(1200px, 100% - 2 * var(--gutter))`; `--gutter: clamp(20px, 4vw, 24px)`.
-- 12 columns, 24px gaps on desktop; 4px spacing base everywhere.
-- Section rhythm `clamp(80px, 12vh, 128px)`; full-bleed bands use 64px inner padding.
+- One container: `.shell` = `min(1200px, 100% - 2 * var(--gutter))`; `--gutter` 16px, 24px from 640px.
+- 12 columns, 24px gaps on desktop.
+- **Spacing rule: 8px.** Every margin, padding, and gap is a factor or a multiple of 8:
+  2, 4, 8, 16, 24, 32, 40, 48, 64, 96, 128. 2 and 4 are for component interiors only (chip padding,
+  icon-to-label gaps); anything between blocks uses 8 or more. Never 6, 10, 12, 14, 18, 20, 28, 36. In
+  Tailwind: steps 0.5, 1, 2, 4, 6, 8, 10, 12, 16, 24, 32 (no 1.5, 2.5, 3, 3.5, 5, 7, 9). Spacing never
+  interpolates with `vw`/`vh`; it steps at breakpoints so every rendered value stays on the rule. The only
+  exception is the mark's clear-space specimen on /brand, which is drawn to the mark's own proportion.
+- Section rhythm `.section-y`: 64px, 96px from 1024px. Cards and bento cells pad 24px, 32px from 1024px;
+  full-bleed bands use 64px inner padding.
 - Breakpoints: 640, 768, 1024, 1280. The page wire renders at >= 1360px (`--breakpoint-wire: 85rem`) only, weaving through the home page's `data-wire-section` sections.
 - Verify every layout at 390, 768, 1024, 1440. No horizontal page overflow ever; wide specimens scroll inside their own frame.
 
@@ -127,7 +134,7 @@ Anatomy (all classes in global.css):
 - **Port** `.port[data-side="in|out|up|down"]`: 8px circle centered on the border edge (offset `var(--port-off)`), white fill, 1.5px `graphic-deep` stroke. Ports exist ONLY where an edge attaches.
 - **Edge** `.edge[data-state]` (SVG path): cubic bezier, horizontal tangents (exit right, enter left; exit bottom, enter top). 1.5px. Idle `line`, active `graphic-deep`, done `graphic`. Edges never cross, never loop, no diagonal free curves.
 - **Packet** `.packet`: 6px `graphic-deep` dot, 2px white ring, linear travel, one per active edge, 600ms stagger. Packets only move; a packet at rest is a bug.
-- **Canvas** `.grid-canvas` / `.grid-canvas-ink`: 24px dot grid. ONLY behind genuine graph surfaces (hero graph, pipeline stage, footer sitemap, closing band). Never texture.
+- **Canvas** `.grid-canvas` / `.grid-canvas-ink`: 24px dot grid. ONLY behind genuine graph surfaces (hero graph, pipeline stages, closing band). Never texture.
 
 Rules: max 6 nodes per graph outside the pipeline demo; every node title is real production vocabulary; mono
 appears on a graph only for literal file names, paths, or code (titles, captions, legends are sans); no
@@ -137,14 +144,29 @@ packet crosses them. `data-route="elbow"` (or `data-route-compact` for the stack
 orthogonally with one rounded corner, for edges that must not cut across other nodes.
 
 - **Page wire** (`PageWire.astro`, home only, >= 1360px): one path from under the proof rail, down a gutter
-  beside each `data-wire-section`, crossing to the other gutter in the whitespace between sections, and
-  ending at the closing CTA panel, where the panel's own line carries on to "Get in touch". A ball rides it
-  level with 55% of the viewport and the wire fills teal behind it (WAAPI `ScrollTimeline`, no scroll
-  listeners). Reduced motion or no support: static grey wire, no ball. The wire sits behind all content.
-- **Pipelines** (`Pipeline.astro`, runners in `src/scripts/pipeline.ts`): two lanes with different shapes.
-  The ad generator merges four inputs into Render and fans out to the 8-file matrix; the photo intake drains
-  a loose field of frames through Cull and Name into four bins. Each lane triggers on its own visibility,
-  finishes under 2.5s, and settles to its final state offscreen or in a hidden tab.
+  beside each `data-wire-section`, crossing to the other gutter in the whitespace between sections
+  (`data-wire-stay` on a section keeps the previous gutter, used for the two pipeline sections), and turning
+  into the closing CTA panel. Every bend meets its straight runs with zero curvature (doubled cubic control
+  points), so runs never kink into curves. A ball rides it level with 55% of the viewport and the wire fills
+  teal behind it; on the final approach the ball crosses the panel along the panel's own line and reaches
+  "Get in touch" exactly when the button is at the middle of the viewport, where it docks. One WAAPI
+  `ScrollTimeline`, no scroll listeners. Reduced motion or no support: static grey wire, no ball. The strokes
+  sit behind all content; only the 12px ball is layered above (it may cross the ink panel).
+- **CTA arrival** (`ClosingCta.astro`, all widths): when the button's center reaches the middle of the
+  viewport (IntersectionObserver on a 1px marker with pixel root margins), the button gets one ring pulse
+  (600ms, never loops, once per arrival from below). Skipped on a hidden tab and under reduced motion.
+- **Pipelines**: two sections, each with its own copy and graphic. `AdGenerator.astro` shows the decisions
+  (persona and brand kit picked from stacks, a template picked from the five, content curated per slot)
+  feeding Render and the 8-file output; `PhotoIntake.astro` walks one example shoot through select and
+  discard, sort, name, and the production library. Choreography lives in `src/scripts/ad-generator.ts` and
+  `src/scripts/photo-intake.ts` on the shared runner in `src/scripts/pipeline.ts`. Each run is under 5s,
+  starts from a reachable sentinel, ships and rests in its finished state, and settles instantly
+  (`data-instant`) offscreen, in a hidden tab, or under reduced motion.
+- **Who does what** (`AiBento.astro`): three nodes; the last, "I sign off", is a centered seal with one
+  stamp pulse when the packet pass reaches it.
+- **Footer status panel** (`Footer.astro`): "Before you email me", with availability, response time, and time
+  zone as placeholders, the email with a copy button (`src/scripts/copy-email.ts`, shared with /contact), and
+  the resume download.
 - **Render demo** (`AiBento.astro`): the illustrative code types out, then each terminal row lights its code
   line and ticks the matching gate in "Nothing renders half set up". The moving copy is `aria-hidden` with
   an sr-only copy, the pane height is reserved, and it ships finished.

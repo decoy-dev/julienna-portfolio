@@ -12,7 +12,7 @@ const pieces: Piece[] = [
 ];
 ---
 
-<section class="py-[clamp(80px,12vh,128px)]" data-wire-section aria-labelledby="personal-title">
+<section class="section-y" data-wire-section aria-labelledby="personal-title">
   <div class="shell">
     <h2 id="personal-title" class="max-w-[22ch] text-h2">Off the clock: self-initiated work and commissions</h2>
     <p class="mt-4 max-w-[56ch] text-body text-muted">Visualizers, live visuals, streetwear, and posters, often for grassroots and LGBTQ+-friendly shows. I have a soft spot for projects that care about community.</p>
@@ -21,10 +21,10 @@ const pieces: Piece[] = [
       {pieces.map((p) => (
         <li class="piece reveal">
           <Slot ratio={p.ratio} brief={p.brief} radius="card" />
-          <p class="meta mt-3 text-muted">{p.meta}</p>
+          <p class="meta mt-4 text-muted">{p.meta}</p>
           <p class="mt-1 text-small font-semibold text-ink">{p.title}</p>
           {p.note && <p class="mt-0.5 text-small text-muted">{p.note}</p>}
-          {p.placeholder && <span class="ph-chip mt-1.5" data-todo="commission">Add piece and client</span>}
+          {p.placeholder && <span class="ph-chip mt-2" data-todo="commission">Add piece and client</span>}
         </li>
       ))}
     </ul>

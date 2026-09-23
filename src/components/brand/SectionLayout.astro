@@ -4,11 +4,11 @@ import Spec from './Spec.astro';
 
 const rows = [
   { token: '.shell', value: 'min(1200px, 100% - 2 * gutter)', use: 'The one content container. Everything centers in it.' },
-  { token: '--gutter', value: 'clamp(20px, 4vw, 24px)', use: 'Page padding: 20px at 390, 24px at 1440.' },
+  { token: '--gutter', value: '16px, 24px from 640px', use: 'Page padding on each side of the shell.' },
   { token: 'columns', value: '12 cols, 24px gaps', use: 'Desktop grid inside the shell. Collapses to one column on phones.' },
-  { token: 'section rhythm', value: 'clamp(80px, 12vh, 128px)', use: 'Vertical space between sections.' },
+  { token: 'section rhythm', value: '64px, 96px from 1024px', use: 'Vertical padding of every home section (.section-y).' },
   { token: 'band padding', value: '64px', use: 'Inner padding of full-bleed bands (proof rail, closing CTA).' },
-  { token: 'spacing base', value: '4px', use: 'All gaps and padding are multiples of 4.' },
+  { token: 'spacing rule', value: '8px: 2, 4, 8, 16, 24, 32, 48, 64, 96, 128', use: 'Every margin, padding, and gap is a factor or a multiple of 8. 2 and 4 only inside components.' },
 ];
 
 const breakpoints = [
@@ -26,12 +26,12 @@ const breakpoints = [
   intro="One 1200px shell, a 12-column grid, and a 4px spacing base. Verify every layout at 390, 768, 1024, and 1440."
 >
   <Spec label=".shell + grid-cols-12" note="The 12 columns at 24px gaps, drawn live inside the shell.">
-    <div class="grid grid-cols-6 gap-3 sm:grid-cols-12 sm:gap-6" aria-hidden="true">
+    <div class="grid grid-cols-6 gap-4 sm:grid-cols-12 sm:gap-6" aria-hidden="true">
       {Array.from({ length: 12 }).map((_, i) => (
         <div class:list={['h-14 rounded-[4px] bg-graphic-tint', i >= 6 && 'hidden sm:block']}></div>
       ))}
     </div>
-    <p class="mt-3 text-small text-muted">Phones use the same shell; the grid collapses to a single column.</p>
+    <p class="mt-4 text-small text-muted">Phones use the same shell; the grid collapses to a single column.</p>
   </Spec>
 
   <div class="rounded-card border border-line">
@@ -54,7 +54,7 @@ const breakpoints = [
         </div>
       ))}
     </div>
-    <p class="mt-3 max-w-[65ch] text-small text-muted">
+    <p class="mt-4 max-w-[65ch] text-small text-muted">
       No horizontal overflow at any width. Wide specimens scroll inside their own frame instead of stretching the page.
     </p>
   </div>
@@ -64,7 +64,7 @@ const breakpoints = [
   .layout-row {
     display: grid;
     gap: 0.25rem 1.5rem;
-    padding: 0.875rem 1.25rem;
+    padding: 1rem 1rem;
     align-items: baseline;
   }
   .layout-row + .layout-row { border-top: 1px solid var(--color-line); }

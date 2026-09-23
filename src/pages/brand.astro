@@ -54,7 +54,7 @@ const principles = [
 >
   <header class="shell guide-head">
     <Mark size={48} />
-    <h1 class="mt-5 text-display">Brand guide</h1>
+    <h1 class="mt-4 text-display">Brand guide</h1>
     <p class="mt-4 max-w-[60ch] text-body text-muted">
       The tokens, rules, and components behind everything I put my name on. Copy from here instead of
       improvising; the kit is downloadable at the end.
@@ -102,22 +102,27 @@ const principles = [
 
 <style>
   .guide-head {
-    padding-top: calc(var(--nav-top) + var(--nav-h) + clamp(48px, 8vh, 80px));
+    padding-top: calc(var(--nav-top) + var(--nav-h) + 48px);
   }
+  @media (min-width: 64rem) { .guide-head { padding-top: calc(var(--nav-top) + var(--nav-h) + 64px); } }
   .guide-grid {
     display: grid;
     gap: 48px;
-    margin-top: clamp(40px, 6vh, 64px);
-    padding-bottom: clamp(80px, 12vh, 128px);
+    margin-top: 48px;
+    padding-bottom: 64px;
   }
   .guide-flow {
     display: grid;
-    gap: clamp(64px, 9vh, 96px);
+    gap: 64px;
     min-width: 0;
+  }
+  @media (min-width: 64rem) {
+    .guide-grid { margin-top: 64px; padding-bottom: 96px; }
+    .guide-flow { gap: 96px; }
   }
   .guide-flow > :global(section) {
     border-top: 1px solid var(--color-line);
-    padding-top: clamp(40px, 6vh, 56px);
+    padding-top: 48px;
   }
   .guide-flow > :global(section:first-child) {
     border-top: 0;
@@ -125,10 +130,10 @@ const principles = [
   }
 
   .index-list {
-    margin-top: 0.75rem;
+    margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 1.25rem;
+    gap: 0.25rem 1rem;
   }
   .index-list a {
     display: block;
@@ -173,11 +178,11 @@ const principles = [
   .principle-grid {
     display: grid;
   }
-  .principle { padding: 1.5rem 1.25rem; }
+  .principle { padding: 1.5rem 1rem; }
   .principle + .principle { border-top: 1px solid var(--color-line); }
   @media (min-width: 48rem) {
     .principle-grid { grid-template-columns: 1fr 1fr; }
-    .principle { padding: 2rem 1.75rem; }
+    .principle { padding: 2rem 2rem; }
     .principle + .principle { border-top: 0; }
     .principle:nth-child(n + 3) { border-top: 1px solid var(--color-line); }
     .principle:nth-child(even) { border-left: 1px solid var(--color-line); }

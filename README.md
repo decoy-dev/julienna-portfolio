@@ -23,7 +23,7 @@ npm run preview
 | `src/components/` | Shared components (nav, footer, mark, placeholder slot, graph pieces). |
 | `src/scripts/graph.ts` | Node-graph engine: edge routing, packets, edge drawing. |
 | `src/scripts/field.ts` | WebGL dot-grid field for the hero (falls back to CSS on software rendering). |
-| `src/scripts/pipeline.ts` | Pipeline demo choreography. |
+| `src/scripts/pipeline.ts` | Shared runner for the pipeline sections; choreography in `ad-generator.ts` and `photo-intake.ts`. |
 | `src/pages/brand.astro` | Live brand guide; downloads in `public/brand-kit/`. |
 
 ## Link-preview card

@@ -30,7 +30,7 @@ const certs = [
 ];
 ---
 
-<section id="about" class="relative py-[clamp(80px,12vh,128px)]" data-wire-section aria-labelledby="about-title">
+<section id="about" class="relative section-y" data-wire-section aria-labelledby="about-title">
   <div class="shell">
     <h2 id="about-title" class="max-w-[20ch] text-h2">How I ended up doing all of it</h2>
     <p class="mt-4 max-w-[56ch] text-body text-muted">Every job added something I still use: art direction at the conventions, 3D at Machine Communications, and systems at OrthoBoost.</p>
@@ -51,7 +51,7 @@ const certs = [
         {entries.map((e) => (
           <li class="tl-item" style={`--c0:${e.col[0]};--c1:${e.col[1]};--row:${LANES.indexOf(e.lane) + 2}`}>
             <div class="node tl-bar" data-node={e.id}>
-              <div class="px-3.5 py-2.5">
+              <div class="px-4 py-2">
                 <p class="text-small font-semibold text-ink">{e.title}</p>
                 <p class="text-[0.75rem] tabular-nums text-muted">{e.years}</p>
                 <p class="mt-1 text-[0.8125rem] leading-snug text-muted">{e.role}</p>
@@ -59,8 +59,8 @@ const certs = [
               {e.feeds && <span class="port" data-side="out" />}
             </div>
             {e.skills.length > 0 && (
-              <ul role="list" class="mt-2 flex flex-wrap gap-1.5" aria-label={`Added at ${e.title}`}>
-                {e.skills.map((s) => <li class="chip h-6 px-2.5 text-[0.75rem]">{s}</li>)}
+              <ul role="list" class="mt-2 flex flex-wrap gap-2" aria-label={`Added at ${e.title}`}>
+                {e.skills.map((s) => <li class="chip h-6 px-2 text-[0.75rem]">{s}</li>)}
               </ul>
             )}
           </li>
@@ -71,7 +71,7 @@ const certs = [
         <span class="port" data-side="in" />
         <span class="port" data-side="down" />
         <p class="node-head">What I do now</p>
-        <ul role="list" class="grid gap-1.5 p-3 pt-2.5" aria-label="Every discipline, today">
+        <ul role="list" class="grid gap-2 p-4 pt-2" aria-label="Every discipline, today">
           {seats.map((s) => (
             <li class="flex items-center gap-2 text-[0.8125rem] font-medium text-ink">
               <Icon name={s.icon} size={14} class="shrink-0 text-primary" aria-hidden="true" />
@@ -85,7 +85,7 @@ const certs = [
     <div class="mt-20 grid gap-10 lg:grid-cols-12 lg:gap-8">
       <Slot ratio="4 / 5" brief="4:5 · portrait photo" class="lg:col-span-4" />
       <div class="lg:col-span-7 lg:col-start-6 lg:pt-4">
-        <div class="grid max-w-[62ch] gap-5 text-body text-ink">
+        <div class="grid max-w-[62ch] gap-4 text-body text-ink">
           <p>
             I started freelancing in 2017, making release art and brand systems for musicians, including cover art for an artist with 10M+ Spotify plays.
             At Geek Inc. I art-directed three conventions that drew 30,000+ people a year, which meant designing the website, the merch, and the signage as one identity.
@@ -98,9 +98,9 @@ const certs = [
             The thread through all of it is that I like work where design decisions become reusable systems instead of one-off files.
           </p>
         </div>
-        <ul role="list" class="mt-8 grid gap-3" aria-label="Certifications">
+        <ul role="list" class="mt-8 grid gap-4" aria-label="Certifications">
           {certs.map((c) => (
-            <li class="flex items-start gap-2.5 text-small text-ink">
+            <li class="flex items-start gap-2 text-small text-ink">
               <Icon name="ph:seal-check" size={18} class="mt-px shrink-0 text-primary" aria-hidden="true" />
               {c}
             </li>
@@ -113,7 +113,7 @@ const certs = [
 
 <style>
   /* Mobile / tablet: chronological list on a rail. */
-  .tl { position: relative; display: grid; gap: 28px; padding-left: 28px; }
+  .tl { position: relative; display: grid; gap: 32px; padding-left: 32px; }
   .tl::before { content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--color-line); }
   .tl-axis, .tl-lane, .tl-edges { display: none; }
   .tl-item { position: relative; }
@@ -136,7 +136,7 @@ const certs = [
       grid-template-columns: repeat(11, minmax(0, 1fr)) minmax(220px, 1.9fr);
       grid-template-rows: auto repeat(3, auto);
       column-gap: 0;
-      row-gap: 20px;
+      row-gap: 16px;
       padding-left: 0;
       padding-top: 8px;
     }
@@ -155,9 +155,9 @@ const certs = [
     }
     /* Lane label sits in the 22px strip above that lane's bars. */
     .tl-lane { display: block; grid-column: 1 / 4; align-self: start; line-height: 22px; pointer-events: none; }
-    .tl-item { grid-column: var(--c0) / var(--c1); grid-row: var(--row); padding-right: 8px; padding-top: 22px; }
+    .tl-item { grid-column: var(--c0) / var(--c1); grid-row: var(--row); padding-right: 8px; padding-top: 24px; }
     .tl-bar .port { display: block; }
-    .tl-now { grid-column: 12; grid-row: 2 / 5; align-self: center; margin-left: 36px; }
+    .tl-now { grid-column: 12; grid-row: 2 / 5; align-self: center; margin-left: 32px; }
     .tl-now .port { display: block; }
   }
 

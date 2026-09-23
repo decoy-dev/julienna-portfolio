@@ -27,7 +27,7 @@ const rest = projects.filter((p) => !p.featured);
         <button type="button" class="chip filter-chip" data-filter={c} aria-pressed="false">{c}</button>
       ))}
     </div>
-    <p id="filter-count" class="mt-3 text-small text-muted" aria-live="polite">
+    <p id="filter-count" class="mt-4 text-small text-muted" aria-live="polite">
       Showing all {projects.length} projects
     </p>
   </section>
@@ -43,7 +43,7 @@ const rest = projects.filter((p) => !p.featured);
           <h2 class="mt-2 text-h3">
             <a class="entry-link" href={href(`/work#${p.slug}`)}>{p.title}</a>
           </h2>
-          <p class="mt-3 max-w-[46ch] text-body text-muted">{p.summary}</p>
+          <p class="mt-4 max-w-[46ch] text-body text-muted">{p.summary}</p>
           {p.outcome && (
             <p class="mt-4"><span class="chip"><CountUp text={p.outcome} /></span></p>
           )}
@@ -65,9 +65,9 @@ const rest = projects.filter((p) => !p.featured);
         </h2>
         <p class="mt-2 text-small text-muted">{p.summary}</p>
         {p.outcome && (
-          <p class="mt-3"><span class="chip"><CountUp text={p.outcome} /></span></p>
+          <p class="mt-4"><span class="chip"><CountUp text={p.outcome} /></span></p>
         )}
-        <p class="mt-3 text-small text-dash-ink">Case study coming soon</p>
+        <p class="mt-4 text-small text-dash-ink">Case study coming soon</p>
       </article>
     ))}
   </section>
