@@ -10,7 +10,6 @@
 
 export const person = {
   name: 'Julienna Batten',
-  short: 'Jules',
   role: 'Web Designer & Creative Director',
   email: 'julesbatten.design@gmail.com',
   linkedin: '', // TODO(Jules): profile URL; empty hides the link sitewide (CONTENT-TODO.md)
@@ -46,7 +45,7 @@ export const brands: Brand[] = [
   { name: 'Client logo', placeholder: true },
 ];
 
-/** The six seats of a creative team she covers. Drives the hero graph and the background "Now" node. */
+/** The six seats of a creative team I cover. Drives the hero graph and the background "Now" node. */
 export const seats = [
   { id: 'direction', label: 'Creative direction', short: 'Direction', icon: 'ph:compass' },
   { id: 'brand', label: 'Brand identity', short: 'Brand', icon: 'ph:pen-nib' },

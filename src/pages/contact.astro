@@ -7,10 +7,10 @@ import { person } from '../data/site';
 
 <Base
   title="Contact | Julienna Batten"
-  description="Contact Julienna Batten about full-time roles, contracts, or freelance design and creative direction work."
+  description="Get in touch about full-time roles, contracts, or freelance design and creative direction work."
 >
   <header class="page-head shell">
-    <h1 class="text-display">Tell Jules what you're building</h1>
+    <h1 class="text-display">Tell me what you're building</h1>
     <p class="mt-4 max-w-[52ch] text-body text-muted">
       Hiring for a full-time seat, a contract, or a one-off project? Start here.
     </p>
@@ -29,7 +29,7 @@ import { person } from '../data/site';
           required
           aria-describedby="c-name-error"
         />
-        <p class="field-error" id="c-name-error">Add your name so Jules knows who is writing.</p>
+        <p class="field-error" id="c-name-error">Add your name so I know who is writing.</p>
       </div>
 
       <div class="field" data-field>
@@ -74,7 +74,7 @@ import { person } from '../data/site';
           rows="6"
           required
           aria-describedby="c-message-help c-message-error"></textarea>
-        <p class="field-help" id="c-message-help">The role or project, the timeline, and anything you want Jules to look at first.</p>
+        <p class="field-help" id="c-message-help">The role or project, the timeline, and anything you want me to look at first.</p>
         <p class="field-error" id="c-message-error">Add a message, even a short one.</p>
       </div>
 
@@ -83,14 +83,14 @@ import { person } from '../data/site';
       <p class="form-notice" id="form-notice" role="status" hidden>
         <Icon name="ph:info" size={18} aria-hidden="true" />
         <span>
-          Preview only. This form does not send messages yet. Email Jules directly at{' '}
+          Preview only. This form does not send messages yet. Email me directly at{' '}
           <a class="link" href={`mailto:${person.email}`}>{person.email}</a>.
         </span>
       </p>
 
       <noscript>
         <p class="form-notice">
-          Preview only. This form does not send messages yet. Email Jules directly at{' '}
+          Preview only. This form does not send messages yet. Email me directly at{' '}
           <a class="link" href={`mailto:${person.email}`}>{person.email}</a>.
         </p>
       </noscript>
