@@ -21,7 +21,7 @@ const banned = [
 <Guide
   id="voice"
   title="Voice and copy"
-  intro="Specific, plain, confident. The work carries the superlatives; the copy just states what happened."
+  intro="First person, plain, and specific, with a little warmth from what I choose to say. The full guide with before-and-after rewrites is VOICE.md in the repo."
 >
   <div class="rounded-card border border-line">
     <div class="voice-row">
@@ -55,6 +55,10 @@ const banned = [
       <p class="text-small text-muted">"Julienna Batten" only as identity: nav lockup, page titles, the operator node. Client names only when real; otherwise "Sample" labels.</p>
     </div>
     <div class="voice-row">
+      <p class="text-small font-semibold">Sentence shapes</p>
+      <p class="text-small text-muted">No triads or parallel repetition ("AI drafts. Rules decide."), no "X, not Y" headlines, no all-caps eyebrows above headings. Tie each fact to what it did.</p>
+    </div>
+    <div class="voice-row">
       <p class="text-small font-semibold">Banned words</p>
       <p class="flex flex-wrap gap-x-3 gap-y-1">
         {banned.map((w) => (
@@ -64,13 +68,17 @@ const banned = [
     </div>
   </div>
 
+  <DoDont topic="sentence shape">
+    <div slot="do"><p>"Around 40 practices each need eight ad files per campaign, so I built these to start every job from rules instead of a blank artboard."</p></div>
+    <div slot="dont"><p>"Two pipelines that ship real work: one input goes in, a finished library comes out."</p></div>
+  </DoDont>
   <DoDont topic="claims">
     <div slot="do"><p>"One brand system runs ad campaigns for ~40 practices."</p></div>
     <div slot="dont"><p>"An innovative solution delighting dozens of happy clients."</p></div>
   </DoDont>
   <DoDont topic="placeholders">
     <div slot="do"><p>"hours saved per year" with a dashed <span class="ph-chip">add number</span> chip where the digits will sit.</p></div>
-    <div slot="dont"><p>"10,000+ hours saved" when nobody has measured it. Invented numbers end careers.</p></div>
+    <div slot="dont"><p>"10,000+ hours saved" when nobody has measured it.</p></div>
   </DoDont>
   <DoDont topic="labels">
     <div slot="do"><p>"Get in touch" on the nav, the hero, the closing band, and the contact page.</p></div>

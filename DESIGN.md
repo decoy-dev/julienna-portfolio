@@ -161,7 +161,8 @@ overlaid on images; no scroll cues; no decorative dots (a dot grid must have nod
 - ZERO em dashes and en dashes in visible copy AND in source strings. Commas, colons, periods, parentheses, hyphen ranges (2019-2022).
 - Banned: streamline, empower, supercharge, leverage, unleash, transform, seamless, elevate, cutting-edge, world-class, next-gen, game-changer.
 - Sentence case headlines, 8 words max; subcopy 25 words max, 65ch measure.
-- Eyebrow labels on at most 1 of every 3 headed sections. No section numbering.
+- No all-caps eyebrow labels above section headings, and no section numbering. Mono uppercase labels belong to UI only (node title bars, stat and rail labels).
+- Full voice rules, banned sentence shapes, and before/after rewrites: `VOICE.md`. Write from it at the source.
 - First person, always: the site is Julienna speaking about her own work ("I built", "my pipelines", "email me"). Never "she", "her", or "Jules does" in site copy.
 - "Julienna Batten" appears only as identity (nav lockup, page titles, the hero operator node). No invented client names ("Sample" labels instead).
 

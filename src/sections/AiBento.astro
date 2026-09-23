@@ -26,9 +26,9 @@ const tools = ['Template drafts (Claude)', 'Variants and sizes', 'File naming an
 
 <section class="py-[clamp(80px,12vh,128px)]" aria-labelledby="ai-title">
   <div class="shell">
-    <h2 id="ai-title" class="max-w-[18ch] text-h2">AI drafts. Rules decide. I direct.</h2>
+    <h2 id="ai-title" class="max-w-[18ch] text-h2">I use AI for the repetitive half</h2>
     <p class="mt-4 max-w-[56ch] text-body text-muted">
-      I put AI where the repetition lives. Every creative call stays with me.
+      Claude drafts templates and handles file prep, which leaves my time for the concepts and for signing off on every piece before it ships.
     </p>
 
     <div class="bento mt-10">
@@ -39,7 +39,7 @@ const tools = ['Template drafts (Claude)', 'Variants and sizes', 'File naming an
         </div>
         <h3 class="mt-5 text-h3 text-white">No LLM in the render path</h3>
         <p class="mt-2 max-w-[44ch] text-small text-on-ink-muted">
-          Claude drafts templates. Rules render the ads, from the approved template, persona, and brand kit.
+          Claude helps draft new templates, but fixed rules render the ads, so the same template, persona, and brand kit always produce the same file.
         </p>
         <pre class="code mt-6" aria-label="Excerpt from the Split Stack template definition"><code>{tokens.map((t) => (t.key ? <span class="k">{t.part}</span> : t.part))}</code></pre>
       </article>
@@ -49,13 +49,13 @@ const tools = ['Template drafts (Claude)', 'Variants and sizes', 'File naming an
         <p class="mt-6 text-display leading-none text-ink">40%</p>
         <h3 class="mt-3 text-h3">Less catalog production time</h3>
         <p class="mt-2 max-w-[40ch] text-small text-muted">
-          The AI tooling I introduced at Machine Communications cut catalog and brochure production time by 40%.
+          I introduced AI tooling at Machine Communications that cut catalog and brochure production time by 40%.
         </p>
       </article>
 
       <article class="cell cell-c bg-bg shadow-raised">
-        <h3 class="text-h3">Gated, step by step</h3>
-        <p class="mt-2 text-small text-muted">Persona, brand kit, template, and content are all selected before anything renders.</p>
+        <h3 class="text-h3">Nothing renders half set up</h3>
+        <p class="mt-2 text-small text-muted">Each step unlocks once the one before it is complete, so a missing logo or headline stops the run before it reaches a file.</p>
         <ol class="mt-5 grid gap-2" aria-label="Render gates">
           {gates.map((g, i) => (
             <li class="flex items-center gap-2.5 text-small font-medium text-ink">
@@ -71,7 +71,7 @@ const tools = ['Template drafts (Claude)', 'Variants and sizes', 'File naming an
       <article class="cell cell-d bg-graphic-tint">
         <Icon name="ph:file-text" size={22} class="text-primary" aria-hidden="true" />
         <h3 class="mt-5 text-h3">One naming convention</h3>
-        <p class="mt-2 text-small text-muted">Every deliverable follows the same pattern, so files sort and hand off predictably.</p>
+        <p class="mt-2 text-small text-muted">Every file gets the same name pattern, so whoever uploads them can sort by client, size, or version without opening one.</p>
         <p class="naming mt-5" aria-label="File name pattern: Ad set, theme and year, type, version, size, client">
           {namingParts.map((p, i) => (
             <>
@@ -83,7 +83,7 @@ const tools = ['Template drafts (Claude)', 'Variants and sizes', 'File naming an
       </article>
 
       <article class="cell cell-e bg-bg shadow-raised">
-        <h3 class="text-h3">Human direction on every decision</h3>
+        <h3 class="text-h3">Who does what</h3>
         <div class="mt-6 grid gap-6 sm:grid-cols-2">
           <div>
             <p class="label flex items-center gap-2 text-primary"><Icon name="ph:user" size={14} aria-hidden="true" /> I decide</p>
