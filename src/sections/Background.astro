@@ -1,6 +1,5 @@
 ---
 import { Icon } from 'astro-icon/components';
-import Wire from '../components/Wire.astro';
 import Slot from '../components/Slot.astro';
 import { seats } from '../data/site';
 
@@ -31,15 +30,16 @@ const certs = [
 ];
 ---
 
-<section id="about" class="relative py-[clamp(80px,12vh,128px)]" data-wired aria-labelledby="about-title">
-  <Wire portTop="clamp(80px, 12vh, 128px)" />
+<section id="about" class="relative py-[clamp(80px,12vh,128px)]" data-wire-section aria-labelledby="about-title">
   <div class="shell">
     <h2 id="about-title" class="max-w-[20ch] text-h2">How I ended up doing all of it</h2>
     <p class="mt-4 max-w-[56ch] text-body text-muted">Every job added something I still use: art direction at the conventions, 3D at Machine Communications, and systems at OrthoBoost.</p>
 
     <div class="tl mt-12" data-graph data-timeline>
       <svg data-edges class="tl-edges pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
-        {entries.filter((e) => e.feeds).map((e) => <path class="edge" pathLength="1" data-state="done" data-from={`${e.id}:out`} data-to="now:in" />)}
+        {/* Marshall ends in 2020, so its edge runs along the Education lane and enters from below
+            instead of cutting across the Freelance bar. */}
+        {entries.filter((e) => e.feeds).map((e) => <path class="edge" pathLength="1" data-state="done" data-from={`${e.id}:out`} data-to={e.lane === 'Education' ? 'now:down' : 'now:in'} data-route={e.lane === 'Education' ? 'elbow' : undefined} />)}
       </svg>
 
       <ol class="tl-axis" aria-hidden="true">
@@ -69,6 +69,7 @@ const certs = [
 
       <div class="node tl-now" data-node="now" data-state="active">
         <span class="port" data-side="in" />
+        <span class="port" data-side="down" />
         <p class="node-head">What I do now</p>
         <ul role="list" class="grid gap-1.5 p-3 pt-2.5" aria-label="Every discipline, today">
           {seats.map((s) => (

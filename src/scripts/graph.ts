@@ -38,6 +38,24 @@ export function edgePath(a: Pt, aSide: Side, b: Pt, bSide: Side): string {
   return `M${a.x.toFixed(1)} ${a.y.toFixed(1)}C${c1.x.toFixed(1)} ${c1.y.toFixed(1)} ${c2.x.toFixed(1)} ${c2.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
 }
 
+/**
+ * Orthogonal route for edges that must stay inside a lane: leave `a` along its normal, turn once
+ * with a rounded corner, and enter `b` along its normal. Used when a curve would cut across other
+ * nodes (opt in with `data-route="elbow"`). Only perpendicular port pairs make sense here.
+ */
+export function elbowPath(a: Pt, aSide: Side, b: Pt, radius = 14): string {
+  const horizontalFirst = aSide === 'in' || aSide === 'out';
+  const corner = horizontalFirst ? { x: b.x, y: a.y } : { x: a.x, y: b.y };
+  const r = Math.min(radius, Math.abs(b.x - a.x) / 2, Math.abs(b.y - a.y) / 2);
+  const sx = Math.sign(corner.x - a.x) || Math.sign(b.x - corner.x);
+  const sy = Math.sign(b.y - corner.y) || Math.sign(corner.y - a.y);
+  const f = (n: number) => n.toFixed(1);
+  if (horizontalFirst) {
+    return `M${f(a.x)} ${f(a.y)}H${f(corner.x - sx * r)}Q${f(corner.x)} ${f(corner.y)} ${f(corner.x)} ${f(corner.y + sy * r)}V${f(b.y)}`;
+  }
+  return `M${f(a.x)} ${f(a.y)}V${f(corner.y - sy * r)}Q${f(corner.x)} ${f(corner.y)} ${f(corner.x + sx * r)} ${f(corner.y)}H${f(b.x)}`;
+}
+
 function parseEnd(spec: string): [string, Side] {
   const [id, side = 'out'] = spec.split(':');
   return [id, side as Side];
@@ -46,7 +64,7 @@ function parseEnd(spec: string): [string, Side] {
 /**
  * Lay out every edge inside `root`. Returns a function that re-runs layout (rAF-coalesced).
  * When the root's CSS sets `--graph-compact: 1` (a breakpoint decision owned by CSS), paths use
- * their `data-from-compact` / `data-to-compact` specs if present.
+ * their `data-from-compact` / `data-to-compact` / `data-route-compact` specs if present.
  */
 export function layoutEdges(root: HTMLElement): () => void {
   const svg = root.querySelector<SVGSVGElement>('svg[data-edges]');
@@ -70,7 +88,10 @@ export function layoutEdges(root: HTMLElement): () => void {
         p.setAttribute('d', '');
         continue;
       }
-      p.setAttribute('d', edgePath(portOf(from.getBoundingClientRect(), fromSide, origin), fromSide, portOf(to.getBoundingClientRect(), toSide, origin), toSide));
+      const a = portOf(from.getBoundingClientRect(), fromSide, origin);
+      const b = portOf(to.getBoundingClientRect(), toSide, origin);
+      const route = (compact && p.dataset.routeCompact) || p.dataset.route;
+      p.setAttribute('d', route === 'elbow' ? elbowPath(a, fromSide, b) : edgePath(a, fromSide, b, toSide));
     }
   };
 

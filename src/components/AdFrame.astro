@@ -14,12 +14,14 @@ const { size, color } = Astro.props;
 const canvas = size === 'Story' ? { w: 1080, h: 1920 } : { w: 1080, h: 1350 };
 const zones = template.zones[size];
 const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
+// `--persona` lets a pipeline run re-tint the frames without re-rendering them.
+const accent = `var(--persona, ${color})`;
 const FILL: Record<string, string> = {
-  photo: `color-mix(in oklab, ${color} 22%, white)`,
+  photo: `color-mix(in oklab, ${accent} 22%, white)`,
   logo: 'oklch(0.205 0.018 222 / 0.18)',
   headline: 'oklch(0.205 0.018 222 / 0.75)',
   subhead: 'oklch(0.47 0.02 215 / 0.4)',
-  cta: color,
+  cta: accent,
 };
 ---
 

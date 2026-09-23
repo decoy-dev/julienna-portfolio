@@ -9,8 +9,8 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
 <div class="hero-graph-wrap">
   <div class="hero-graph grid-canvas relative overflow-hidden rounded-media" data-graph data-hero-graph>
     <svg data-edges class="pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
-      {seats.map((s) => <path class="edge" data-role-edge data-state="done" data-from={`${s.id}:out`} data-to="me:in" />)}
-      <path class="edge" data-out-edge data-state="done" data-from="me:down" data-to="out:up" />
+      {seats.map((s) => <path class="edge" data-role-edge data-from={`${s.id}:out`} data-to="me:in" />)}
+      <path class="edge" data-out-edge data-from="me:down" data-to="out:up" />
       {seats.map(() => <circle class="packet" r="3" opacity="0" />)}
       <circle class="packet" data-out-dot r="3.5" opacity="0" />
       <circle class="packet" data-out-dot r="3.5" opacity="0" />
@@ -171,16 +171,23 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
     const toggle = root.querySelector<HTMLButtonElement>('[data-hero-toggle]')!;
     const field = mountField(root, reducedMotion);
 
-    // Timings from the round-2 spec (ms).
-    const FILL = [700, 400]; // base + random
-    const FILL_FAST = 350;
+    // Timings (ms). Wide randomization so two roles rarely fire together.
+    const FILL = [800, 800]; // base + random
     const HOLD = 120;
-    const IDLE = [400, 500];
+    const IDLE = [800, 1600];
+    const START_STEP = 420; // first cycles land on shuffled slots 0-2.1s apart
     const ROLE_TRAVEL = 520;
     const OUT_TRAVEL = 480;
     const PULSE_GAP = 300;
-    const OUT_EVERY = 4;
+    const LAUNCH_GAP = 380; // no two balls ever leave within this window of each other
+    const OUT_EVERY = 3;
     const rand = (n: number) => Math.random() * n;
+    // Shuffled first-fire order so the roles never start top to bottom.
+    const startSlot = roles.map((_, i) => i);
+    for (let i = startSlot.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [startSlot[i], startSlot[j]] = [startSlot[j], startSlot[i]];
+    }
 
     let visible = false;
     let paused = false;
@@ -196,13 +203,15 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
     let lastPulse = 0;
     let chipIndex = 0;
     let outDot = 0;
+    let nextLaunch = 0;
 
     const resetVisuals = () => {
       for (const f of fills) {
         f.style.transform = 'scaleX(0)';
         f.style.opacity = '1';
       }
-      for (const e of roleEdges) e.dataset.state = 'done';
+      for (const e of roleEdges) e.dataset.state = '';
+      outEdge.dataset.state = '';
       for (const c of chips) c.removeAttribute('data-lit');
       ring.style.opacity = '0';
       for (const s of state) s.flying = false;
@@ -218,7 +227,7 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
       outEdge.dataset.state = 'active';
       sendPacket(s, outEdge, outDots[outDot++ % outDots.length], OUT_TRAVEL).then(() => {
         if (!s.alive) return;
-        outEdge.dataset.state = 'done';
+        outEdge.dataset.state = '';
         const chip = chips[chipIndex++ % chips.length];
         chip.setAttribute('data-lit', '');
         s.wait(450).then(() => chip.removeAttribute('data-lit'));
@@ -234,7 +243,7 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
     };
 
     const cycle = async (s: MotionScope, i: number) => {
-      await idle(s, i, i * 180 + rand(200));
+      await idle(s, i, startSlot[i] * START_STEP + rand(260));
       while (s.alive) {
         const run = s.animation(fills[i], { scaleX: [0, 1], opacity: 1, duration: FILL[0] + rand(FILL[1]), ease: 'inOut(2)' });
         state[i].fillAnim = run.anim;
@@ -244,13 +253,19 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
         if (!s.alive) return;
         await s.wait(HOLD);
         if (!s.alive) return; // a stop during the hold must not re-light the edge
+        // Reserve the next free launch slot, then wait for it; this spaces the balls out even when
+        // two fills happen to finish together.
+        const at = Math.max(performance.now(), nextLaunch);
+        nextLaunch = at + LAUNCH_GAP;
+        if (at > performance.now()) await s.wait(at - performance.now());
+        if (!s.alive) return;
         s.animate(fills[i], { opacity: 0, duration: 200, ease: 'linear' });
         state[i].flying = true;
         roleEdges[i].dataset.state = 'active';
         await sendPacket(s, roleEdges[i], roleDots[i], ROLE_TRAVEL);
         state[i].flying = false;
         if (!s.alive) return;
-        roleEdges[i].dataset.state = 'done';
+        roleEdges[i].dataset.state = ''; // back to grey; the stroke transition fades it
         onArrival(s);
         fills[i].style.transform = 'scaleX(0)';
         fills[i].style.opacity = '1';
@@ -300,7 +315,7 @@ const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
       for (const e of roleEdges) e.dataset.state = '';
       await Promise.all(roleEdges.map((p, i) => drawEdge(s, p, 560, 120 + i * 70)));
       if (!s.alive) return;
-      for (const e of roleEdges) e.dataset.state = 'done';
+      for (const e of roleEdges) e.dataset.state = '';
       const box = root.getBoundingClientRect();
       const mb = me.getBoundingClientRect();
       field?.ripple(mb.left - box.left + mb.width / 2, mb.top - box.top + mb.height / 2);

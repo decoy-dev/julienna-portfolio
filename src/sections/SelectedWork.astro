@@ -1,4 +1,5 @@
 ---
+import CountUp from '../components/CountUp.astro';
 import { Icon } from 'astro-icon/components';
 import Slot from '../components/Slot.astro';
 import { href } from '../lib/url';
@@ -35,7 +36,7 @@ const pair = [
 ];
 ---
 
-<section id="work" class="relative py-[clamp(80px,12vh,128px)]" aria-labelledby="work-title">
+<section id="work" class="relative py-[clamp(80px,12vh,128px)]" data-wire-section aria-labelledby="work-title">
   <div class="shell">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
@@ -56,7 +57,7 @@ const pair = [
         </div>
         <p class="text-small text-muted lg:col-span-4">{feature.summary}</p>
         <ul role="list" class="flex flex-wrap content-start gap-2 lg:col-span-3 lg:justify-end">
-          {feature.outcomes.map((o) => <li class="chip">{o}</li>)}
+          {feature.outcomes.map((o) => <li class="chip"><CountUp text={o} /></li>)}
         </ul>
       </div>
     </article>
@@ -71,7 +72,7 @@ const pair = [
           <h3 class="mt-2 text-h3"><a href={href('/work')} class="hover:text-primary">{p.title}</a></h3>
           <p class="mt-2 max-w-[52ch] text-small text-muted">{p.summary}</p>
           <ul role="list" class="mt-4 flex flex-wrap gap-2">
-            {p.outcomes.map((o) => <li class="chip">{o}</li>)}
+            {p.outcomes.map((o) => <li class="chip"><CountUp text={o} /></li>)}
           </ul>
         </article>
       ))}

@@ -7,10 +7,10 @@ import { person } from '../data/site';
 <section class="pb-8" aria-labelledby="cta-title">
   <div class="shell">
     <div class="cta grid-canvas-ink relative overflow-hidden rounded-media px-6 py-16 text-center md:px-12 md:py-24" data-cta>
-      <!-- The wire enters from the left edge and terminates behind the primary button: the page's sink. -->
+      <!-- The wire enters from the left edge and terminates behind the primary button. On desktop the
+           page wire (PageWire.astro) arrives at this edge, so this line is its final segment. -->
       <svg class="cta-wire pointer-events-none absolute inset-0 size-full" aria-hidden="true">
         <line class="cta-line" x1="0" y1="0" x2="0" y2="0" />
-        <circle class="packet" r="3.5" cx="-10" cy="0" opacity="0" />
       </svg>
       <h2 id="cta-title" class="relative mx-auto max-w-[18ch] text-h2 text-white">Let's build something reusable</h2>
       <p class="relative mx-auto mt-4 max-w-[44ch] text-body text-on-ink-muted">If you're hiring for brand, web, or creative direction, I'd like to hear about it.</p>
@@ -29,49 +29,21 @@ import { person } from '../data/site';
   .cta-wire { display: none; }
   @media (min-width: 40rem) { .cta-wire { display: block; } }
   .cta-line { stroke: oklch(0.72 0.1 188 / 0.55); stroke-width: 1.5; }
-  .cta-wire .packet { stroke: var(--color-ink); }
 </style>
 
 <script>
-  import { MotionScope, reducedMotion, watchVisibility } from '../scripts/graph';
-
+  // Keep the panel's wire at the primary button's midline; it is the end of the page wire.
   const cta = document.querySelector<HTMLElement>('[data-cta]');
   const sink = cta?.querySelector<HTMLElement>('[data-cta-sink]');
   const line = cta?.querySelector<SVGLineElement>('.cta-line');
-  const packet = cta?.querySelector<SVGCircleElement>('.packet');
-  if (cta && sink && line && packet) {
-    let end = 0;
-    const place = () => {
+  if (cta && sink && line) {
+    new ResizeObserver(() => {
       const c = cta.getBoundingClientRect();
       const b = sink.getBoundingClientRect();
       const y = (b.top - c.top + b.height / 2).toFixed(1);
-      end = b.left - c.left + b.width / 2;
       line.setAttribute('y1', y);
       line.setAttribute('y2', y);
-      line.setAttribute('x2', end.toFixed(1));
-      packet.setAttribute('cy', y);
-    };
-    new ResizeObserver(place).observe(cta);
-
-    // Finite: three packets per page view, only while on screen; leaving view or turning on
-    // reduced motion cancels the one in flight.
-    let scope = new MotionScope();
-    let sent = 0;
-    const hide = () => packet.setAttribute('opacity', '0');
-    const send = async () => {
-      if (scope.alive && sent > 0 && sent < 3) return; // already running
-      const s = (scope = new MotionScope());
-      while (s.alive && sent < 3 && !reducedMotion.matches) {
-        sent++;
-        await s.animate(packet, { cx: [-10, end - 40], opacity: [{ to: 1, duration: 120 }, { to: 1, duration: 960 }, { to: 0, duration: 120 }], ease: 'linear' }, hide);
-        await s.wait(1000);
-      }
-    };
-    const stop = () => {
-      scope.cancel();
-      hide();
-    };
-    watchVisibility(cta, (v) => (v ? send() : stop()), 0.5);
-    reducedMotion.addEventListener('change', () => reducedMotion.matches && stop());
+      line.setAttribute('x2', (b.left - c.left + b.width / 2).toFixed(1));
+    }).observe(cta);
   }
 </script>

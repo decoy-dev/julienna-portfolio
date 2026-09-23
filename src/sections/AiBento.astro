@@ -1,27 +1,59 @@
 ---
+import CountUp from '../components/CountUp.astro';
 import { Icon } from 'astro-icon/components';
+import { personas } from '../data/site';
 import template from '../data/split-stack.json';
 
-// Real excerpt from the Split Stack template (OrthoBoost ad generator repo), trimmed to what reads
-// at a glance: which slots exist and where the Story safe areas sit.
-const excerpt = {
-  slug: template.slug,
-  slots: template.slots,
-  placement: { Story: template.placement.Story },
-};
-// Keep flat arrays and small objects on one line so the excerpt stays around ten lines.
-const json = JSON.stringify(excerpt, null, 2).replace(/[[{]\n\s+([^[\]{}]*?)\n\s+[\]}]/g, (m, body: string) =>
-  `${m[0]} ${body.replace(/\n\s+/g, ' ')} ${m.at(-1)}`,
-);
-// Tokenize JSON for light syntax tinting (keys vs values) without a highlighter dependency.
-const tokens = json.split(/("(?:[^"\\]|\\.)*"(?=\s*:))/g).map((part, i) => ({ part, key: i % 2 === 1 }));
+const persona = personas[0];
+const client = 'SamplePractice'; // stand-in; client names stay private
+
+/* An illustrative render sequence (not the production source), typed out and then "run". The
+   terminal rows are the gates: each one ticks the matching item in the checklist next door. */
+const source = [
+  '// Illustrative render sequence',
+  "import { personas, brandKits, templates, render } from './generator';",
+  '',
+  "const persona = personas.get('dr-v-frizzle');",
+  "const kit = brandKits.get('sample-practice');",
+  "const template = templates.get('split-stack');",
+  'const content = { headline, subhead, cta, photo, logo };',
+  '',
+  'render({ persona, kit, template, content }).forEach(write);',
+];
+type Role = 'kw' | 'str' | 'com' | 'id';
+const TOKEN = /(\/\/.*$)|('[^']*')|\b(import|from|const)\b/g;
+const lines = source.map((line) => {
+  const toks: { role: Role; text: string }[] = [];
+  let last = 0;
+  for (const m of line.matchAll(TOKEN)) {
+    if (m.index > last) toks.push({ role: 'id', text: line.slice(last, m.index) });
+    toks.push({ role: m[1] ? 'com' : m[2] ? 'str' : 'kw', text: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < line.length) toks.push({ role: 'id', text: line.slice(last) });
+  return toks;
+});
 
 const gates = ['Persona selected', 'Brand kit applied', 'Template chosen', 'Content complete', 'Render'];
-const human = ['Campaign concepts', 'Persona definitions', 'Layout design in Figma', 'Final approval'];
-const tools = ['Template drafts (Claude)', 'Every size and version', 'File naming and export'];
+// Each terminal row: which checklist gate it ticks and which code line it lights up.
+const rows = [
+  { key: 'persona', value: `dr-v-frizzle, ${persona.archetype}`, gate: 0, line: 3 },
+  { key: 'brand kit', value: 'sample-practice', gate: 1, line: 4 },
+  { key: 'template', value: `split-stack, ${template.slots.length} slots`, gate: 2, line: 5 },
+  { key: 'content', value: `${template.slots.length} of ${template.slots.length} slots filled`, gate: 3, line: 6 },
+  { key: 'render', value: `8 files for ${client}`, gate: 4, line: 8 },
+];
+const firstFile = `Seasonal_Summer-2026_Image_V1_Story_${client}`;
+const plain = `${source.join('\n')}\n\n$ node render-campaign.ts\n${rows.map((r) => `${r.key}: ok, ${r.value}`).join('\n')}\n${firstFile}, and 7 more`;
+
+const who = [
+  { id: 'decide', icon: 'ph:compass', title: 'I decide', me: true, items: ['Campaign concepts', 'Persona definitions', 'Layout design in Figma'] },
+  { id: 'tools', icon: 'ph:gear-six', title: 'Tools handle', me: false, items: ['Template drafts with Claude', 'Every size and version', 'File naming and export'] },
+  { id: 'signoff', icon: 'ph:seal-check', title: 'I sign off', me: true, items: ['Final approval on every piece'] },
+];
 ---
 
-<section class="py-[clamp(80px,12vh,128px)]" aria-labelledby="ai-title">
+<section class="py-[clamp(80px,12vh,128px)]" data-wire-section aria-labelledby="ai-title">
   <div class="shell">
     <h2 id="ai-title" class="max-w-[18ch] text-h2">I use AI for the repetitive half</h2>
     <p class="mt-4 max-w-[56ch] text-body text-muted">
@@ -29,21 +61,28 @@ const tools = ['Template drafts (Claude)', 'Every size and version', 'File namin
     </p>
 
     <div class="bento mt-10">
-      <article class="cell cell-a grid-canvas-ink text-white">
+      <article class="cell cell-a grid-canvas-ink text-white" data-render-demo>
         <div class="flex items-center gap-2 text-on-ink-muted">
           <Icon name="ph:brackets-curly" size={18} aria-hidden="true" />
-          <span class="font-mono text-[0.75rem]">split-stack.json</span>
+          <span class="font-mono text-[0.75rem]">render-campaign.ts</span>
+          <button type="button" class="btn btn-outline-invert btn-sm ml-auto" data-run-again hidden>
+            <Icon name="ph:arrow-counter-clockwise" size={16} aria-hidden="true" /> Run again
+          </button>
         </div>
         <h3 class="mt-5 text-h3 text-white">No LLM in the render path</h3>
         <p class="mt-2 max-w-[44ch] text-small text-on-ink-muted">
           Claude helps me draft new templates. The ads themselves come from fixed rules applied to the chosen persona, brand kit, template, and content.
         </p>
-        <pre class="code mt-6" aria-label="Excerpt from the Split Stack template definition"><code>{tokens.map((t) => (t.key ? <span class="k">{t.part}</span> : t.part))}</code></pre>
+        <!-- The moving copy is decorative; the sr-only block carries the same text, once. -->
+        <pre class="code mt-6" aria-hidden="true" data-code><code>{lines.map((toks, i) => <span class="ln" data-line={i}>{toks.map((t) => <span class={`t-${t.role}`} data-t>{t.text}</span>)}</span>)}</code></pre>
+        <pre class="term mt-2.5" aria-hidden="true"><code><span class="tl" data-row data-state="done"><span class="t-com">$</span> node render-campaign.ts</span>{rows.map((r) => <span class="tl" data-row data-state="done" data-gate-at={r.gate} data-line-at={r.line}>{r.key.padEnd(11)}<span class="t-str">ok</span>  <span class="t-val">{r.value}</span></span>)}<span class="tl" data-row data-state="done">{' '.repeat(15)}<span class="t-com">{firstFile}, and 7 more</span></span></code></pre>
+        <pre class="sr-only">{plain}</pre>
+        <p class="sr-only" role="status" data-render-status></p>
       </article>
 
       <article class="cell cell-b bg-surface-2">
         <Icon name="ph:timer" size={22} class="text-primary" aria-hidden="true" />
-        <p class="mt-6 text-display leading-none text-ink">40%</p>
+        <p class="mt-6 text-display leading-none text-ink"><CountUp text="40%" /></p>
         <h3 class="mt-3 text-h3">Less catalog production time</h3>
         <p class="mt-2 max-w-[40ch] text-small text-muted">
           I introduced AI tooling at Machine Communications that cut catalog and brochure production time by 40%.
@@ -52,13 +91,11 @@ const tools = ['Template drafts (Claude)', 'Every size and version', 'File namin
 
       <article class="cell cell-c bg-bg shadow-raised">
         <h3 class="text-h3">Nothing renders half set up</h3>
-        <p class="mt-2 text-small text-muted">Each step unlocks once the one before it is complete, so a missing logo or headline stops the run before it reaches a file.</p>
+        <p class="mt-2 text-small text-muted">I complete the persona, brand kit, template, and content steps before rendering.</p>
         <ol class="mt-5 grid gap-2" aria-label="Render gates">
-          {gates.map((g, i) => (
-            <li class="flex items-center gap-2.5 text-small font-medium text-ink">
-              <span class="grid size-5 place-items-center rounded-full bg-graphic-tint text-primary">
-                <Icon name={i === gates.length - 1 ? 'ph:play-fill' : 'ph:check-bold'} size={11} aria-hidden="true" />
-              </span>
+          {gates.map((g) => (
+            <li class="gate" data-gate data-state="done">
+              <span class="gate-dot"><Icon name="ph:check-bold" size={11} aria-hidden="true" /></span>
               {g}
             </li>
           ))}
@@ -67,19 +104,25 @@ const tools = ['Template drafts (Claude)', 'Every size and version', 'File namin
 
       <article class="cell cell-e bg-surface">
         <h3 class="text-h3">Who does what</h3>
-        <div class="mt-6 grid gap-6 sm:grid-cols-2">
-          <div>
-            <p class="meta flex items-center gap-2 text-primary"><Icon name="ph:user" size={14} aria-hidden="true" /> I decide</p>
-            <ul role="list" class="mt-3 grid gap-2">
-              {human.map((h) => <li class="text-small font-medium text-ink">{h}</li>)}
-            </ul>
-          </div>
-          <div>
-            <p class="meta flex items-center gap-2 text-muted"><Icon name="ph:gear-six" size={14} aria-hidden="true" /> Tools handle</p>
-            <ul role="list" class="mt-3 grid gap-2">
-              {tools.map((t) => <li class="text-small text-muted">{t}</li>)}
-            </ul>
-          </div>
+        <div class="who mt-5" data-graph data-who>
+          <svg data-edges class="pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
+            <path class="edge" data-state="done" data-from="who-decide:out" data-to="who-tools:in" data-from-compact="who-decide:down" data-to-compact="who-tools:up" />
+            <path class="edge" data-state="done" data-from="who-tools:out" data-to="who-signoff:in" data-from-compact="who-tools:down" data-to-compact="who-signoff:up" />
+            <circle class="packet" r="3" opacity="0" />
+          </svg>
+          {who.map((w, i) => (
+            <div class:list={['node who-node', { 'who-me': w.me }]} data-node={`who-${w.id}`}>
+              {i > 0 && <span class="port w-in" />}
+              <p class="node-head">
+                <Icon name={w.icon} size={16} class={w.me ? 'text-primary' : 'text-muted'} aria-hidden="true" />
+                <span class={w.me ? 'text-primary' : 'text-muted'}>{w.title}</span>
+              </p>
+              <ul role="list" class="who-list">
+                {w.items.map((item) => <li>{item}</li>)}
+              </ul>
+              {i < who.length - 1 && <span class="port w-out" />}
+            </div>
+          ))}
         </div>
       </article>
     </div>
@@ -104,18 +147,228 @@ const tools = ['Template drafts (Claude)', 'Every size and version', 'File namin
     .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .cell-a, .cell-e { grid-column: 1 / -1; }
   }
-  .code {
+  /* Stacked: the checklist sits right under the code it follows. */
+  @media (max-width: 47.99rem) {
+    .cell-c { order: 1; }
+    .cell-b { order: 2; }
+    .cell-e { order: 3; }
+  }
+
+  .code, .term {
     margin: 0;
     padding: 1rem 1.125rem;
     border-radius: var(--radius-inset);
-    background: oklch(1 0 0 / 0.04);
-    box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.08);
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
     color: var(--color-on-ink-muted);
-    overflow: auto;
-    scrollbar-color: oklch(1 0 0 / 0.2) transparent;
   }
-  .code .k { color: var(--color-graphic); }
+  .code { line-height: 1.6; background: oklch(1 0 0 / 0.04); box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.08); }
+  .term { line-height: 1.7; background: oklch(0 0 0 / 0.28); box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.06); }
+  .ln, .tl { display: block; min-height: 1lh; }
+  /* A running row lights the code line it came from; the highlight bleeds to the pane edges. */
+  .ln { margin-inline: -1.125rem; padding-inline: 1.125rem; transition: background-color var(--d2) var(--ease-std); }
+  .ln[data-state='active'] { background: oklch(0.72 0.1 188 / 0.12); }
+  .tl { transition: opacity var(--d1) var(--ease-std); }
+  .tl:not([data-state='done']) { opacity: 0; }
+  .t-kw { color: var(--color-white); }
+  .t-str { color: var(--color-graphic); }
+  .t-com { color: oklch(0.64 0.015 215); }
+  .t-val { color: var(--color-white); }
+  .code :global(.caret) {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.15em;
+    margin-left: 1px;
+    vertical-align: -0.2em;
+    background: var(--color-graphic);
+  }
+
+  .gate { display: flex; align-items: center; gap: 0.625rem; font-size: var(--text-small); font-weight: 500; color: var(--color-muted); transition: color var(--d2) var(--ease-std); }
+  .gate-dot {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1.5px var(--color-line);
+    color: var(--color-graphic-deep);
+    transition: background-color var(--d2) var(--ease-std), box-shadow var(--d2) var(--ease-std);
+  }
+  .gate-dot :global(svg) { opacity: 0; scale: 0.6; transition: opacity var(--d2) var(--ease-std), scale var(--d2) var(--ease-out); }
+  .gate[data-state='done'] { color: var(--color-ink); }
+  .gate[data-state='done'] .gate-dot { background: var(--color-graphic-tint); box-shadow: none; }
+  .gate[data-state='done'] .gate-dot :global(svg) { opacity: 1; scale: 1; }
+
+  /* Who does what: a three-node flow. Teal heads are my calls; the grey head is the tooling. */
+  .who {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+    column-gap: 56px;
+    row-gap: 40px;
+    align-items: stretch;
+  }
+  .who-node { position: relative; z-index: 2; padding-bottom: 0.875rem; }
+  .who-me { border-color: oklch(0.72 0.1 188 / 0.55); }
+  .who-list { display: grid; gap: 0.375rem; margin-top: 0.625rem; padding-inline: 0.875rem; font-size: var(--text-small); line-height: 1.45; color: var(--color-ink); }
+  .who-node:not(.who-me) .who-list { color: var(--color-muted); }
+  .w-in { left: var(--port-off); top: calc(50% - 4px); }
+  .w-out { right: var(--port-off); top: calc(50% - 4px); }
+  @media (max-width: 47.99rem) {
+    .who { --graph-compact: 1; grid-template-columns: minmax(0, 1fr); }
+    .w-in { left: calc(50% - 4px); top: var(--port-off); }
+    .w-out { right: auto; top: auto; left: calc(50% - 4px); bottom: var(--port-off); }
+  }
 </style>
+
+<script>
+  import { layoutEdges, MotionScope, reducedMotion, sendPacket, watchVisibility } from '../scripts/graph';
+
+  /* Render demo: type the code, then "run" it. Each terminal row lights its code line and ticks
+     its gate. Finite (about 2.7s). The finished specimen stays on screen until a run actually
+     starts; any run settles to finished when it leaves the screen, the tab hides, the cell
+     changes width, or reduced motion turns on. */
+  const cell = document.querySelector<HTMLElement>('[data-render-demo]');
+  const pre = cell?.querySelector<HTMLElement>('[data-code]');
+  const again = cell?.querySelector<HTMLButtonElement>('[data-run-again]');
+  if (cell && pre && again) {
+    const TYPE_MS = 1300;
+    const ROW_MS = 190;
+    const toks = [...pre.querySelectorAll<HTMLElement>('[data-t]')].map((el) => ({ el, text: el.textContent ?? '', shown: -1 }));
+    const total = toks.reduce((n, t) => n + t.text.length, 0);
+    const codeLines = [...pre.querySelectorAll<HTMLElement>('[data-line]')];
+    const rows = [...cell.querySelectorAll<HTMLElement>('[data-row]')];
+    const gates = [...document.querySelectorAll<HTMLElement>('[data-gate]')];
+    const status = cell.querySelector<HTMLElement>('[data-render-status]')!;
+    const caret = document.createElement('span');
+    caret.className = 'caret';
+    let scope = new MotionScope();
+    let started = false;
+    let running = false;
+
+    // Reveal the first `n` characters; only tokens whose visible length changed are touched.
+    const type = (n: number) => {
+      let left = n;
+      let at: HTMLElement | null = null;
+      for (const t of toks) {
+        const k = Math.max(0, Math.min(t.text.length, left));
+        if (k !== t.shown) {
+          t.el.textContent = t.text.slice(0, k);
+          t.shown = k;
+        }
+        if (k > 0 || !at) at = t.el;
+        left -= t.text.length;
+      }
+      if (at && caret.previousElementSibling !== at) at.after(caret);
+    };
+    const light = (line: number) => codeLines.forEach((l, i) => (l.dataset.state = i === line ? 'active' : ''));
+
+    const finish = () => {
+      scope.cancel();
+      running = false;
+      type(total);
+      caret.remove();
+      light(-1);
+      rows.forEach((r) => (r.dataset.state = 'done'));
+      gates.forEach((g) => (g.dataset.state = 'done'));
+      pre.style.minHeight = '';
+    };
+    /** `announce` is for explicit Run again only; autoplay stays silent. */
+    const play = async (announce: boolean) => {
+      started = true;
+      status.textContent = '';
+      finish();
+      if (reducedMotion.matches || document.hidden) return;
+      // Hold the finished height so typing never reflows the cell.
+      pre.style.minHeight = `${pre.offsetHeight}px`;
+      type(0);
+      rows.forEach((r) => (r.dataset.state = ''));
+      gates.forEach((g) => (g.dataset.state = ''));
+      const s = (scope = new MotionScope());
+      running = true;
+      const state = { n: 0 };
+      // anime batches the reveal per frame; no per-character timers.
+      await s.animate(state, { n: [0, total], duration: TYPE_MS, ease: 'linear', onUpdate: () => type(Math.round(state.n)) });
+      if (!s.alive) return;
+      caret.remove();
+      for (const row of rows) {
+        await s.wait(ROW_MS);
+        if (!s.alive) return;
+        row.dataset.state = 'done';
+        if (row.dataset.lineAt) light(Number(row.dataset.lineAt));
+        if (row.dataset.gateAt) gates[Number(row.dataset.gateAt)].dataset.state = 'done';
+      }
+      await s.wait(ROW_MS * 2);
+      if (!s.alive) return;
+      finish();
+      if (announce) status.textContent = 'Render finished: 8 files for SamplePractice.';
+    };
+    const settle = () => running && finish();
+
+    again.hidden = false;
+    again.addEventListener('click', () => play(true));
+    // Autoplay once the first code line sits in the upper three quarters of the viewport. A single
+    // line is always reachable, however short or zoomed the viewport.
+    const first = codeLines[0];
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting || started) return;
+        io.disconnect();
+        play(false);
+      },
+      { rootMargin: '0px 0px -25% 0px', threshold: 1 },
+    );
+    if (!reducedMotion.matches) io.observe(first);
+    watchVisibility(cell, (on) => on || settle(), 0);
+    // The reserved height is only valid for the width it was measured at.
+    let width = cell.clientWidth;
+    new ResizeObserver(() => {
+      if (cell.clientWidth !== width) settle();
+      width = cell.clientWidth;
+    }).observe(cell);
+    document.addEventListener('visibilitychange', () => document.hidden && settle());
+    reducedMotion.addEventListener('change', () => {
+      if (!reducedMotion.matches) return;
+      io.disconnect();
+      finish();
+    });
+  }
+
+  /* Who does what: the edges wait grey until one packet runs the flow, once. A hidden tab or
+     reduced motion spends the pass and shows the finished flow. */
+  const who = document.querySelector<HTMLElement>('[data-who]');
+  if (who) {
+    layoutEdges(who);
+    const edges = [...who.querySelectorAll<SVGPathElement>('path.edge')];
+    const dot = who.querySelector<SVGCircleElement>('circle.packet')!;
+    let scope: MotionScope | null = null;
+    let spent = false;
+    const done = () => {
+      spent = true;
+      scope?.cancel();
+      edges.forEach((e) => (e.dataset.state = 'done'));
+    };
+    if (!reducedMotion.matches) {
+      edges.forEach((e) => (e.dataset.state = ''));
+      watchVisibility(who, async (visible) => {
+        if (!visible) return scope?.cancel();
+        if (spent) return;
+        if (reducedMotion.matches || document.hidden) return done();
+        spent = true;
+        const s = (scope = new MotionScope());
+        s.own(() => edges.forEach((e) => (e.dataset.state = 'done')));
+        for (const edge of edges) {
+          edge.dataset.state = 'active';
+          await sendPacket(s, edge, dot, 520);
+          if (!s.alive) return;
+          edge.dataset.state = 'done';
+          await s.wait(160);
+        }
+      }, 0.6);
+      document.addEventListener('visibilitychange', () => document.hidden && done());
+      reducedMotion.addEventListener('change', () => reducedMotion.matches && done());
+    }
+  }
+</script>

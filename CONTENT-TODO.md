@@ -21,7 +21,9 @@ To fill a stat, set `value` and remove `placeholder: true`.
 
 ## Facts to confirm
 
-- Photo intake steps (Import, Cull, Name, Prepare) are examples; the lane shows an "Example steps" chip. Replace them in `src/sections/Pipeline.astro` → `lanes[1].steps`, then remove `example: true` and update the footnote under the demo.
+- Photo intake steps and folders are examples; the lane shows an "Example steps and folders" chip. The lane is drawn as a raw field (24 frames, 8 rejects) feeding Cull and Name, then the `/web`, `/ads`, `/social`, `/print` bins. Replace the gates or folders in `src/sections/Pipeline.astro`, then update the chip and the footnote under the demo.
+- The ad generator's Brand kit input shows "SamplePractice" with a "Sample brand kit" chip. Client names stay private; keep it a stand-in.
+- The render demo in `src/sections/AiBento.astro` is labelled "Illustrative render sequence". The code, `render-campaign.ts`, and the terminal rows are stand-ins built from real vocabulary (the persona slug, Split Stack's 5 slots, the 8 deliverables). Swap in a real excerpt if one can be shared.
 - The 40% cut in catalog and brochure production time is attributed to AI tooling at Machine Communications (`src/sections/AiBento.astro`). Confirm the wording.
 - OrthoBoost promotion month in 2026 (the copy currently says "in 2026").
 - The link-preview card (`public/og.png`) repeats the hero headline and sub. If either changes, re-render it (see README) and bump `OG_VERSION` in `src/layouts/Base.astro`.

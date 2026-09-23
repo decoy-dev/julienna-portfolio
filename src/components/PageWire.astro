@@ -1,0 +1,218 @@
+---
+/**
+ * One continuous wire for the whole home page (desktop gutters only, >= 1360px).
+ * It starts under the proof rail, runs down a gutter beside each [data-wire-section], and in the
+ * whitespace between sections sweeps across to the opposite gutter, ending at the closing CTA
+ * panel where it meets the panel's own wire into "Get in touch".
+ *
+ * A ball rides the wire level with ~55% of the viewport and the wire fills teal behind it. Both are
+ * driven by a native ScrollTimeline (WAAPI); there are no scroll listeners. Geometry is rebuilt
+ * only when layout changes (ResizeObserver, fonts). Without ScrollTimeline, or with reduced motion,
+ * the wire is static and there is no ball.
+ */
+---
+
+<div class="page-wire" aria-hidden="true" data-page-wire>
+  <svg class="page-wire-svg" focusable="false">
+    <path class="pw-base" data-pw-base />
+    <path class="pw-fill" data-pw-fill />
+    <g data-pw-ports></g>
+  </svg>
+  <span class="pw-ball" data-pw-ball></span>
+</div>
+
+<style>
+  .page-wire { display: none; }
+  @media (min-width: 85rem) {
+    .page-wire {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+  }
+  .page-wire-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .pw-base { fill: none; stroke: var(--color-line); stroke-width: 2; }
+  .pw-fill { fill: none; stroke: var(--color-graphic-deep); stroke-width: 2; opacity: 0; }
+  .page-wire[data-live] .pw-fill { opacity: 1; }
+  .page-wire :global(.pw-port) { fill: var(--color-bg); stroke: var(--color-graphic-deep); stroke-width: 1.5; }
+  .pw-ball {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--color-graphic-deep);
+    box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 4.5px oklch(0.6 0.09 188 / 0.25);
+    offset-rotate: 0deg;
+    opacity: 0;
+  }
+  .page-wire[data-live] .pw-ball { opacity: 1; }
+</style>
+
+<script>
+  import { reducedMotion } from '../scripts/graph';
+
+  const wire = document.querySelector<HTMLElement>('[data-page-wire]');
+  const main = wire?.parentElement;
+  if (wire && main) {
+    const base = wire.querySelector<SVGPathElement>('[data-pw-base]')!;
+    const fill = wire.querySelector<SVGPathElement>('[data-pw-fill]')!;
+    const ports = wire.querySelector<SVGGElement>('[data-pw-ports]')!;
+    const ball = wire.querySelector<HTMLElement>('[data-pw-ball]')!;
+    const desktop = matchMedia('(min-width: 85rem)');
+    const GUTTER = 40; // px outside the content column
+    const TRACK = 0.55; // the ball sits level with this fraction of the viewport
+    const SAMPLES = 360;
+    // ScrollTimeline is not in every TS DOM lib yet; feature-detect the exact combination we need.
+    const ScrollTimelineCtor = (globalThis as { ScrollTimeline?: new (o: { source: Element; axis: string }) => AnimationTimeline }).ScrollTimeline;
+    const supported = typeof ScrollTimelineCtor === 'function' && CSS.supports('offset-path', 'path("M0 0L1 1")');
+    let anims: Animation[] = [];
+
+    const f = (n: number) => n.toFixed(1);
+    const cancel = () => {
+      anims.forEach((a) => a.cancel());
+      anims = [];
+      wire.removeAttribute('data-live');
+    };
+
+    /** Measure everything first, then write. Runs only on layout changes, never per scroll frame. */
+    const build = () => {
+      cancel();
+      if (!desktop.matches) return;
+      const m = main.getBoundingClientRect();
+      const top = (el: Element) => el.getBoundingClientRect().top - m.top;
+      const bottom = (el: Element) => el.getBoundingClientRect().bottom - m.top;
+      const shell = main.querySelector('.shell')!.getBoundingClientRect();
+      const xs = [shell.left - m.left - GUTTER, shell.right - m.left + GUTTER];
+      const sections = [...main.querySelectorAll<HTMLElement>('[data-wire-section]')];
+      const proof = main.querySelector('.proof');
+      const cta = main.querySelector<HTMLElement>('[data-cta]');
+      const sink = cta?.querySelector<HTMLElement>('[data-cta-sink]');
+      if (!sections.length || !proof || !cta || !sink) return;
+
+
+      const startY = bottom(proof) + 32;
+      const heads = sections.map((s) => top(s.querySelector('h2') ?? s));
+      const ends = sections.map((s) => bottom(s.querySelector('.shell') ?? s));
+      let side = 0;
+      let d = `M${f(xs[0])} ${f(startY)}`;
+      const portAt: [number, number][] = [[xs[0], startY]];
+      sections.forEach((_, i) => {
+        const x = xs[side];
+        d += `V${f(heads[i])}`;
+        portAt.push([x, heads[i] + 14]);
+        const next = heads[i + 1];
+        if (next === undefined) return;
+        d += `V${f(ends[i])}`;
+        // Cross to the other gutter inside the empty gap between this section and the next.
+        const nx = xs[1 - side];
+        const mid = (ends[i] + next) / 2;
+        d += `C${f(x)} ${f(mid)} ${f(nx)} ${f(mid)} ${f(nx)} ${f(next)}`;
+        side = 1 - side;
+      });
+      // Final approach: come back to the left gutter if needed, then turn into the CTA panel wire.
+      const panel = cta.getBoundingClientRect();
+      const s = sink.getBoundingClientRect();
+      const lineY = s.top - m.top + s.height / 2; // the CTA's own wire runs at the button's midline
+      const px = panel.left - m.left;
+      const last = ends.at(-1)!;
+      if (side === 1) {
+        const mid = (last + lineY) / 2;
+        d += `V${f(last)}C${f(xs[1])} ${f(mid)} ${f(xs[0])} ${f(mid)} ${f(xs[0])} ${f(lineY - 24)}`;
+      }
+      const r = 16;
+      d += `V${f(lineY - r)}Q${f(xs[0])} ${f(lineY)} ${f(xs[0] + r)} ${f(lineY)}H${f(px)}`;
+
+      base.setAttribute('d', d);
+      fill.setAttribute('d', d);
+      ports.replaceChildren(
+        ...portAt.map(([x, y]) => {
+          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          c.setAttribute('class', 'pw-port');
+          c.setAttribute('cx', f(x));
+          c.setAttribute('cy', f(y));
+          c.setAttribute('r', '5');
+          return c;
+        }),
+      );
+
+      if (!supported || reducedMotion.matches) return;
+      animate(d, m);
+    };
+
+    /**
+     * Keyframes map scroll offset to path distance so the ball tracks a fixed viewport line, even
+     * on sideways crossings: sample the path, convert each sample's y to the scroll position that
+     * puts it at TRACK * viewport, and keep offsets strictly increasing so crossings still take a
+     * little scroll instead of teleporting.
+     */
+    const animate = (d: string, m: DOMRect) => {
+      const total = base.getTotalLength();
+      const docTop = m.top + scrollY;
+      const maxScroll = document.documentElement.scrollHeight - innerHeight;
+      if (!total || maxScroll <= 0) return;
+      const raw: number[] = [];
+      const lens: number[] = [];
+      for (let i = 0; i <= SAMPLES; i++) {
+        const len = (total * i) / SAMPLES;
+        const y = base.getPointAtLength(len).y;
+        lens.push(len);
+        raw.push((docTop + y - innerHeight * TRACK) / maxScroll);
+      }
+      const minStep = 0.35 / SAMPLES;
+      const offsets: number[] = [];
+      raw.forEach((o, i) => {
+        const clamped = Math.min(Math.max(o, 0), 1);
+        offsets.push(i ? Math.max(offsets[i - 1] + minStep, clamped) : clamped);
+      });
+      // If the tail runs past the bottom of the page, compress after the start so the end is
+      // reachable; the start keeps its measured offset.
+      const o0 = offsets[0];
+      const peak = offsets.at(-1)!;
+      const norm = peak > 1 ? offsets.map((o) => o0 + ((o - o0) / (peak - o0)) * (1 - o0)) : offsets;
+      // Outside the route the ball holds still at its ends instead of stretching the first and last
+      // intervals: stationary keyframes pin 0 and 1.
+      const frames = (value: (len: number) => Keyframe): Keyframe[] => [
+        ...(norm[0] > 0 ? [{ ...value(0), offset: 0 }] : []),
+        ...lens.map((l, i) => ({ ...value(l), offset: norm[i] })),
+        ...(norm.at(-1)! < 1 ? [{ ...value(total), offset: 1 }] : []),
+      ];
+
+      ball.style.offsetPath = `path("${d}")`;
+      fill.style.strokeDasharray = `${total}`;
+      try {
+        const timeline = new ScrollTimelineCtor!({ source: document.documentElement, axis: 'block' });
+        const options = { timeline, fill: 'both', easing: 'linear' } as KeyframeAnimationOptions;
+        // Register each animation as soon as it exists, so a later failure still cancels it.
+        anims.push(ball.animate(frames((l) => ({ offsetDistance: `${((l / total) * 100).toFixed(3)}%` })), options));
+        anims.push(fill.animate(frames((l) => ({ strokeDashoffset: `${total - l}` })), options));
+        if (anims.some((a) => a.timeline !== timeline)) throw new Error('scroll timeline not attached');
+        wire.setAttribute('data-live', '');
+      } catch {
+        cancel(); // keep the static wire
+      }
+    };
+
+    let queued = 0;
+    const schedule = () => {
+      cancelAnimationFrame(queued);
+      queued = requestAnimationFrame(build);
+    };
+    // Anything that can move the route: main's size, any section's size (content can shift inside
+    // a constant-height main), the viewport height (the tracking line), and late font loads.
+    const observer = new ResizeObserver(schedule);
+    observer.observe(main);
+    main.querySelectorAll('[data-wire-section], [data-cta]').forEach((el) => observer.observe(el));
+    addEventListener('resize', schedule);
+    desktop.addEventListener('change', schedule);
+    reducedMotion.addEventListener('change', schedule);
+    document.fonts?.ready.then(schedule);
+    document.fonts?.addEventListener('loadingdone', schedule);
+    addEventListener('load', schedule);
+    schedule();
+  }
+</script>

@@ -103,8 +103,7 @@
   --gutter: clamp(20px, 4vw, 24px);
   --nav-h: 56px;
   --nav-top: 16px;
-  /* z-index scale: content < wire < sticky chrome < popover */
-  --z-wire: 1;
+  /* z-index scale: content < sticky chrome < popover (the page wire sits at 0, behind content) */
   --z-chrome: 20;
   --z-popover: 30;
 }
@@ -327,63 +326,10 @@
   }
 }
 
-/* Section wire: the page is a pipeline. Desktop ≥ 1360px only; drawn by scroll where supported.
-   Wired sections are full-bleed, so 50% - 600px is the content column's left edge. */
-.wire { display: none; }
-@media (min-width: 85rem) {
-  [data-wired] { position: relative; }
-  .wire {
-    display: block;
-    position: absolute;
-    z-index: var(--z-wire);
-    left: calc(50% - 640px);
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    pointer-events: none;
-  }
-  .wire::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--color-line);
-  }
-  .wire-fill {
-    position: absolute;
-    inset: 0;
-    background: var(--color-graphic-deep);
-    transform-origin: top;
-  }
-  .wire-port {
-    position: absolute;
-    left: -4px;
-    top: var(--port-top, 7.5rem);
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: var(--color-bg);
-    box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep);
-  }
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .wire-fill {
-        animation: wire-draw linear both;
-        animation-timeline: view();
-        animation-range: cover 10% cover 75%;
-      }
-      .wire-port {
-        animation: port-fill linear both;
-        animation-timeline: view();
-        animation-range: cover 30% cover 45%;
-      }
-    }
-  }
-}
-@keyframes wire-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-@keyframes port-fill {
-  from { background: var(--color-bg); }
-  to { background: var(--color-graphic-deep); }
-}
+/* Page wire stacking (src/components/PageWire.astro): the wire sits behind every home-page block,
+   so it shows in the gutters and between sections but never over text or controls. */
+#main:has(> .page-wire) { position: relative; }
+#main:has(> .page-wire) > :not(.page-wire) { position: relative; z-index: 1; }
 
 /* Entry drift driven by the element's own view timeline. Zero JS, transform only: content is
    always fully opaque and readable, with or without support, and under reduced motion. */

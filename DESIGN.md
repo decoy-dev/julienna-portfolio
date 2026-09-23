@@ -85,7 +85,7 @@ eight words max, `text-wrap: balance` (global). Sub-paragraphs 25 words max. Sta
 - One container: `.shell` = `min(1200px, 100% - 2 * var(--gutter))`; `--gutter: clamp(20px, 4vw, 24px)`.
 - 12 columns, 24px gaps on desktop; 4px spacing base everywhere.
 - Section rhythm `clamp(80px, 12vh, 128px)`; full-bleed bands use 64px inner padding.
-- Breakpoints: 640, 768, 1024, 1280. The left-gutter section wire renders at >= 1360px (`--breakpoint-wire: 85rem`) only, on the home page's `data-wired` sections.
+- Breakpoints: 640, 768, 1024, 1280. The page wire renders at >= 1360px (`--breakpoint-wire: 85rem`) only, weaving through the home page's `data-wire-section` sections.
 - Verify every layout at 390, 768, 1024, 1440. No horizontal page overflow ever; wide specimens scroll inside their own frame.
 
 ## Radius and elevation
@@ -108,7 +108,7 @@ for packet travel. anime.js mappings: easeOutExpo entrances, easeInOutQuad morph
 Rules:
 
 - Animate transform and opacity only, plus SVG stroke-dashoffset / packet position on graph surfaces.
-- Choreography is IntersectionObserver-triggered, plays once, pauses offscreen. NEVER scroll-driven content, NEVER scroll locking or hijacking. (CSS `animation-timeline` is allowed for the wire and progress ring because it is passive chrome.)
+- Choreography is IntersectionObserver-triggered, plays once, pauses offscreen. NEVER scroll-driven content, NEVER scroll locking or hijacking. (Scroll timelines, CSS `animation-timeline` or a WAAPI `ScrollTimeline`, are allowed for the page wire and progress ring because they are passive chrome.)
 - Loops are finite or pausable. `prefers-reduced-motion: reduce` gets completed end states (global kill switch exists in global.css).
 - No bounce, spring, or overshoot. Content is visible by default; entry animation never gates readability.
 - `.reveal` (CSS scroll-driven, transform-only rise, no opacity fade) is used on the home gallery; never place it on elements that graph edges attach to.
@@ -132,7 +132,24 @@ Anatomy (all classes in global.css):
 Rules: max 6 nodes per graph outside the pipeline demo; every node title is real production vocabulary; mono
 appears on a graph only for literal file names, paths, or code (titles, captions, legends are sans); no
 gradients, glows, or neon on wires. Layout/animation helpers live in `src/scripts/graph.ts` (`layoutEdges`,
-`drawEdge`, `sendPacket`, `reducedMotion`, `watchVisibility`).
+`drawEdge`, `sendPacket`, `reducedMotion`, `watchVisibility`). Edges idle grey and turn done only after a
+packet crosses them. `data-route="elbow"` (or `data-route-compact` for the stacked layout) routes an edge
+orthogonally with one rounded corner, for edges that must not cut across other nodes.
+
+- **Page wire** (`PageWire.astro`, home only, >= 1360px): one path from under the proof rail, down a gutter
+  beside each `data-wire-section`, crossing to the other gutter in the whitespace between sections, and
+  ending at the closing CTA panel, where the panel's own line carries on to "Get in touch". A ball rides it
+  level with 55% of the viewport and the wire fills teal behind it (WAAPI `ScrollTimeline`, no scroll
+  listeners). Reduced motion or no support: static grey wire, no ball. The wire sits behind all content.
+- **Pipelines** (`Pipeline.astro`, runners in `src/scripts/pipeline.ts`): two lanes with different shapes.
+  The ad generator merges four inputs into Render and fans out to the 8-file matrix; the photo intake drains
+  a loose field of frames through Cull and Name into four bins. Each lane triggers on its own visibility,
+  finishes under 2.5s, and settles to its final state offscreen or in a hidden tab.
+- **Render demo** (`AiBento.astro`): the illustrative code types out, then each terminal row lights its code
+  line and ticks the matching gate in "Nothing renders half set up". The moving copy is `aria-hidden` with
+  an sr-only copy, the pane height is reserved, and it ships finished.
+- **Count-up** (`CountUp.astro`): verified numbers count up once when 60% visible (900ms, ease out). Prefixes
+  and suffixes stay exact. Never on dates, ratios, file names, or placeholders.
 
 ## The mark
 
@@ -146,11 +163,12 @@ redraw. Lockup: mark 32px + 10px gap + "Julienna Batten" Funnel Display 600 at -
 
 | Thing | Where | Notes |
 | --- | --- | --- |
-| Global classes: `.shell .meta .btn(-primary/-ghost/-invert/-outline-invert/-sm) .link .chip .ph-frame .ph-chip .grid-canvas(-ink) .node .node-head .node-check .port .edge .packet .window .wire .reveal` | `src/styles/global.css` | Never redefine locally; page-local classes go in component `<style>` |
+| Global classes: `.shell .meta .btn(-primary/-ghost/-invert/-outline-invert/-sm) .link .chip .ph-frame .ph-chip .grid-canvas(-ink) .node .node-head .node-check .port .edge .packet .window .reveal` | `src/styles/global.css` | Never redefine locally; page-local classes go in component `<style>` |
 | `<Base title description>` | `src/layouts/Base.astro` | Wraps every page: nav, footer, back-to-top, skip link, fonts, view transitions |
 | `<Mark size tile? />` | `src/components/Mark.astro` | The monogram |
 | `<Slot ratio brief radius? />` | `src/components/Slot.astro` | EVERY self-provided image until the real asset lands |
-| `<Wire portTop? />` | `src/components/Wire.astro` | Home page `data-wired` sections only |
+| `<PageWire />` | `src/components/PageWire.astro` | Home page only, first child of `<main>` |
+| `<CountUp text />` | `src/components/CountUp.astro` | Verified numbers only |
 | Nav, Footer, BackToTop, HeroGraph, AdFrame | `src/components/` | Owned by the home shell |
 | `href()` | `src/lib/url.ts` | Wraps ALL internal links and public asset URLs |
 | Copy + facts | `src/data/site.ts` | Single source for stats, brands, personas, templates |

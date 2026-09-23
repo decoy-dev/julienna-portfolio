@@ -1,0 +1,124 @@
+---
+/**
+ * Renders text whose first number counts up from zero when it scrolls into view.
+ *   <CountUp text="+25% online sales" />   <CountUp text="~40" />   <CountUp text="30,000+ attendees a year" />
+ * Server HTML carries the final value (no-JS and reduced motion see it as-is). A hidden copy of
+ * the final text reserves the width, so counting never shifts layout; screen readers hear only
+ * the final text. `data-zero` is the pre-formatted start value, so an inline script can arm
+ * above-the-fold numbers before first paint.
+ */
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const m = text.match(/^(\D*?)(\d[\d,]*(?:\.\d+)?)(.*)$/s);
+const parts = m && {
+  prefix: m[1],
+  value: Number(m[2].replace(/,/g, '')),
+  decimals: m[2].split('.')[1]?.length ?? 0,
+  commas: m[2].includes(','),
+  suffix: m[3],
+};
+const zero = parts && `${parts.prefix}${(0).toFixed(parts.decimals)}${parts.suffix}`;
+---
+
+{parts ? (
+  <span
+    class="cu"
+    data-countup
+    data-to={parts.value}
+    data-decimals={parts.decimals}
+    data-commas={parts.commas ? '' : undefined}
+    data-prefix={parts.prefix}
+    data-suffix={parts.suffix}
+    data-zero={zero}
+  >
+    <span class="cu-ghost" aria-hidden="true">{text}</span>
+    <span class="cu-live" aria-hidden="true">{text}</span>
+    <span class="sr-only">{text}</span>
+  </span>
+) : (
+  text
+)}
+
+<style>
+  .cu { display: inline-grid; }
+  .cu > * { grid-area: 1 / 1; }
+  .cu-ghost { visibility: hidden; }
+</style>
+
+<script>
+  import { animate, type JSAnimation } from 'animejs/animation';
+  import { reducedMotion } from '../scripts/graph';
+
+  const THRESHOLD = 0.6;
+  const els = [...document.querySelectorAll<HTMLElement>('[data-countup]')];
+  const live = (el: HTMLElement) => el.querySelector<HTMLElement>('.cu-live')!;
+  const format = (el: HTMLElement, v: number) => {
+    const d = Number(el.dataset.decimals);
+    const n = el.dataset.commas !== undefined ? v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }) : v.toFixed(d);
+    return `${el.dataset.prefix ?? ''}${n}${el.dataset.suffix ?? ''}`;
+  };
+  const settle = (el: HTMLElement) => (live(el).textContent = el.querySelector('.cu-ghost')!.textContent);
+
+  if (reducedMotion.matches) {
+    els.forEach(settle);
+  } else {
+    const running = new Map<HTMLElement, JSAnimation>();
+    // Any end to a count (finished, scrolled away, tab hidden) lands on the final value, once.
+    const stop = (el: HTMLElement) => {
+      running.get(el)?.cancel();
+      running.delete(el);
+      settle(el);
+      io.unobserve(el);
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const el = e.target as HTMLElement;
+          if (running.has(el)) {
+            if (!e.isIntersecting) stop(el);
+            continue;
+          }
+          if (e.intersectionRatio < THRESHOLD - 0.001) continue;
+          // Reached while the tab is hidden: the observer won't fire again, so show the value now.
+          if (document.hidden) {
+            stop(el);
+            continue;
+          }
+          const n = { v: 0 };
+          running.set(
+            el,
+            animate(n, {
+              v: Number(el.dataset.to),
+              duration: 900,
+              ease: 'out(4)',
+              onUpdate: () => (live(el).textContent = format(el, n.v)),
+              onComplete: () => stop(el),
+            }),
+          );
+        }
+      },
+      { threshold: [0, THRESHOLD] },
+    );
+    for (const el of els) {
+      if (!el.hasAttribute('data-armed')) {
+        // Already painted with its final value (the module arrived late): never yank it to zero.
+        const r = el.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < innerHeight) continue;
+        el.setAttribute('data-armed', '');
+        live(el).textContent = el.dataset.zero ?? '';
+      }
+      io.observe(el);
+    }
+    document.addEventListener('visibilitychange', () => document.hidden && [...running.keys()].forEach(stop));
+    // Turning on reduced motion shows every final value and ends all future counting.
+    reducedMotion.addEventListener('change', () => {
+      if (!reducedMotion.matches) return;
+      io.disconnect();
+      running.forEach((a) => a.cancel());
+      running.clear();
+      els.forEach(settle);
+    });
+  }
+</script>
