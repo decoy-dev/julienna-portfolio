@@ -3,39 +3,45 @@ import Guide from './Guide.astro';
 import Spec from './Spec.astro';
 
 const scale = [
-  { name: 'display', cls: 'text-display', sample: 'Put a system behind it', spec: 'clamp(2.5rem, 4rem) / 1.05 / 650 / -0.03em' },
-  { name: 'h2', cls: 'text-h2', sample: 'Selected work', spec: 'clamp(2rem, 3rem) / 1.1 / 600 / -0.025em' },
-  { name: 'h3', cls: 'text-h3', sample: 'One brand system, forty practices', spec: 'clamp(1.25rem, 1.5rem) / 1.25 / 600 / -0.015em' },
-  { name: 'body', cls: 'text-body', sample: 'Brand, web, motion, and automation shipped by one person.', spec: 'clamp(1rem, 1.125rem) / 1.6 / 400 / 0, max 65ch' },
-  { name: 'small', cls: 'text-small text-muted', sample: 'Secondary copy, captions, and metadata sit one step down.', spec: '0.875rem / 1.5 / 400' },
-  { name: 'label', cls: 'label', sample: 'Worked with', spec: 'mono 0.75rem / 1.4 / 500 / +0.08em / uppercase' },
-  { name: 'stat', cls: 'text-stat tabular-nums', sample: '+25%', spec: 'clamp(1.75rem, 2.5rem) / 1.1 / 650 / -0.02em / tnum' },
+  { name: 'display', cls: 'text-display font-display', sample: 'Put a system behind it', spec: 'display / clamp(2.375rem, 3.625rem) / 1.06 / 700 / -0.025em' },
+  { name: 'h2', cls: 'text-h2 font-display', sample: 'Selected work', spec: 'display / clamp(1.875rem, 2.75rem) / 1.1 / 650 / -0.02em' },
+  { name: 'h3', cls: 'text-h3 font-display', sample: 'One brand system, forty practices', spec: 'display / clamp(1.1875rem, 1.375rem) / 1.25 / 650 / -0.01em' },
+  { name: 'body', cls: 'text-body', sample: 'Brand, web, motion, and automation shipped by one person.', spec: 'sans / clamp(1rem, 1.125rem) / 1.6 / 400 / 0, max 65ch' },
+  { name: 'small', cls: 'text-small text-muted', sample: 'Secondary copy, captions, and metadata sit one step down.', spec: 'sans / 0.875rem / 1.5 / 400' },
+  { name: 'meta', cls: 'meta text-muted', sample: 'Worked with', spec: 'sans / 0.8125rem / 1.4 / 600 / +0.005em, sentence case' },
+  { name: 'stat', cls: 'text-stat font-display tabular-nums', sample: '+25%', spec: 'display / clamp(1.75rem, 2.5rem) / 1.1 / 700 / -0.02em / tnum' },
 ];
 ---
 
 <Guide
   id="type"
   title="Typography"
-  intro="Host Grotesk does all the talking. Commit Mono marks data: node titles, file names, labels, excerpts. Nothing else."
+  intro="Funnel Display carries headlines and stats, Funnel Sans carries everything you read, and Spline Sans Mono appears only for literal file names, paths, and code."
 >
-  <div class="grid gap-4 md:grid-cols-2">
-    <Spec label="Host Grotesk" note="Variable, self-hosted, latin subset. Weights 400 to 650.">
-      <p class="text-[3rem] leading-none font-[650] tracking-[-0.03em]">Aa</p>
+  <div class="grid gap-4 lg:grid-cols-3">
+    <Spec label="Funnel Display" note="Headlines, stats, the wordmark. Variable, self-hosted, weights 650 to 700.">
+      <p class="font-display text-[3rem] leading-none font-bold tracking-[-0.025em]">Aa</p>
+      <p class="mt-4 font-display text-body font-[650] break-words">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
+      <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 font-display text-body">
+        <span class="font-[650]">Heading 650</span>
+        <span class="font-bold">Display 700</span>
+      </p>
+    </Spec>
+    <Spec label="Funnel Sans" note="Body, captions, buttons, labels. Variable, self-hosted, weights 400 to 600.">
+      <p class="text-[3rem] leading-none font-semibold">Aa</p>
       <p class="mt-4 text-body break-words">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
       <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-body">
         <span class="font-normal">Regular 400</span>
         <span class="font-medium">Medium 500</span>
         <span class="font-semibold">Semibold 600</span>
-        <span class="font-[650]">Display 650</span>
       </p>
     </Spec>
-    <Spec label="Commit Mono" note="Weight 500. Data only, never prose or headlines.">
+    <Spec label="Spline Sans Mono" note="Literal file names, paths, and code only. Never labels, never uppercase, never tracked.">
       <p class="font-mono text-[3rem] leading-none font-medium">Aa</p>
       <p class="mt-4 font-mono text-[0.8125rem] break-words">Seasonal_Spring-2026_Image_V1_Story_Client</p>
       <p class="mt-2 font-mono text-[0.8125rem] text-muted break-words">
         {'{ "archetype": "The Wellness Educator" }'}
       </p>
-      <p class="mt-3 label text-muted">Uppercase label at +0.08em</p>
     </Spec>
   </div>
 
@@ -50,10 +56,11 @@ const scale = [
   </div>
 
   <ul class="rules">
-    <li>Letter-spacing never goes tighter than -0.04em; only display, h2, and stat track negative.</li>
+    <li>The <code class="font-mono text-[0.8125rem]">.meta</code> class is the one small-label voice: sentence-case sans, 600. No uppercase, no tracked lettering, anywhere.</li>
+    <li>Mono is reserved for literal data: file names, paths, token names and values, code excerpts. If it reads as a sentence or names a thing for a reader, it is sans.</li>
+    <li>Letter-spacing never goes tighter than -0.025em; only display, h2, and stat track negative.</li>
     <li>Stats always set <code class="font-mono text-[0.8125rem]">font-feature-settings: "tnum"</code> so digits align in columns.</li>
     <li>Body measure caps at 65ch. Headlines are sentence case, eight words or fewer.</li>
-    <li>Mono never escapes graph surfaces, captions, or data into prose. If it reads as a sentence, it is sans.</li>
   </ul>
 </Guide>
 
@@ -66,7 +73,7 @@ const scale = [
   }
   .type-row + .type-row { border-top: 1px solid var(--color-line); }
   @media (min-width: 48rem) {
-    .type-row { grid-template-columns: 72px minmax(0, 1fr) 260px; }
+    .type-row { grid-template-columns: 72px minmax(0, 1fr) 300px; }
   }
   .rules {
     display: grid;

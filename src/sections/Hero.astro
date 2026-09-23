@@ -12,7 +12,17 @@ const logos = brands.map((b) => ({ ...b, svg: logoFiles[`../assets/logos/${slug(
 
 <div class="hero-grid">
   <section class="hero-copy" aria-labelledby="hero-title">
-    <h1 id="hero-title" class="text-display text-ink max-w-[13ch]">A whole design team's output, from one person.</h1>
+    <h1 id="hero-title" class="text-display text-ink max-w-[14ch]">A <span class="hl" data-hl>whole design team's output</span>, from one person.</h1>
+    <!-- Runs during parse, before first paint: arm the sweep only when motion is welcome, so
+         no-JS and reduced-motion visitors get the full static highlight with no flash. -->
+    <script is:inline>
+      (function () {
+        var hl = document.querySelector('[data-hl]');
+        if (!hl || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        hl.setAttribute('data-sweep', '');
+        setTimeout(function () { hl.setAttribute('data-sweep', 'run'); }, 450);
+      })();
+    </script>
     <p class="mt-6 max-w-[44ch] text-body text-muted">
       I run brand, web, and motion, and I build the automation that lets me ship all three.
     </p>
@@ -31,11 +41,11 @@ const logos = brands.map((b) => ({ ...b, svg: logoFiles[`../assets/logos/${slug(
   <section class="proof border-y border-line bg-surface" aria-label="Proof of work">
     <div class="shell py-7 md:py-8">
       <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-10">
-        <p class="label shrink-0 text-muted">Worked with</p>
+        <p class="meta shrink-0 text-muted">Worked with</p>
         <ul role="list" class="logo-row flex flex-wrap items-center gap-x-8 gap-y-3 xl:flex-1 xl:flex-nowrap xl:justify-between xl:gap-x-6">
           {logos.map((b) =>
             b.placeholder ? (
-              <li class="ph-chip justify-self-start" data-todo="logo">add logo</li>
+              <li class="ph-chip justify-self-start" data-todo="logo">Add logo</li>
             ) : b.svg ? (
               <li class="logo h-6 text-muted" aria-label={b.name} set:html={b.svg} />
             ) : (
@@ -53,7 +63,7 @@ const logos = brands.map((b) => ({ ...b, svg: logoFiles[`../assets/logos/${slug(
             </dt>
             <dd class="order-1 flex h-[2.75rem] items-center">
               {s.placeholder ? (
-                <span class="ph-chip" data-todo="metric">add number</span>
+                <span class="ph-chip" data-todo="metric">Add number</span>
               ) : (
                 <span class="text-stat tabular-nums text-ink">{s.value}</span>
               )}
@@ -86,7 +96,22 @@ const logos = brands.map((b) => ({ ...b, svg: logoFiles[`../assets/logos/${slug(
     .proof { grid-row: 2; margin-top: 48px; }
   }
 
+  /* Marker band behind the key phrase. Each wrapped line fragment paints its own band. */
+  .hl {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    background-image: linear-gradient(var(--color-graphic-tint), var(--color-graphic-tint));
+    background-repeat: no-repeat;
+    background-position: 0 92%;
+    background-size: 100% 0.62em;
+  }
+  .hl[data-sweep] { background-size: 0% 0.62em; }
+  .hl[data-sweep='run'] {
+    background-size: 100% 0.62em;
+    transition: background-size 750ms var(--ease-out);
+  }
   .wordmark {
+    font-family: var(--font-display);
     font-weight: 650;
     font-size: 1.0625rem;
     letter-spacing: -0.015em;

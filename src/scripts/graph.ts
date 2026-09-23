@@ -9,7 +9,7 @@
  * Edges use tangents that leave a port along its side's normal, so graphs never draw diagonal
  * spaghetti. Layout is recomputed on resize only, never per frame.
  */
-import { animate } from 'animejs/animation';
+import { animate, type JSAnimation } from 'animejs/animation';
 
 export type Side = 'in' | 'out' | 'down' | 'up';
 type Pt = { x: number; y: number };
@@ -83,6 +83,8 @@ export function layoutEdges(root: HTMLElement): () => void {
     });
   };
   new ResizeObserver(schedule).observe(root);
+  // Web fonts change node sizes without resizing the root; re-measure once they settle.
+  document.fonts?.ready.then(schedule);
   run();
   return schedule;
 }
@@ -129,10 +131,15 @@ export class MotionScope {
   }
 
   animate(targets: Parameters<typeof animate>[0], params: AnimParams, onCancel?: () => void): Promise<void> {
+    return this.animation(targets, params, onCancel).done;
+  }
+
+  /** Like `animate`, but also returns the live handle so callers can change `speed` mid-flight. */
+  animation(targets: Parameters<typeof animate>[0], params: AnimParams, onCancel?: () => void): { done: Promise<void>; anim?: JSAnimation } {
     const { promise, resolve } = Promise.withResolvers<void>();
     if (!this.alive) {
       resolve();
-      return promise;
+      return { done: promise };
     }
     const anim = animate(targets, {
       ...params,
@@ -146,16 +153,18 @@ export class MotionScope {
       onCancel?.();
       resolve();
     });
-    return promise;
+    return { done: promise, anim };
   }
 }
 
 /**
- * Move a packet (an SVG circle) along a path once. Length is read live so resizes mid-flight
- * stay on the wire. Resolves when the packet reaches the sink port (or the scope is cancelled).
+ * Move a packet (an SVG circle) along a path once. The path length is read once per flight
+ * (several packets run concurrently, so no per-frame length queries); layout only changes on
+ * resize, and a packet lasts well under a second. Resolves at the sink port or on cancel.
  */
 export function sendPacket(scope: MotionScope, path: SVGPathElement, dot: SVGCircleElement, duration = 900): Promise<void> {
   if (!path.getAttribute('d')) return Promise.resolve();
+  const len = path.getTotalLength();
   const state = { t: 0 };
   const hide = () => dot.setAttribute('opacity', '0');
   return scope
@@ -166,7 +175,7 @@ export function sendPacket(scope: MotionScope, path: SVGPathElement, dot: SVGCir
         duration,
         ease: 'linear',
         onUpdate: () => {
-          const pt = path.getPointAtLength(state.t * path.getTotalLength());
+          const pt = path.getPointAtLength(state.t * len);
           dot.setAttribute('cx', pt.x.toFixed(1));
           dot.setAttribute('cy', pt.y.toFixed(1));
           // Fade in at the source port, out at the sink.

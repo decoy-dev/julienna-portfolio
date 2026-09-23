@@ -22,8 +22,8 @@ All defined in `@theme` in `src/styles/global.css`; Tailwind utilities are `bg-*
 | Token | OKLCH | Role | Contrast |
 | --- | --- | --- | --- |
 | `bg` / `white` | `oklch(1 0 0)` | Page background, pure white | base |
-| `surface` | `oklch(0.978 0.004 200)` | Bands: proof rail, footer, tab bars | |
-| `surface-2` | `oklch(0.955 0.006 200)` | Inset wells, segmented tracks, chips | |
+| `surface` | `oklch(0.978 0.004 200)` | Bands: proof rail, footer base, window chrome | |
+| `surface-2` | `oklch(0.955 0.006 200)` | Inset wells, bento cells, chips | |
 | `line` | `oklch(0.9 0.01 200)` | Hairlines, dividers, idle edges, node borders | |
 | `ink` | `oklch(0.205 0.018 222)` | Headings, body text | 17.9:1 on white, AAA |
 | `muted` | `oklch(0.47 0.02 215)` | Secondary text, captions | 6.8:1 on white, AA |
@@ -55,24 +55,29 @@ in `public/brand-kit/tokens.css` and `tokens.json`.
 
 ## Typography
 
-Two faces, self-hosted, `font-display: swap`, sans preloaded in `Base.astro`:
+Three faces, self-hosted variable woff2, `font-display: swap`. Funnel Display and Funnel Sans are preloaded
+in `Base.astro`; the mono is never preloaded (nothing above the fold uses it).
 
-- **Host Grotesk** (variable, `src/assets/fonts/host-grotesk-var.woff2`): all prose. Weights 400 body, 500 medium, 600 headings/buttons, 650 display/stats.
-- **Commit Mono** (`src/assets/fonts/commit-mono-500.woff2`): data only. Node titles, port labels, file names, JSON excerpts, stat labels, placeholder labels, `.label`. Never prose, never headlines.
+- **Funnel Display** (`src/assets/fonts/funnel-display-var.woff2`): h1 through h3 (automatic via base CSS), stat numbers, the wordmark. Weights 650 headings, 700 display/stats, 600 wordmark.
+- **Funnel Sans** (`src/assets/fonts/funnel-sans-var.woff2`): everything you read that is not a heading. Weights 400 body, 500 chips, 600 buttons/labels/`.meta`.
+- **Spline Sans Mono** (`src/assets/fonts/spline-sans-mono-var.woff2`): literal file names, paths, JSON/code excerpts, token names and values ONLY. Never labels, never titles, never uppercase, never letterspaced. If it reads as a sentence or names a thing for a reader, it is sans.
+
+The one small-label voice is `.meta` (also `text-meta`): sans, 0.8125rem, 600, sentence case, +0.005em.
+There is no uppercase tracked label anywhere on the site; the old mono `.label` is deleted.
 
 Scale (each `text-*` utility sets size, line-height, tracking, weight):
 
-| Utility | Size | lh / ls / wt |
-| --- | --- | --- |
-| `text-display` | `clamp(2.5rem, 1.6rem + 3.4vw, 4rem)` | 1.05 / -0.03em / 650 |
-| `text-h2` | `clamp(2rem, 1.5rem + 1.8vw, 3rem)` | 1.1 / -0.025em / 600 |
-| `text-h3` | `clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem)` | 1.25 / -0.015em / 600 |
-| `text-body` | `clamp(1rem, 0.95rem + 0.2vw, 1.125rem)` | 1.6 / 0 / 400, max 65ch |
-| `text-small` | `0.875rem` | 1.5 / 0 / 400 |
-| `text-label` | `0.75rem` (mono, uppercase) | 1.4 / +0.08em / 500 |
-| `text-stat` | `clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem)` | 1.1 / -0.02em / 650, `tabular-nums` |
+| Utility | Face | Size | lh / ls / wt |
+| --- | --- | --- | --- |
+| `text-display` | display | `clamp(2.375rem, 1.55rem + 3vw, 3.625rem)` | 1.06 / -0.025em / 700 |
+| `text-h2` | display | `clamp(1.875rem, 1.45rem + 1.6vw, 2.75rem)` | 1.1 / -0.02em / 650 |
+| `text-h3` | display | `clamp(1.1875rem, 1.07rem + 0.5vw, 1.375rem)` | 1.25 / -0.01em / 650 |
+| `text-body` | sans | `clamp(1rem, 0.95rem + 0.2vw, 1.125rem)` | 1.6 / 0 / 400, max 65ch |
+| `text-small` | sans | `0.875rem` | 1.5 / 0 / 400 |
+| `text-meta` | sans | `0.8125rem` (sentence case) | 1.4 / +0.005em / 600 |
+| `text-stat` | display | `clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem)` | 1.1 / -0.02em / 700, `tabular-nums` |
 
-Rules: tracking never tighter than -0.04em; only display/h2/stat go negative. Headlines are sentence case,
+Rules: tracking never tighter than -0.025em; only display/h2/stat go negative. Headlines are sentence case,
 eight words max, `text-wrap: balance` (global). Sub-paragraphs 25 words max. Stats always tabular.
 
 ## Layout
@@ -85,7 +90,7 @@ eight words max, `text-wrap: balance` (global). Sub-paragraphs 25 words max. Sta
 
 ## Radius and elevation
 
-Radii (`rounded-*`): `inset` 8px (inputs, swatches, segmented controls, nested media), `card` 12px (cards,
+Radii (`rounded-*`): `inset` 8px (inputs, swatches, nested media), `card` 12px (cards,
 nodes, windows, bento cells), `media` 16px (feature imagery, graph canvases), `full` 999px (buttons, chips,
 ports, nav). **Nesting rule: a child container steps down exactly one radius.**
 
@@ -95,7 +100,7 @@ Shadow color is cool-tinted `oklch(0.3 0.03 220 / a)`. **Border OR shadow, never
 
 ## Motion
 
-Durations: `--d1` 120ms hovers, `--d2` 200ms tabs/menus/toggles, `--d3` 350ms panels/popovers/page crossfade,
+Durations: `--d1` 120ms hovers, `--d2` 200ms menus/toggles/small state changes, `--d3` 350ms panels/popovers/page crossfade,
 `--d4` 600ms per pipeline choreography step. Easings: `--ease-std cubic-bezier(0.4, 0, 0.2, 1)` morphs,
 `--ease-out cubic-bezier(0.16, 1, 0.3, 1)` entrances, `--ease-in cubic-bezier(0.4, 0, 1, 1)` exits, linear
 for packet travel. anime.js mappings: easeOutExpo entrances, easeInOutQuad morphs, linear packets.
@@ -118,15 +123,16 @@ replace a visible label. No filled/duotone/bold variants.
 
 Anatomy (all classes in global.css):
 
-- **Node** `.node`: card radius, real 1.5px border, min 160x56 desktop. `.node-bar` mono title bar on surface with bottom hairline. States via `data-state`: idle = `line` border; `active` = `graphic-deep` border + `shadow-raised`; `done` = `graphic` border + 14px `ph:check` (`.node-check`) in the bar.
+- **Node** `.node`: card radius, real 1.5px border, min 160x56 desktop. One padded card, no header band. The optional title row is `.node-head`: sentence-case sans, 0.8125rem/600 ink, padding 0.75rem 0.875rem 0. Node titles are literal ("8 files for one practice"), never slogans. States via `data-state`: idle = `line` border; `active` = `graphic-deep` border + `shadow-raised`; `done` = `graphic` border + 14px `ph:check` (`.node-check`) on the title row.
 - **Port** `.port[data-side="in|out|up|down"]`: 8px circle centered on the border edge (offset `var(--port-off)`), white fill, 1.5px `graphic-deep` stroke. Ports exist ONLY where an edge attaches.
 - **Edge** `.edge[data-state]` (SVG path): cubic bezier, horizontal tangents (exit right, enter left; exit bottom, enter top). 1.5px. Idle `line`, active `graphic-deep`, done `graphic`. Edges never cross, never loop, no diagonal free curves.
 - **Packet** `.packet`: 6px `graphic-deep` dot, 2px white ring, linear travel, one per active edge, 600ms stagger. Packets only move; a packet at rest is a bug.
 - **Canvas** `.grid-canvas` / `.grid-canvas-ink`: 24px dot grid. ONLY behind genuine graph surfaces (hero graph, pipeline stage, footer sitemap, closing band). Never texture.
 
-Rules: max 6 nodes per graph outside the pipeline demo; every node label is real production vocabulary; mono
-never leaks from graph surfaces into prose; no gradients, glows, or neon on wires. Layout/animation helpers
-live in `src/scripts/graph.ts` (`layoutEdges`, `drawEdge`, `sendPacket`, `reducedMotion`, `watchVisibility`).
+Rules: max 6 nodes per graph outside the pipeline demo; every node title is real production vocabulary; mono
+appears on a graph only for literal file names, paths, or code (titles, captions, legends are sans); no
+gradients, glows, or neon on wires. Layout/animation helpers live in `src/scripts/graph.ts` (`layoutEdges`,
+`drawEdge`, `sendPacket`, `reducedMotion`, `watchVisibility`).
 
 ## The mark
 
@@ -134,13 +140,13 @@ live in `src/scripts/graph.ts` (`layoutEdges`, `drawEdge`, `sendPacket`, `reduce
 `translate(1 -1.6)`; ports r2.6 at 18,9 and 12,34.2). Variants: currentColor strokes + `graphic` ports
 (default); `tile` = `primary` r-2 tile, white strokes, `graphic-tint` ports. Clear space: one port height
 (13% of mark) all sides. Min 16px (tile 24px). Never recolor ports, never rotate, shadow, outline, or
-redraw. Lockup: mark 32px + 10px gap + "Julienna Batten" Host Grotesk 600 at -0.01em.
+redraw. Lockup: mark 32px + 10px gap + "Julienna Batten" Funnel Display 600 at -0.01em.
 
 ## Component inventory
 
 | Thing | Where | Notes |
 | --- | --- | --- |
-| Global classes: `.shell .label .btn(-primary/-ghost/-invert/-outline-invert/-sm) .link .chip .ph-frame .ph-chip .grid-canvas(-ink) .node .node-bar .node-check .port .edge .packet .window .wire .reveal` | `src/styles/global.css` | Never redefine locally; page-local classes go in component `<style>` |
+| Global classes: `.shell .meta .btn(-primary/-ghost/-invert/-outline-invert/-sm) .link .chip .ph-frame .ph-chip .grid-canvas(-ink) .node .node-head .node-check .port .edge .packet .window .wire .reveal` | `src/styles/global.css` | Never redefine locally; page-local classes go in component `<style>` |
 | `<Base title description>` | `src/layouts/Base.astro` | Wraps every page: nav, footer, back-to-top, skip link, fonts, view transitions |
 | `<Mark size tile? />` | `src/components/Mark.astro` | The monogram |
 | `<Slot ratio brief radius? />` | `src/components/Slot.astro` | EVERY self-provided image until the real asset lands |
@@ -152,16 +158,17 @@ redraw. Lockup: mark 32px + 10px gap + "Julienna Batten" Host Grotesk 600 at -0.
 
 Component rules: one CTA label per intent ("Get in touch" for contact, "See the work" for the portfolio,
 "View project" for project links). Buttons are pills, 44px (36px `.btn-sm`). Labels above inputs, never
-placeholder-as-label; errors use `danger` border + `danger` message with `ph:warning-circle`. Segmented
-controls: `surface-2` track, white active pill on `shadow-raised`. No 3 identical cards in a row; no pills
-overlaid on images; no scroll cues; no decorative dots (a dot grid must have nodes on it).
+placeholder-as-label; errors use `danger` border + `danger` message with `ph:warning-circle`. Window chrome
+titles are sentence-case sans (`.meta`) or absent, never mono. No tabs that hide content: parallel content
+shows in parallel. No 3 identical cards in a row; no pills overlaid on images; no scroll cues; no decorative
+dots (a dot grid must have nodes on it).
 
 ## Voice
 
 - ZERO em dashes and en dashes in visible copy AND in source strings. Commas, colons, periods, parentheses, hyphen ranges (2019-2022).
 - Banned: streamline, empower, supercharge, leverage, unleash, transform, seamless, elevate, cutting-edge, world-class, next-gen, game-changer.
 - Sentence case headlines, 8 words max; subcopy 25 words max, 65ch measure.
-- No all-caps eyebrow labels above section headings, and no section numbering. Mono uppercase labels belong to UI only (node title bars, stat and rail labels).
+- No all-caps eyebrow labels above section headings, and no section numbering. There is no uppercase label anywhere: small labels are sentence-case sans (`.meta`); mono is reserved for literal file names, paths, and code.
 - Full voice rules, banned sentence shapes, and before/after rewrites: `VOICE.md`. Write from it at the source.
 - First person, always: the site is Julienna speaking about her own work ("I built", "my pipelines", "email me"). Never "she", "her", or "Jules does" in site copy.
 - "Julienna Batten" appears only as identity (nav lockup, page titles, the hero operator node). No invented client names ("Sample" labels instead).
@@ -169,7 +176,7 @@ overlaid on images; no scroll cues; no decorative dots (a dot grid must have nod
 ## Placeholder policy
 
 Unknown numbers, missing logos, missing images, missing quotes: dashed treatment (`.ph-frame`, `.ph-chip`,
-`<Slot />`), mono label naming exactly what belongs there, listed in CONTENT-TODO.md. Placeholders never
+`<Slot />`), a sentence-case label naming exactly what belongs there, listed in CONTENT-TODO.md. Placeholders never
 carry plausible fake data. Only resume-verified figures ship unmarked (see `src/data/site.ts`).
 
 ## Performance and accessibility requirements

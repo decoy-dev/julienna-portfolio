@@ -1,5 +1,5 @@
 /**
- * Julienna Batten brand tokens (v1, 2026).
+ * Julienna Batten brand tokens (v2, 2026).
  * Source of truth: src/styles/global.css in the portfolio repo; this file mirrors it for reuse.
  *
  * Rules:
@@ -12,8 +12,8 @@
 :root {
   /* ── Color: light (shipped) ─────────────────────────────────────────── */
   --color-bg: oklch(1 0 0);                    /* page. pure white */
-  --color-surface: oklch(0.978 0.004 200);     /* bands: proof rail, footers, tab bars */
-  --color-surface-2: oklch(0.955 0.006 200);   /* inset wells, segmented tracks, bento cells */
+  --color-surface: oklch(0.978 0.004 200);     /* bands: proof rail, footer base, window chrome */
+  --color-surface-2: oklch(0.955 0.006 200);   /* inset wells, bento cells, chips */
   --color-line: oklch(0.9 0.01 200);           /* hairlines, dividers, idle edges, node strokes */
   --color-ink: oklch(0.205 0.018 222);         /* headings, body. 17.9:1 on white */
   --color-muted: oklch(0.47 0.02 215);         /* secondary text. 6.8:1 on white (AA) */
@@ -30,19 +30,20 @@
   --color-on-ink-muted: oklch(0.78 0.02 215);  /* secondary text on ink bands. 9.0:1 on ink */
 
   /* ── Type ───────────────────────────────────────────────────────────── */
-  --font-sans: "Host Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Funnel Display", ui-sans-serif, system-ui, sans-serif;  /* h1-h3, stats, wordmark */
+  --font-sans: "Funnel Sans", ui-sans-serif, system-ui, sans-serif;        /* everything you read */
+  --font-mono: "Spline Sans Mono", ui-monospace, "SF Mono", Menlo, monospace; /* literal file names, paths, code ONLY */
 
-  --text-display: clamp(2.5rem, 1.6rem + 3.4vw, 4rem);   /* lh 1.05, ls -0.03em, wt 650 */
-  --text-h2: clamp(2rem, 1.5rem + 1.8vw, 3rem);          /* lh 1.1, ls -0.025em, wt 600 */
-  --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);     /* lh 1.25, ls -0.015em, wt 600 */
-  --text-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);   /* lh 1.6, wt 400, max 65ch */
-  --text-small: 0.875rem;                                 /* lh 1.5, wt 400 */
-  --text-label: 0.75rem;                                  /* mono, lh 1.4, ls 0.08em, wt 500, uppercase */
-  --text-stat: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);   /* lh 1.1, ls -0.02em, wt 650, tabular nums */
+  --text-display: clamp(2.375rem, 1.55rem + 3vw, 3.625rem); /* display, lh 1.06, ls -0.025em, wt 700 */
+  --text-h2: clamp(1.875rem, 1.45rem + 1.6vw, 2.75rem);     /* display, lh 1.1, ls -0.02em, wt 650 */
+  --text-h3: clamp(1.1875rem, 1.07rem + 0.5vw, 1.375rem);   /* display, lh 1.25, ls -0.01em, wt 650 */
+  --text-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);      /* sans, lh 1.6, wt 400, max 65ch */
+  --text-small: 0.875rem;                                    /* sans, lh 1.5, wt 400 */
+  --text-meta: 0.8125rem;                                    /* sans, lh 1.4, ls +0.005em, wt 600, sentence case */
+  --text-stat: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);      /* display, lh 1.1, ls -0.02em, wt 700, tabular nums */
 
   /* ── Radius (nested elements step DOWN one radius) ──────────────────── */
-  --radius-inset: 8px;   /* inputs, swatches, segmented controls, nested media */
+  --radius-inset: 8px;   /* inputs, swatches, nested media */
   --radius-card: 12px;   /* cards, nodes, app windows, bento cells */
   --radius-media: 16px;  /* feature imagery, graph canvases */
   --radius-full: 999px;  /* buttons, chips, ports, packets, nav pill */
@@ -53,7 +54,7 @@
 
   /* ── Motion ─────────────────────────────────────────────────────────── */
   --d1: 120ms;  /* hovers */
-  --d2: 200ms;  /* tabs, menus, chip toggles */
+  --d2: 200ms;  /* menus, chip toggles, small state changes */
   --d3: 350ms;  /* panels, popovers, page crossfade */
   --d4: 600ms;  /* one pipeline choreography step */
   --ease-std: cubic-bezier(0.4, 0, 0.2, 1);

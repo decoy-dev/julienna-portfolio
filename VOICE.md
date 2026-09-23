@@ -27,7 +27,7 @@ These are the recognizable fingerprints of model-written copy. Rewrite the sente
 - **Stock phrases.** Intensifiers that add nothing ("real work", "actually", "genuinely", "truly"); spatial metaphors for abstractions ("lives in", "sits", "under the hood", "the backbone of"); verdict idioms ("does the heavy lifting", "moves the needle", "table stakes"); knowingness markers ("worth noting", "here's the thing", "the kicker"). Name the action or the number instead.
 - **Figurative stand-ins for mechanics.** If a literal verb names what happens, use it. "Fixed rules render the ads" beats "rules do the talking".
 - **Marketing verbs.** streamline, empower, supercharge, leverage, unleash, transform, seamless, elevate, cutting-edge, world-class, next-gen, game-changer.
-- **All-caps eyebrow labels above section headings.** The heading carries the section. Mono uppercase labels stay only inside UI (node title bars, stat labels, the "Worked with" rail).
+- **All-caps eyebrow labels above section headings.** The heading carries the section. Small labels are sentence-case sans (the `.meta` class); mono appears only for literal file names, paths, and code, never as a label.
 - **Overpromising.** Copy matches what the work or the site does. No guarantees ("never drifts off brand"), no invented outcomes, no implied headcount.
 
 ## Length

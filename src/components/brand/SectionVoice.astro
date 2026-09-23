@@ -59,10 +59,14 @@ const banned = [
       <p class="text-small text-muted">No triads or parallel repetition ("AI drafts. Rules decide."), no "X, not Y" headlines, no all-caps eyebrows above headings. Tie each fact to what it did.</p>
     </div>
     <div class="voice-row">
+      <p class="text-small font-semibold">Small labels</p>
+      <p class="text-small text-muted">Sentence-case sans everywhere (the .meta class). No uppercase, no tracked lettering. Mono is only for literal file names, paths, and code.</p>
+    </div>
+    <div class="voice-row">
       <p class="text-small font-semibold">Banned words</p>
       <p class="flex flex-wrap gap-x-3 gap-y-1">
         {banned.map((w) => (
-          <span class="font-mono text-[0.75rem] text-dash-ink line-through">{w}</span>
+          <span class="text-[0.75rem] font-medium text-dash-ink line-through">{w}</span>
         ))}
       </p>
     </div>
@@ -77,7 +81,7 @@ const banned = [
     <div slot="dont"><p>"An innovative solution delighting dozens of happy clients."</p></div>
   </DoDont>
   <DoDont topic="placeholders">
-    <div slot="do"><p>"hours saved per year" with a dashed <span class="ph-chip">add number</span> chip where the digits will sit.</p></div>
+    <div slot="do"><p>"hours saved per year" with a dashed <span class="ph-chip">Add number</span> chip where the digits will sit.</p></div>
     <div slot="dont"><p>"10,000+ hours saved" when nobody has measured it.</p></div>
   </DoDont>
   <DoDont topic="labels">

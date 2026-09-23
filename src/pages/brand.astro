@@ -35,7 +35,7 @@ const principles = [
   },
   {
     title: 'Every graphic explains something',
-    body: 'Node graphs, mono labels, and dot grids show up only where they describe how a piece of work runs. None of them are texture.',
+    body: 'Node graphs, ports, and dot grids show up only where they describe how a piece of work runs. None of them are texture.',
   },
   {
     title: 'Only verified numbers',
@@ -59,12 +59,12 @@ const principles = [
       The tokens, rules, and components behind everything I put my name on. Copy from here instead of
       improvising; the kit is downloadable at the end.
     </p>
-    <p class="mt-4 label text-dash-ink">v1, 2026</p>
+    <p class="mt-4 meta text-dash-ink">v2, 2026</p>
   </header>
 
   <div class="shell guide-grid">
     <aside class="guide-index" aria-label="On this page">
-      <p class="label text-muted">On this page</p>
+      <p class="meta text-muted">On this page</p>
       <ol class="index-list">
         {index.map((item) => (
           <li><a href={`#${item.id}`} data-index-link={item.id}>{item.label}</a></li>

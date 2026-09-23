@@ -9,13 +9,13 @@ const { topic } = Astro.props;
 
 <div class="grid gap-4 sm:grid-cols-2" data-topic={topic}>
   <div class="rounded-card border border-line p-5">
-    <p class="label flex items-center gap-1.5 text-primary">
+    <p class="meta flex items-center gap-1.5 text-primary">
       <Icon name="ph:check-circle" size={16} aria-hidden="true" /> Do
     </p>
     <div class="mt-3 grid gap-2 text-small"><slot name="do" /></div>
   </div>
   <div class="rounded-card border border-line p-5">
-    <p class="label flex items-center gap-1.5 text-muted">
+    <p class="meta flex items-center gap-1.5 text-muted">
       <Icon name="ph:x-circle" size={16} aria-hidden="true" /> Don't
     </p>
     <div class="mt-3 grid gap-2 text-small text-muted"><slot name="dont" /></div>

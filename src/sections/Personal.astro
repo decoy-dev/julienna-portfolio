@@ -21,10 +21,10 @@ const pieces: Piece[] = [
       {pieces.map((p) => (
         <li class="piece reveal">
           <Slot ratio={p.ratio} brief={p.brief} radius="card" />
-          <p class="label mt-3 text-muted">{p.meta}</p>
+          <p class="meta mt-3 text-muted">{p.meta}</p>
           <p class="mt-1 text-small font-semibold text-ink">{p.title}</p>
           {p.note && <p class="mt-0.5 text-small text-muted">{p.note}</p>}
-          {p.placeholder && <span class="ph-chip mt-1.5" data-todo="commission">add piece and client</span>}
+          {p.placeholder && <span class="ph-chip mt-1.5" data-todo="commission">Add piece and client</span>}
         </li>
       ))}
     </ul>

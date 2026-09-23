@@ -51,7 +51,7 @@ const pair = [
       </a>
       <div class="mt-6 grid gap-6 lg:grid-cols-12">
         <div class="lg:col-span-5">
-          <p class="label text-muted">{feature.client} <span aria-hidden="true">/</span> {feature.years}</p>
+          <p class="meta text-muted">{feature.client} <span aria-hidden="true">/</span> {feature.years}</p>
           <h3 class="mt-2 text-h3"><a href={href('/work')} class="hover:text-primary">{feature.title}</a></h3>
         </div>
         <p class="text-small text-muted lg:col-span-4">{feature.summary}</p>
@@ -67,7 +67,7 @@ const pair = [
           <a href={href('/work')} class="block rounded-media" tabindex="-1" aria-hidden="true">
             <div class="overflow-hidden rounded-media"><Slot ratio={p.ratio} brief={p.brief} class="work-media" /></div>
           </a>
-          <p class="label mt-6 text-muted">{p.client} <span aria-hidden="true">/</span> {p.years}</p>
+          <p class="meta mt-6 text-muted">{p.client} <span aria-hidden="true">/</span> {p.years}</p>
           <h3 class="mt-2 text-h3"><a href={href('/work')} class="hover:text-primary">{p.title}</a></h3>
           <p class="mt-2 max-w-[52ch] text-small text-muted">{p.summary}</p>
           <ul role="list" class="mt-4 flex flex-wrap gap-2">

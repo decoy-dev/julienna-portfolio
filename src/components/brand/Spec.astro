@@ -14,7 +14,7 @@ const { label, note, class: className, pad = true, ...rest } = Astro.props;
     <slot />
   </div>
   <figcaption class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-    <code class="font-mono text-[0.75rem] tracking-[0.02em] text-dash-ink">{label}</code>
+    <code class="font-mono text-[0.75rem] text-dash-ink">{label}</code>
     {note && <span class="text-small text-muted">{note}</span>}
   </figcaption>
 </figure>

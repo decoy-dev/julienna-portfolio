@@ -98,7 +98,7 @@ import { person } from '../data/site';
 
     <aside class="contact-aside" aria-label="Direct contact details">
       <div class="aside-block">
-        <p class="label text-muted">Email</p>
+        <p class="meta text-muted">Email</p>
         <a class="email-link" href={`mailto:${person.email}`}>{person.email}</a>
         <button type="button" class="btn btn-ghost btn-sm mt-3" data-copy-email={person.email}>
           <Icon name="ph:copy" size={16} aria-hidden="true" />
@@ -107,7 +107,7 @@ import { person } from '../data/site';
       </div>
 
       <div class="aside-block">
-        <p class="label text-muted">Resume</p>
+        <p class="meta text-muted">Resume</p>
         <a class="link mt-2" href={href(person.resume)} download>
           Download resume
           <Icon name="ph:download-simple" size={16} class="link-arrow" aria-hidden="true" />
@@ -115,19 +115,19 @@ import { person } from '../data/site';
       </div>
 
       <div class="aside-block">
-        <p class="label text-muted">LinkedIn</p>
-        <p class="mt-2"><span class="ph-chip">add link</span></p>
+        <p class="meta text-muted">LinkedIn</p>
+        <p class="mt-2"><span class="ph-chip">Add link</span></p>
       </div>
 
       <div class="aside-block">
-        <p class="label text-muted">Availability</p>
-        <p class="mt-2"><span class="ph-chip">add status</span></p>
+        <p class="meta text-muted">Availability</p>
+        <p class="mt-2"><span class="ph-chip">Add status</span></p>
       </div>
 
       <div class="aside-block">
-        <p class="label text-muted">What to expect</p>
+        <p class="meta text-muted">What to expect</p>
         <ul class="expect-list">
-          <li>A reply within <span class="ph-chip">add number</span> business days</li>
+          <li>A reply within <span class="ph-chip">Add number</span> business days</li>
           <li>A short call to scope the role or project</li>
           <li>Work samples beyond this site, on request</li>
         </ul>

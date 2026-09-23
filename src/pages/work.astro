@@ -38,7 +38,7 @@ const rest = projects.filter((p) => !p.featured);
           <Slot ratio="16 / 10" brief={p.brief} radius="media" />
         </a>
         <div class="row-copy">
-          <p class="label text-muted">{p.client}, {p.years}</p>
+          <p class="meta text-muted">{p.client}, {p.years}</p>
           <h2 class="mt-2 text-h3">
             <a class="entry-link" href={href(`/work#${p.slug}`)}>{p.title}</a>
           </h2>
@@ -58,7 +58,7 @@ const rest = projects.filter((p) => !p.featured);
         <a href={href(`/work#${p.slug}`)} tabindex="-1" aria-hidden="true">
           <Slot ratio="4 / 3" brief={p.brief} radius="card" />
         </a>
-        <p class="label mt-4 text-muted">{p.client}, {p.years}</p>
+        <p class="meta mt-4 text-muted">{p.client}, {p.years}</p>
         <h2 class="mt-1 text-[1.0625rem] font-semibold tracking-[-0.01em]">
           <a class="entry-link" href={href(`/work#${p.slug}`)}>{p.title}</a>
         </h2>

@@ -14,13 +14,13 @@ type Entry = {
   years: string;
   col: [number, number];
   skills: string[];
-  feeds?: boolean; // last entry in its lane: wired into "Now"
+  feeds?: boolean; // last entry in its lane: wired into "What I do now"
 };
 const entries: Entry[] = [
-  { id: 'marshall', lane: 'Education', title: 'Marshall University', role: 'BA, Visual Arts & Media', years: '2016-2020', col: [1, 5], skills: ['Visual arts', 'Media'], feeds: true },
-  { id: 'freelance', lane: 'Freelance', title: 'Freelance', role: 'Multimedia designer & brand strategist', years: '2017 to now', col: [2, 12], skills: ['Brand identity', 'Release art', '3D visualizers', 'Social content', 'Live visuals'], feeds: true },
-  { id: 'geek', lane: 'Roles', title: 'Geek Inc.', role: 'Brand & multimedia visual designer', years: '2019-2022', col: [4, 7], skills: ['Art direction', 'Event branding', 'Apparel + signage'] },
-  { id: 'machine', lane: 'Roles', title: 'Machine Communications', role: 'Design production specialist', years: '2022-2025', col: [7, 10], skills: ['3D rendering', 'Technical drawing', 'AI tooling'] },
+  { id: 'marshall', lane: 'Education', title: 'Marshall University', role: 'BA, Visual Arts & Media', years: '2016-2020', col: [1, 5], skills: [], feeds: true },
+  { id: 'freelance', lane: 'Freelance', title: 'Freelance', role: 'Multimedia designer & brand strategist', years: '2017 to now', col: [2, 12], skills: ['Brand identity', '3D visualizers', 'Live visuals'], feeds: true },
+  { id: 'geek', lane: 'Roles', title: 'Geek Inc.', role: 'Brand & multimedia visual designer', years: '2019-2022', col: [4, 7], skills: ['Art direction', 'Event branding'] },
+  { id: 'machine', lane: 'Roles', title: 'Machine Communications', role: 'Design production specialist', years: '2022-2025', col: [7, 10], skills: ['3D rendering', 'AI tooling'] },
   { id: 'ortho', lane: 'Roles', title: 'OrthoBoost', role: 'Graphic designer, then creative director', years: '2025 to now', col: [10, 12], skills: ['Design systems', 'Web + code', 'React tooling'], feeds: true },
 ];
 const LANES = ['Roles', 'Freelance', 'Education'] as const;
@@ -45,7 +45,7 @@ const certs = [
       <ol class="tl-axis" aria-hidden="true">
         {YEARS.map((y) => <li>{y}</li>)}
       </ol>
-      {LANES.map((lane, i) => <p class="tl-lane label text-muted" style={`grid-row:${i + 2}`}>{lane}</p>)}
+      {LANES.map((lane, i) => <p class="tl-lane meta text-muted" style={`grid-row:${i + 2}`}>{lane}</p>)}
 
       <ol class="contents" aria-label="Career timeline">
         {entries.map((e) => (
@@ -53,22 +53,24 @@ const certs = [
             <div class="node tl-bar" data-node={e.id}>
               <div class="px-3.5 py-2.5">
                 <p class="text-small font-semibold text-ink">{e.title}</p>
-                <p class="font-mono text-[0.6875rem] text-muted">{e.years}</p>
+                <p class="text-[0.75rem] tabular-nums text-muted">{e.years}</p>
                 <p class="mt-1 text-[0.8125rem] leading-snug text-muted">{e.role}</p>
               </div>
               {e.feeds && <span class="port" data-side="out" />}
             </div>
-            <ul role="list" class="mt-2 flex flex-wrap gap-1.5" aria-label={`Added at ${e.title}`}>
-              {e.skills.map((s) => <li class="chip h-6 px-2.5 text-[0.75rem]">{s}</li>)}
-            </ul>
+            {e.skills.length > 0 && (
+              <ul role="list" class="mt-2 flex flex-wrap gap-1.5" aria-label={`Added at ${e.title}`}>
+                {e.skills.map((s) => <li class="chip h-6 px-2.5 text-[0.75rem]">{s}</li>)}
+              </ul>
+            )}
           </li>
         ))}
       </ol>
 
       <div class="node tl-now" data-node="now" data-state="active">
         <span class="port" data-side="in" />
-        <div class="node-bar">Now</div>
-        <ul role="list" class="grid gap-1.5 p-3" aria-label="Every discipline, today">
+        <p class="node-head">What I do now</p>
+        <ul role="list" class="grid gap-1.5 p-3 pt-2.5" aria-label="Every discipline, today">
           {seats.map((s) => (
             <li class="flex items-center gap-2 text-[0.8125rem] font-medium text-ink">
               <Icon name={s.icon} size={14} class="shrink-0 text-primary" aria-hidden="true" />
@@ -144,14 +146,14 @@ const certs = [
       grid-column: 1 / 12;
       grid-row: 1;
       grid-template-columns: subgrid;
-      font-family: var(--font-mono);
-      font-size: 0.6875rem;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
       color: var(--color-muted);
       border-bottom: 1px solid var(--color-line);
       padding-bottom: 8px;
     }
     /* Lane label sits in the 22px strip above that lane's bars. */
-    .tl-lane { display: block; grid-column: 1 / 4; align-self: start; line-height: 22px; font-size: 0.625rem; pointer-events: none; }
+    .tl-lane { display: block; grid-column: 1 / 4; align-self: start; line-height: 22px; pointer-events: none; }
     .tl-item { grid-column: var(--c0) / var(--c1); grid-row: var(--row); padding-right: 8px; padding-top: 22px; }
     .tl-bar .port { display: block; }
     .tl-now { grid-column: 12; grid-row: 2 / 5; align-self: center; margin-left: 36px; }

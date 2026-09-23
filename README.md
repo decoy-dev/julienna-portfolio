@@ -26,6 +26,16 @@ npm run preview
 | `src/scripts/pipeline.ts` | Pipeline demo choreography. |
 | `src/pages/brand.astro` | Live brand guide; downloads in `public/brand-kit/`. |
 
+## Link-preview card
+
+`public/og.png` (1200x630) and `public/apple-touch-icon.png` are rendered from HTML in `scripts/og/render.mjs`, using the site's own fonts and tokens:
+
+```sh
+CHROME=/path/to/chrome-headless-shell node scripts/og/render.mjs
+```
+
+Then bump `OG_VERSION` in `src/layouts/Base.astro` so social platforms fetch the new image instead of a cached one.
+
 ## Deploy
 
 Pushing to `main` runs `.github/workflows/deploy.yml`, which builds and publishes to GitHub Pages. Internal links must go through `href()` in `src/lib/url.ts` because the site lives under the `/julienna-portfolio` base path.

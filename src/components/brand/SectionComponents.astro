@@ -37,8 +37,8 @@ import Slot from '../Slot.astro';
       <div class="flex flex-wrap items-center gap-2">
         <span class="chip">+25% online sales</span>
         <span class="chip">~40 practices</span>
-        <span class="ph-chip">add number</span>
-        <span class="ph-chip">add logo</span>
+        <span class="ph-chip">Add number</span>
+        <span class="ph-chip">Add logo</span>
       </div>
     </Spec>
   </div>
@@ -57,7 +57,7 @@ import Slot from '../Slot.astro';
         </div>
         <div>
           <p class="text-stat tabular-nums text-dash-ink">000</p>
-          <p class="mt-1 flex flex-wrap items-center gap-1.5 text-small text-muted">hours saved per year <span class="ph-chip">add number</span></p>
+          <p class="mt-1 flex flex-wrap items-center gap-1.5 text-small text-muted">hours saved per year <span class="ph-chip">Add number</span></p>
         </div>
       </div>
     </Spec>
@@ -68,7 +68,7 @@ import Slot from '../Slot.astro';
       <div class="inline-flex max-w-full items-center gap-4 rounded-full bg-white py-2 pr-2 pl-4 shadow-float">
         <span class="flex items-center gap-2">
           <Mark size={24} />
-          <span class="text-small font-[650] tracking-[-0.015em] whitespace-nowrap">Julienna Batten</span>
+          <span class="font-display text-small font-[650] tracking-[-0.01em] whitespace-nowrap">Julienna Batten</span>
         </span>
         <span class="hidden items-center gap-4 text-small text-muted sm:flex">
           <span>Work</span><span>Systems</span><span class="text-ink font-medium">About</span>
@@ -76,10 +76,10 @@ import Slot from '../Slot.astro';
         <span class="btn btn-primary btn-sm">Get in touch</span>
       </div>
     </Spec>
-    <Spec label="segmented control" note="Surface-2 track, white active pill on shadow-raised, 200ms. Try it.">
-      <div class="seg" role="tablist" aria-label="Pipeline picker" data-seg>
-        <button type="button" role="tab" aria-selected="true" class="seg-btn">ad-generator</button>
-        <button type="button" role="tab" aria-selected="false" class="seg-btn">photo-intake</button>
+    <Spec label=".node + .node-head" note="1.5px border, one padded card, sentence-case title row, ports only where wired." class="grid-canvas">
+      <div class="node relative inline-block w-[170px]">
+        <div class="node-head">Rename and tag <Icon name="ph:check" size={14} class="node-check ml-auto" aria-hidden="true" /></div>
+        <div class="px-3.5 pt-1 pb-3 text-[0.75rem] text-muted">312 files</div>
       </div>
     </Spec>
   </div>
@@ -99,44 +99,16 @@ import Slot from '../Slot.astro';
         </p>
       </div>
     </Spec>
-    <div class="grid gap-4">
-      <Spec label=".node" note="1.5px border, mono title bar, ports only where wired." class="grid-canvas">
-        <div class="node relative inline-block w-[170px]">
-          <div class="node-bar">rename-tag <Icon name="ph:check" size={14} class="node-check ml-auto" aria-hidden="true" /></div>
-          <div class="px-3 py-2 font-mono text-[0.6875rem] text-muted">312 files</div>
-        </div>
-      </Spec>
-      <Spec label=".window" note="App frame for pipeline stages: card radius, 1px line border, mono chrome title." pad={false}>
-        <div class="window">
-          <div class="flex h-9 items-center border-b border-line bg-surface px-3 font-mono text-[0.6875rem] tracking-[0.06em] text-muted uppercase">photo-intake.pipeline</div>
-          <div class="grid-canvas h-20"></div>
-        </div>
-      </Spec>
-    </div>
+    <Spec label=".window" note="App frame for pipeline stages: card radius, 1px line border, sentence-case sans title or no title." pad={false}>
+      <div class="window">
+        <div class="meta flex h-9 items-center border-b border-line bg-surface px-3.5 text-muted">Photo intake</div>
+        <div class="grid-canvas h-20"></div>
+      </div>
+    </Spec>
   </div>
 </Guide>
 
 <style>
-  .seg {
-    display: inline-flex;
-    gap: 2px;
-    padding: 3px;
-    border-radius: var(--radius-inset);
-    background: var(--color-surface-2);
-  }
-  .seg-btn {
-    padding: 0.375rem 0.875rem;
-    border-radius: 6px;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--color-muted);
-    transition: background-color var(--d2) var(--ease-std), color var(--d2) var(--ease-std), box-shadow var(--d2) var(--ease-std);
-  }
-  .seg-btn[aria-selected='true'] {
-    background: var(--color-white);
-    color: var(--color-ink);
-    box-shadow: var(--shadow-raised);
-  }
   .field {
     height: 44px;
     padding-inline: 0.75rem;
@@ -151,13 +123,3 @@ import Slot from '../Slot.astro';
   .field-error { border-color: var(--color-danger); }
 </style>
 
-<script>
-  for (const seg of document.querySelectorAll<HTMLElement>('[data-seg]')) {
-    const tabs = [...seg.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
-    seg.addEventListener('click', (e) => {
-      const hit = (e.target as HTMLElement).closest<HTMLButtonElement>('[role="tab"]');
-      if (!hit) return;
-      for (const t of tabs) t.setAttribute('aria-selected', String(t === hit));
-    });
-  }
-</script>

@@ -21,8 +21,8 @@ const light: Row[] = [
   { name: 'graphic', value: 'oklch(0.72 0.1 188)', role: 'Port fills, done edges, wire tint. The seed teal, demoted to graphics.', contrast: '2.4:1 on white, non-text only' },
   { name: 'graphic-tint', value: 'oklch(0.94 0.03 188)', role: 'Teal wash behind strokes, swatches, selection.', light: true },
   { name: 'danger', value: 'oklch(0.5 0.17 27)', role: 'Form errors only: error borders and error message text. State semantics, never decoration.', contrast: '6.55:1 on white, AA' },
-  { name: 'surface', value: 'oklch(0.978 0.004 200)', role: 'Bands: proof rail, footer base, tab bars.', light: true },
-  { name: 'surface-2', value: 'oklch(0.955 0.006 200)', role: 'Inset wells, segmented tracks, bento cells, chips.', light: true },
+  { name: 'surface', value: 'oklch(0.978 0.004 200)', role: 'Bands: proof rail, footer base, window chrome.', light: true },
+  { name: 'surface-2', value: 'oklch(0.955 0.006 200)', role: 'Inset wells, bento cells, chips.', light: true },
   { name: 'line', value: 'oklch(0.9 0.01 200)', role: 'Hairlines, dividers, idle edges, node borders.', light: true },
   { name: 'grid', value: 'oklch(0.92 0.008 200)', role: 'Node-canvas dot grid. Only behind real graph surfaces.', light: true },
   { name: 'dash', value: 'oklch(0.75 0.005 220)', role: 'Placeholder dashed borders.', light: true },
@@ -70,7 +70,7 @@ const dark: Row[] = [
   <div class="grid gap-4 lg:grid-cols-2">
     <Spec label="dark tokens" note="Documented for a future dark mode. Nothing ships them yet." pad={false}>
       <div class="dark-card">
-        <p class="label" style="color: oklch(0.72 0.02 215)">Dark, documented only</p>
+        <p class="meta" style="color: oklch(0.72 0.02 215)">Dark, documented only</p>
         <p class="mt-3 text-body" style="color: oklch(0.95 0.005 220)">Text on dark reads at 16.8:1.</p>
         <p class="mt-1 text-small" style="color: oklch(0.72 0.02 215)">
           Secondary text reads at 7.9:1. White text is never used on dark-primary; pair it with dark text at 7.1:1.
@@ -91,7 +91,7 @@ const dark: Row[] = [
 
     <Spec label="client color" note="Persona and client palettes exist only inside rendered-output previews.">
       <div class="ph-frame rounded-inset p-4">
-        <p class="label text-dash-ink">Rendered-output preview</p>
+        <p class="meta text-dash-ink">Rendered-output preview</p>
         <div class="mt-3 flex flex-wrap gap-1.5">
           {personas.map((p) => (
             <span

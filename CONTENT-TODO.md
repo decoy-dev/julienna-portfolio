@@ -21,10 +21,10 @@ To fill a stat, set `value` and remove `placeholder: true`.
 
 ## Facts to confirm
 
-- Photo intake stage names (Ingest, Cull, Name, Prepare, Deliver) are illustrative. Replace with the real steps in `src/sections/Pipeline.astro` → `photos.stages`, then update the footnote under the demo.
-- The 40% faster catalog production is attributed to the Wincore line at Machine Communications (`src/sections/AiBento.astro`). Confirm the scope.
+- Photo intake steps (Import, Cull, Name, Prepare) are examples; the lane shows an "Example steps" chip. Replace them in `src/sections/Pipeline.astro` → `lanes[1].steps`, then remove `example: true` and update the footnote under the demo.
+- The 40% cut in catalog and brochure production time is attributed to AI tooling at Machine Communications (`src/sections/AiBento.astro`). Confirm the wording.
 - OrthoBoost promotion month in 2026 (the copy currently says "in 2026").
-- "Ad generator content, Website templates, Social calendar" as photo intake destinations (`src/sections/Pipeline.astro` → `handoffs`).
+- The link-preview card (`public/og.png`) repeats the hero headline and sub. If either changes, re-render it (see README) and bump `OG_VERSION` in `src/layouts/Base.astro`.
 
 ## Logos
 
