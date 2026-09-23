@@ -1,0 +1,83 @@
+---
+import Guide from './Guide.astro';
+import Spec from './Spec.astro';
+
+const radii = [
+  { name: 'inset', px: '8px', cls: 'rounded-inset', use: 'inputs, swatches, segmented controls, nested media' },
+  { name: 'card', px: '12px', cls: 'rounded-card', use: 'cards, nodes, app windows, bento cells' },
+  { name: 'media', px: '16px', cls: 'rounded-media', use: 'feature imagery, graph canvases' },
+  { name: 'full', px: '999px', cls: 'rounded-full', use: 'buttons, chips, ports, packets, nav' },
+];
+---
+
+<Guide
+  id="radius"
+  title="Radius and elevation"
+  intro="Four radii, two shadows, one rule each: nested elements step down one radius, and nothing wears a border and a wide shadow at once."
+>
+  <div class="grid gap-4 md:grid-cols-2">
+    <Spec label="--radius-*" note="The full scale. Pick by element role, not by taste.">
+      <div class="flex flex-wrap items-end gap-6">
+        {radii.map((r) => (
+          <div class="grid justify-items-center gap-2">
+            <div class:list={['h-20 w-24 border-[1.5px] border-graphic-deep bg-graphic-tint', r.cls]}></div>
+            <code class="font-mono text-[0.6875rem] text-dash-ink">{r.name} {r.px}</code>
+          </div>
+        ))}
+      </div>
+      <ul class="mt-5 grid gap-1 text-small text-muted">
+        {radii.map((r) => (
+          <li><code class="font-mono text-[0.75rem] text-ink">{r.name}</code>: {r.use}</li>
+        ))}
+      </ul>
+    </Spec>
+
+    <Spec label="nesting" note="A child container always steps down one radius from its parent.">
+      <div class="rounded-media border border-line p-4">
+        <code class="font-mono text-[0.6875rem] text-dash-ink">media 16</code>
+        <div class="mt-2 rounded-card border border-line p-4">
+          <code class="font-mono text-[0.6875rem] text-dash-ink">card 12</code>
+          <div class="mt-2 rounded-inset border border-line bg-surface p-3">
+            <code class="font-mono text-[0.6875rem] text-dash-ink">inset 8</code>
+          </div>
+        </div>
+      </div>
+      <p class="mt-4 text-small text-muted">Never mix media chrome with inset children directly; the middle step keeps corners parallel.</p>
+    </Spec>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-3">
+    <figure class="m-0">
+      <div class="grid h-28 place-items-center rounded-card border border-line bg-bg">
+        <span class="text-small text-muted">flat</span>
+      </div>
+      <figcaption class="mt-2 grid gap-0.5">
+        <code class="font-mono text-[0.75rem] text-dash-ink">e0: 1px line border</code>
+        <span class="text-small text-muted">Resting cards on bands, windows, table rows.</span>
+      </figcaption>
+    </figure>
+    <figure class="m-0">
+      <div class="grid h-28 place-items-center rounded-card bg-bg shadow-raised">
+        <span class="text-small text-muted">raised</span>
+      </div>
+      <figcaption class="mt-2 grid gap-0.5">
+        <code class="font-mono text-[0.75rem] text-dash-ink">e1: shadow-raised, no border</code>
+        <span class="text-small text-muted">Cells on white, active nodes, back-to-top.</span>
+      </figcaption>
+    </figure>
+    <figure class="m-0">
+      <div class="grid h-28 place-items-center rounded-card bg-bg shadow-float">
+        <span class="text-small text-muted">floating</span>
+      </div>
+      <figcaption class="mt-2 grid gap-0.5">
+        <code class="font-mono text-[0.75rem] text-dash-ink">e2: shadow-float, no border</code>
+        <span class="text-small text-muted">Nav pill, popovers, hover lifts.</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <p class="max-w-[65ch] text-small text-muted">
+    Shadows are cool-tinted, oklch(0.3 0.03 220) at 5 to 8% alpha. Border or shadow, never both when the blur exceeds
+    8px: no ghost cards, no side-stripe borders, no glow.
+  </p>
+</Guide>

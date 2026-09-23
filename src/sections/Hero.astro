@@ -1,0 +1,103 @@
+---
+import { Icon } from 'astro-icon/components';
+import HeroGraph from '../components/HeroGraph.astro';
+import { href } from '../lib/url';
+import { brands, stats } from '../data/site';
+
+// Real logo SVGs dropped into src/assets/logos/{slug}.svg replace the wordmark automatically.
+const logoFiles = import.meta.glob<string>('../assets/logos/*.svg', { eager: true, query: '?raw', import: 'default' });
+const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+const logos = brands.map((b) => ({ ...b, svg: logoFiles[`../assets/logos/${slug(b.name)}.svg`] }));
+---
+
+<div class="hero-grid">
+  <section class="hero-copy" aria-labelledby="hero-title">
+    <h1 id="hero-title" class="text-display text-ink max-w-[13ch]">A whole design team's output, from one person.</h1>
+    <p class="mt-6 max-w-[44ch] text-body text-muted">
+      Brand, web, motion, and the automation behind them: designed, built, and shipped by Julienna Batten.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href={href('/#work')} class="btn btn-primary">
+        See the work <Icon name="ph:arrow-right" size={16} class="btn-arrow" aria-hidden="true" />
+      </a>
+      <a href={href('/contact')} class="btn btn-ghost">Get in touch</a>
+    </div>
+  </section>
+
+  <div class="hero-visual">
+    <HeroGraph />
+  </div>
+
+  <section class="proof border-y border-line bg-surface" aria-label="Proof of work">
+    <div class="shell py-7 md:py-8">
+      <div class="flex flex-col gap-4 xl:flex-row xl:items-center xl:gap-10">
+        <p class="label shrink-0 text-muted">Worked with</p>
+        <ul role="list" class="logo-row flex flex-wrap items-center gap-x-8 gap-y-3 xl:flex-1 xl:flex-nowrap xl:justify-between xl:gap-x-6">
+          {logos.map((b) =>
+            b.placeholder ? (
+              <li class="ph-chip justify-self-start" data-todo="logo">add logo</li>
+            ) : b.svg ? (
+              <li class="logo h-6 text-muted" aria-label={b.name} set:html={b.svg} />
+            ) : (
+              <li class="wordmark text-muted" data-todo="logo-svg" title="Logo file pending">{b.name}</li>
+            ),
+          )}
+        </ul>
+      </div>
+
+      <dl class="stats mt-7 grid grid-cols-2 gap-y-6 border-t border-line pt-7 md:grid-cols-5 md:gap-y-0">
+        {stats.map((s) => (
+          <div class="stat">
+            <dt class="order-2 mt-1.5 text-small text-muted">
+              {s.label}{s.source && <span class="text-ink">, {s.source}</span>}
+            </dt>
+            <dd class="order-1 flex h-[2.75rem] items-center">
+              {s.placeholder ? (
+                <span class="ph-chip" data-todo="metric">add number</span>
+              ) : (
+                <span class="text-stat tabular-nums text-ink">{s.value}</span>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+</div>
+
+<style>
+  .hero-grid {
+    display: grid;
+    grid-template-columns: var(--gutter) minmax(0, 1fr) var(--gutter);
+    padding-top: calc(var(--nav-top) + var(--nav-h) + 40px);
+  }
+  /* Mobile order: copy, proof, graph, so proof is above the fold on phones too. */
+  .hero-copy { grid-column: 2; grid-row: 1; }
+  .proof { grid-column: 1 / -1; grid-row: 2; margin-top: 40px; }
+  .hero-visual { grid-column: 2; grid-row: 3; margin-top: 32px; }
+
+  @media (min-width: 64rem) {
+    .hero-grid {
+      grid-template-columns: minmax(var(--gutter), 1fr) minmax(0, 560px) minmax(0, 640px) minmax(var(--gutter), 1fr);
+      padding-top: calc(var(--nav-top) + var(--nav-h) + 56px);
+    }
+    .hero-copy { grid-column: 2; grid-row: 1; align-self: center; padding-right: 48px; }
+    .hero-visual { grid-column: 3; grid-row: 1; margin-top: 0; }
+    .proof { grid-row: 2; margin-top: 48px; }
+  }
+
+  .wordmark {
+    font-weight: 650;
+    font-size: 1.0625rem;
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+  }
+  .logo :global(svg) { height: 100%; width: auto; }
+  .stat { display: flex; flex-direction: column; }
+  @media (min-width: 48rem) {
+    .stat + .stat { border-left: 1px solid var(--color-line); padding-left: 1.5rem; }
+  }
+  @media (max-width: 47.99rem) {
+    .stat:last-child { grid-column: 1 / -1; }
+  }
+</style>

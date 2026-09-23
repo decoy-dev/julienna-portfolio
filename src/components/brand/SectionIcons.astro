@@ -1,0 +1,62 @@
+---
+import { Icon } from 'astro-icon/components';
+import Guide from './Guide.astro';
+import Spec from './Spec.astro';
+
+const set = [
+  'ph:compass',
+  'ph:pen-nib',
+  'ph:browsers',
+  'ph:film-strip',
+  'ph:cube',
+  'ph:flow-arrow',
+  'ph:check',
+  'ph:arrow-right',
+  'ph:arrow-up',
+  'ph:image',
+  'ph:list',
+  'ph:quotes',
+  'ph:warning-circle',
+  'ph:download-simple',
+];
+---
+
+<Guide
+  id="icons"
+  title="Iconography"
+  intro="Phosphor, regular weight, inlined at build time. One family, one weight, three sizes."
+>
+  <div class="grid gap-4 md:grid-cols-2">
+    <Spec label='<Icon name="ph:..." />' note="The working set. Extend from Phosphor regular only.">
+      <div class="flex flex-wrap gap-x-5 gap-y-4 text-ink">
+        {set.map((name) => (
+          <span class="grid justify-items-center gap-1.5">
+            <Icon name={name} size={18} aria-hidden="true" />
+            <code class="font-mono text-[0.625rem] text-dash-ink">{name.slice(3)}</code>
+          </span>
+        ))}
+      </div>
+    </Spec>
+    <Spec label="sizes 16 / 18 / 24" note="16 in chips and labels, 18 inline with text, 24 in slots and empty states.">
+      <div class="flex items-end gap-8 text-ink">
+        <span class="grid justify-items-center gap-1.5">
+          <Icon name="ph:flow-arrow" size={16} aria-hidden="true" />
+          <code class="font-mono text-[0.6875rem] text-dash-ink">16</code>
+        </span>
+        <span class="grid justify-items-center gap-1.5">
+          <Icon name="ph:flow-arrow" size={18} aria-hidden="true" />
+          <code class="font-mono text-[0.6875rem] text-dash-ink">18</code>
+        </span>
+        <span class="grid justify-items-center gap-1.5">
+          <Icon name="ph:flow-arrow" size={24} aria-hidden="true" />
+          <code class="font-mono text-[0.6875rem] text-dash-ink">24</code>
+        </span>
+      </div>
+      <ul class="mt-5 grid gap-1 text-small text-muted">
+        <li>Icons inherit currentColor; never a third hue.</li>
+        <li>Decorative icons carry aria-hidden. An icon never replaces a visible label.</li>
+        <li>No filled, duotone, or bold variants. Regular only, everywhere.</li>
+      </ul>
+    </Spec>
+  </div>
+</Guide>

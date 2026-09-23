@@ -1,0 +1,103 @@
+---
+import { Icon } from 'astro-icon/components';
+import Mark from './Mark.astro';
+import { href } from '../lib/url';
+import { person } from '../data/site';
+
+const links = [
+  { label: 'Systems', to: '/#systems' },
+  { label: 'Work', to: '/work' },
+  { label: 'About', to: '/#about' },
+];
+const here = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '').replace(/\/$/, '') || '/';
+---
+
+<header class="site-nav fixed inset-x-0 z-(--z-chrome) px-4" style="top: var(--nav-top)">
+  <nav
+    aria-label="Primary"
+    class="mx-auto flex h-(--nav-h) max-w-[720px] items-center gap-2 rounded-full bg-bg pr-2 pl-4 shadow-float"
+  >
+    <a href={href('/')} class="mr-auto flex items-center gap-2.5 rounded-full py-1 pr-2 font-semibold tracking-[-0.01em] text-ink">
+      <Mark size={28} />
+      <span>{person.name}</span>
+    </a>
+
+    <ul class="hidden items-center md:flex" role="list">
+      {links.map((l) => {
+        const current = l.to === here;
+        return (
+          <li>
+            <a
+              href={href(l.to)}
+              aria-current={current ? 'page' : undefined}
+              class="nav-link relative block px-3 py-2 text-small text-muted transition-colors duration-(--d1) hover:text-ink aria-[current=page]:text-ink"
+            >
+              {l.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    <a href={href('/contact')} class="btn btn-primary btn-sm hidden sm:inline-flex">Get in touch</a>
+
+    <button
+      type="button"
+      class="grid size-10 place-items-center rounded-full text-ink hover:bg-surface md:hidden"
+      popovertarget="mobile-menu"
+      aria-label="Open menu"
+    >
+      <Icon name="ph:list" size={22} />
+    </button>
+  </nav>
+
+  <div id="mobile-menu" popover class="mobile-menu rounded-card bg-bg p-2 shadow-float">
+    <ul role="list" class="grid">
+      {links.map((l) => (
+        <li>
+          <a href={href(l.to)} class="flex items-center justify-between rounded-inset px-4 py-3 font-medium text-ink hover:bg-surface">
+            {l.label}
+            <Icon name="ph:arrow-right" size={16} class="text-muted" />
+          </a>
+        </li>
+      ))}
+    </ul>
+    <a href={href('/contact')} class="btn btn-primary mt-2 w-full">Get in touch</a>
+  </div>
+</header>
+
+<style>
+  .site-nav { view-transition-name: site-nav; }
+  .nav-link[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-graphic-deep);
+  }
+  .mobile-menu {
+    position: fixed;
+    inset: calc(var(--nav-top) + var(--nav-h) + 8px) 16px auto auto;
+    width: min(320px, calc(100vw - 32px));
+    margin: 0;
+    border: 0;
+    transform-origin: top right;
+    opacity: 0;
+    transform: scale(0.98) translateY(-4px);
+    transition: opacity var(--d2) var(--ease-out), transform var(--d2) var(--ease-out), display var(--d2) allow-discrete, overlay var(--d2) allow-discrete;
+  }
+  .mobile-menu:popover-open { opacity: 1; transform: none; }
+  @starting-style {
+    .mobile-menu:popover-open { opacity: 0; transform: scale(0.98) translateY(-4px); }
+  }
+</style>
+
+<script>
+  const menu = document.getElementById('mobile-menu');
+  menu?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) menu.hidePopover();
+  });
+</script>

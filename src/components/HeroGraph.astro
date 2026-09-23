@@ -1,0 +1,219 @@
+---
+import { Icon } from 'astro-icon/components';
+import Mark from './Mark.astro';
+import { seats } from '../data/site';
+
+const outputs = ['Brand systems', 'Websites', 'Ad sets', 'Motion', 'Renders'];
+---
+
+<div class="hero-graph-wrap">
+  <div class="hero-graph grid-canvas relative overflow-hidden rounded-media" data-graph data-hero-graph>
+    <svg data-edges class="pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
+      {seats.map((s) => <path class="edge" data-role-edge data-from={`${s.id}:out`} data-to="me:in" />)}
+      <path class="edge" data-out-edge data-state="done" data-from="me:down" data-to="out:up" />
+      {seats.map(() => <circle class="packet" r="3" opacity="0" />)}
+      <circle class="packet" data-out-dot r="3.5" opacity="0" />
+      <circle class="packet" data-out-dot r="3.5" opacity="0" />
+    </svg>
+
+    <ul role="list" class="contents" aria-label="Roles covered">
+      {seats.map((s, i) => (
+        <li class="node role-node" data-node={s.id} style={`--i:${i}`}>
+          <Icon name={s.icon} size={16} class="shrink-0 text-primary" aria-hidden="true" />
+          <span class="role-label role-long">{s.label}</span>
+          <span class="role-label role-short" aria-hidden="true">{s.short}</span>
+          <span class="port" data-side="out" />
+        </li>
+      ))}
+    </ul>
+
+    <div class="node me-node" data-node="me">
+      <span class="port" data-side="in" />
+      <div class="node-bar">
+        <Mark size={14} /> One operator
+      </div>
+      <div class="px-4 py-3">
+        <p class="font-semibold tracking-[-0.01em] text-ink">Julienna Batten</p>
+        <p class="me-sub text-small text-muted">Directs, designs, builds, automates</p>
+      </div>
+      <span class="port" data-side="down" />
+    </div>
+
+    <div class="node out-node" data-node="out" data-state="done">
+      <span class="port" data-side="up" />
+      <div class="node-bar">
+        Shipped work <Icon name="ph:check-bold" size={12} class="node-check ml-auto" aria-hidden="true" />
+      </div>
+      <ul role="list" class="flex flex-wrap gap-1.5 p-3" aria-label="Outputs">
+        {outputs.map((o) => <li class="chip h-6 px-2.5 text-[0.75rem]">{o}</li>)}
+      </ul>
+    </div>
+
+    <button
+      type="button"
+      class="hero-toggle absolute top-3 right-3 z-[3] grid size-8 place-items-center rounded-full bg-bg text-muted shadow-raised hover:text-ink"
+      data-hero-toggle
+      aria-pressed="false"
+      aria-label="Pause animation"
+      hidden
+    >
+      <Icon name="ph:pause-fill" size={14} class="icon-pause" aria-hidden="true" />
+      <Icon name="ph:play-fill" size={14} class="icon-play" aria-hidden="true" />
+    </button>
+  </div>
+</div>
+
+<style>
+  .hero-graph-wrap { container-type: inline-size; }
+  .hero-graph { height: 480px; }
+  /* Frame hairline sits above the WebGL canvas (an inset shadow would paint beneath it). */
+  .hero-graph::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--color-line);
+    pointer-events: none;
+  }
+  .hero-graph :global(.field-canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity var(--d4) var(--ease-std);
+  }
+  .hero-graph :global(.field-canvas.is-ready) { opacity: 1; }
+
+  /* Six roles stacked left, the operator right, output below it. */
+  .role-node {
+    position: absolute;
+    z-index: 2;
+    left: 5%;
+    top: calc(8% + var(--i) * 13.6%);
+    width: 38%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding-inline: 0.875rem;
+    font-size: var(--text-small);
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .role-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .role-short { display: none; }
+  .me-node { position: absolute; z-index: 2; left: 55%; top: 34%; width: 40%; }
+  .out-node { position: absolute; z-index: 2; left: 55%; top: 69%; width: 40%; }
+  .hero-toggle .icon-play { display: none; }
+  .hero-toggle[aria-pressed='true'] .icon-play { display: block; }
+  .hero-toggle[aria-pressed='true'] .icon-pause { display: none; }
+
+  /* Narrow containers keep the same topology with short labels, so every role stays named. */
+  @container (max-width: 520px) {
+    .hero-graph { height: 440px; }
+    .role-node { left: 4%; width: 40%; height: 38px; top: calc(6% + var(--i) * 14.6%); gap: 0.5rem; padding-inline: 0.625rem; font-size: 0.8125rem; }
+    .role-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .role-short { display: inline; }
+    .me-node { left: 52%; width: 45%; top: 30%; }
+    .me-node .px-4 { padding-inline: 0.75rem; }
+    .me-sub { font-size: 0.75rem; line-height: 1.4; }
+    .out-node { left: 52%; width: 45%; top: 64%; }
+  }
+</style>
+
+<script>
+  import { MotionScope, layoutEdges, drawEdge, sendPacket, reducedMotion, watchVisibility } from '../scripts/graph';
+  import { mountField } from '../scripts/field';
+
+  const root = document.querySelector<HTMLElement>('[data-hero-graph]');
+  if (root) {
+    layoutEdges(root);
+    const roleEdges = [...root.querySelectorAll<SVGPathElement>('path[data-role-edge]')];
+    const outEdge = root.querySelector<SVGPathElement>('path[data-out-edge]')!;
+    const roleDots = [...root.querySelectorAll<SVGCircleElement>('circle.packet:not([data-out-dot])')];
+    const outDots = [...root.querySelectorAll<SVGCircleElement>('circle[data-out-dot]')];
+    const me = root.querySelector<HTMLElement>('[data-node="me"]')!;
+    const toggle = root.querySelector<HTMLButtonElement>('[data-hero-toggle]')!;
+    const field = mountField(root, reducedMotion);
+
+    let visible = false;
+    let paused = false;
+    let introStarted = false;
+    let introDone = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+    let loop = new MotionScope();
+    let n = 0;
+
+    /** Final, readable state: every wire drawn, operator active, nothing in flight. */
+    const settle = () => {
+      loop.cancel();
+      for (const e of roleEdges) e.dataset.state = '';
+      me.dataset.state = 'active';
+      introDone = true;
+    };
+
+    const fire = () => {
+      const k = n++ % roleEdges.length;
+      const s = loop;
+      roleEdges[k].dataset.state = 'active';
+      sendPacket(s, roleEdges[k], roleDots[k], 900).then(() => {
+        roleEdges[k].dataset.state = '';
+        return sendPacket(s, outEdge, outDots[k % outDots.length], 750);
+      });
+    };
+
+    const canRun = () => visible && !paused && !document.hidden && !reducedMotion.matches;
+
+    /** One place decides whether anything moves; every condition change routes through here. */
+    const sync = () => {
+      toggle.hidden = reducedMotion.matches;
+      // An intro that loses permission (offscreen, hidden tab, paused, reduced) settles instead of
+      // finishing unseen; it never replays.
+      if (introStarted && !introDone && !canRun()) settle();
+      if (reducedMotion.matches && !introDone) settle();
+      if (!introStarted && canRun()) intro();
+      const run = introDone && canRun();
+      if (run && !timer) {
+        loop = new MotionScope();
+        timer = setInterval(fire, 650);
+      }
+      if (!run && timer) {
+        clearInterval(timer);
+        timer = undefined;
+        loop.cancel(); // stops packets already in flight, not just future ones
+        for (const e of roleEdges) e.dataset.state = '';
+      }
+    };
+
+    const intro = async () => {
+      introStarted = true;
+      const s = loop;
+      await Promise.all(roleEdges.map((p, i) => drawEdge(s, p, 560, 120 + i * 70)));
+      if (!s.alive) return settle();
+      me.dataset.state = 'active';
+      const box = root.getBoundingClientRect();
+      const mb = me.getBoundingClientRect();
+      field?.ripple(mb.left - box.left + mb.width / 2, mb.top - box.top + mb.height / 2);
+      await drawEdge(s, outEdge, 380);
+      introDone = true;
+      sync();
+    };
+
+    toggle.addEventListener('click', () => {
+      paused = !paused;
+      toggle.setAttribute('aria-pressed', String(paused));
+      toggle.setAttribute('aria-label', paused ? 'Play animation' : 'Pause animation');
+      field?.suspend(paused);
+      sync();
+    });
+    watchVisibility(root, (v) => {
+      visible = v;
+      sync();
+    }, 0.1);
+    document.addEventListener('visibilitychange', sync);
+    reducedMotion.addEventListener('change', sync);
+    sync();
+  }
+</script>

@@ -1,0 +1,27 @@
+---
+/**
+ * Wireframe slot for a self-provided asset. Swap for <Image> when the file lands;
+ * the caption doubles as the asset brief (listed in CONTENT-TODO.md).
+ */
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  ratio: string; // CSS aspect-ratio, e.g. "16 / 10"
+  brief: string; // what belongs here
+  radius?: 'inset' | 'card' | 'media';
+  class?: string;
+}
+const { ratio, brief, radius = 'media', class: className } = Astro.props;
+const RADIUS = { inset: 'rounded-inset', card: 'rounded-card', media: 'rounded-media' } as const;
+---
+
+<figure
+  class:list={['ph-frame relative m-0 grid place-items-center overflow-hidden', RADIUS[radius], className]}
+  style={`aspect-ratio: ${ratio}`}
+  data-todo="asset"
+>
+  <div class="grid max-w-[34ch] justify-items-center gap-2 px-6 text-center">
+    <Icon name="ph:image" size={24} aria-hidden="true" />
+    <figcaption class="label text-dash-ink">{brief}</figcaption>
+  </div>
+</figure>

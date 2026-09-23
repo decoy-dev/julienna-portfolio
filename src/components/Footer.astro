@@ -1,0 +1,238 @@
+---
+import { Icon } from 'astro-icon/components';
+import Mark from './Mark.astro';
+import { href } from '../lib/url';
+import { person } from '../data/site';
+
+type FNode = { id: string; kind: string; label: string; to: string; x: number; y: number; external?: boolean };
+const all: FNode[] = [
+  { id: 'home', kind: 'Page', label: 'Home', to: '/', x: 4, y: 40 },
+  { id: 'work', kind: 'Page', label: 'Work', to: '/work', x: 36, y: 10 },
+  { id: 'brand', kind: 'Page', label: 'Brand kit', to: '/brand', x: 36, y: 40 },
+  { id: 'contact', kind: 'Page', label: 'Contact', to: '/contact', x: 36, y: 70 },
+  { id: 'resume', kind: 'File', label: 'Resume', to: person.resume, x: 68, y: 10 },
+  { id: 'email', kind: 'Link', label: 'Email', to: `mailto:${person.email}`, x: 68, y: 44 },
+  { id: 'linkedin', kind: 'Link', label: 'LinkedIn', to: person.linkedin, x: 68, y: 72, external: true },
+];
+// Links without a real destination yet (see CONTENT-TODO.md) are left out rather than faked.
+const nodes = all.filter((n) => n.to);
+const ids = new Set(nodes.map((n) => n.id));
+const edges = [
+  ['home', 'work'],
+  ['home', 'brand'],
+  ['home', 'contact'],
+  ['work', 'resume'],
+  ['contact', 'email'],
+  ['contact', 'linkedin'],
+].filter(([a, b]) => ids.has(a) && ids.has(b));
+const columns = [
+  { title: 'Pages', links: nodes.filter((n) => n.kind === 'Page') },
+  { title: 'Elsewhere', links: nodes.filter((n) => n.kind !== 'Page') },
+];
+---
+
+<footer class="mt-24 border-t border-line bg-surface pt-16 pb-10">
+  <div class="shell">
+    <!-- Copy and graph are separate grid areas, so nodes can never be dragged over the copy. -->
+    <div class="footer-graph-box grid-canvas hidden overflow-hidden rounded-media shadow-[inset_0_0_0_1px_var(--color-line)] md:grid lg:grid-cols-[minmax(0,1fr)_300px]" data-footer-box>
+    <div class="fgraph-copy flex flex-wrap items-end justify-between gap-4 px-6 pt-6 lg:order-2 lg:flex-col lg:flex-nowrap lg:items-end lg:pb-6 lg:text-right">
+      <div>
+        <p class="text-h3 font-semibold text-ink">This site, as a graph.</p>
+        <p class="mt-2 max-w-[36ch] text-small text-muted">Every page and link in one diagram. Grab a handle to rearrange it.</p>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <p class="text-small text-muted" data-move-hint aria-live="polite"></p>
+        <button type="button" class="btn btn-ghost btn-sm" data-footer-reset>
+          <Icon name="ph:arrow-counter-clockwise" size={16} aria-hidden="true" /> Reset layout
+        </button>
+      </div>
+    </div>
+    <div class="relative h-[320px]" data-graph data-footer-graph>
+      <svg data-edges class="pointer-events-none absolute inset-0 size-full" aria-hidden="true">
+        {edges.map(([a, b]) => <path class="edge" data-state="done" data-from={`${a}:out`} data-to={`${b}:in`} />)}
+      </svg>
+
+      {nodes.map((n) => (
+        <div class="node fnode absolute w-[164px]" data-node={n.id} data-x={n.x} data-y={n.y} style={`left:${n.x}%;top:${n.y}%`}>
+          <div class="node-bar">
+            <button
+              type="button"
+              class="fnode-handle -ml-1.5 grid size-6 place-items-center rounded-inset text-muted hover:bg-surface-2 hover:text-ink"
+              aria-label={`Move the ${n.label} node: drag, use arrow keys, or click then click a spot on the canvas`}
+              aria-pressed="false"
+            >
+              <Icon name="ph:dots-six-vertical" size={14} aria-hidden="true" />
+            </button>
+            {n.kind}
+          </div>
+          <a
+            href={href(n.to)}
+            class="flex items-center justify-between rounded-b-card px-3 py-2.5 font-medium text-ink hover:text-primary"
+            {...(n.external ? { target: '_blank', rel: 'noopener' } : {})}
+          >
+            {n.label}
+            <Icon name={n.external ? 'ph:arrow-up-right' : 'ph:arrow-right'} size={14} class="text-muted" aria-hidden="true" />
+          </a>
+          {n.id !== 'home' && <span class="port" data-side="in" />}
+          {edges.some(([a]) => a === n.id) && <span class="port" data-side="out" />}
+        </div>
+      ))}
+    </div>
+    </div>
+
+    <div class="mt-12 grid gap-10 md:grid-cols-[1fr_auto_auto] md:gap-16">
+      <div>
+        <a href={href('/')} class="inline-flex items-center gap-2.5 font-semibold text-ink">
+          <Mark size={28} /> {person.name}
+        </a>
+        <p class="mt-3 max-w-[40ch] text-small text-muted">{person.role}. Brand, web, motion, and the systems that ship them.</p>
+      </div>
+      {columns.map((c) => (
+        <nav aria-label={c.title}>
+          <p class="label text-muted">{c.title}</p>
+          <ul role="list" class="mt-4 grid gap-2.5">
+            {c.links.map((l) => (
+              <li>
+                <a href={href(l.to)} class="text-small text-ink hover:text-primary" {...(l.external ? { target: '_blank', rel: 'noopener' } : {})}>
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))}
+    </div>
+
+    <p class="mt-12 border-t border-line pt-6 text-small text-muted">
+      © 2026 {person.name}. Built with Astro, Tailwind, and anime.js.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .fnode[data-dragging],
+  .fnode[data-picked] { border-color: var(--color-graphic-deep); box-shadow: var(--shadow-float); z-index: 2; }
+  .fnode-handle { cursor: grab; touch-action: none; }
+  .fnode[data-dragging] .fnode-handle { cursor: grabbing; }
+  [data-footer-graph][data-placing] { cursor: crosshair; }
+</style>
+
+<script>
+  import { layoutEdges } from '../scripts/graph';
+
+  const root = document.querySelector<HTMLElement>('[data-footer-graph]');
+  if (root) {
+    const relayout = layoutEdges(root);
+    const nodes = [...root.querySelectorAll<HTMLElement>('.fnode')];
+    const hint = document.querySelector<HTMLElement>('[data-move-hint]')!;
+    const ARROWS: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+    const TAP_SLOP = 4; // px of movement before a press counts as a drag
+    let picked: HTMLElement | null = null;
+
+    const pos = (node: HTMLElement) => [Number(node.dataset.cx ?? node.dataset.x), Number(node.dataset.cy ?? node.dataset.y)];
+
+    /**
+     * Clamp to the graph area using each node's measured size. Skipped while the graph is hidden
+     * (below md it is display:none and measures 0), so saved positions survive breakpoint changes.
+     */
+    const place = (node: HTMLElement, x: number, y: number) => {
+      const box = root.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const limitX = ((box.width - 8 - node.offsetWidth) / box.width) * 100;
+      const limitY = ((box.height - 8 - node.offsetHeight) / box.height) * 100;
+      const cx = Math.min(Math.max(0, limitX), Math.max(0, x));
+      const cy = Math.min(Math.max(0, limitY), Math.max(0, y));
+      node.style.left = `${cx}%`;
+      node.style.top = `${cy}%`;
+      node.dataset.cx = String(cx);
+      node.dataset.cy = String(cy);
+      relayout();
+    };
+    const placeAll = () => {
+      for (const n of nodes) place(n, ...(pos(n) as [number, number]));
+    };
+
+    const setPicked = (node: HTMLElement | null) => {
+      picked?.removeAttribute('data-picked');
+      picked?.querySelector('.fnode-handle')?.setAttribute('aria-pressed', 'false');
+      picked = node;
+      root.toggleAttribute('data-placing', !!node);
+      if (node) {
+        node.toggleAttribute('data-picked', true);
+        node.querySelector('.fnode-handle')!.setAttribute('aria-pressed', 'true');
+      }
+      hint.textContent = node ? 'Click a spot on the canvas to place it. Esc cancels.' : '';
+    };
+
+    for (const node of nodes) {
+      const handle = node.querySelector<HTMLButtonElement>('.fnode-handle')!;
+      let drag: { id: number; px: number; py: number; x: number; y: number; moved: boolean } | null = null;
+      let suppressClick = false; // the click that ends a real drag must not also pick the node up
+
+      handle.addEventListener('pointerdown', (e) => {
+        if (!e.isPrimary || e.button !== 0) return;
+        const [x, y] = pos(node);
+        drag = { id: e.pointerId, px: e.clientX, py: e.clientY, x, y, moved: false };
+        handle.setPointerCapture(e.pointerId);
+      });
+      handle.addEventListener('pointermove', (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        if (!drag.moved && Math.hypot(e.clientX - drag.px, e.clientY - drag.py) < TAP_SLOP) return;
+        drag.moved = true;
+        node.toggleAttribute('data-dragging', true);
+        const box = root.getBoundingClientRect();
+        place(node, drag.x + ((e.clientX - drag.px) / box.width) * 100, drag.y + ((e.clientY - drag.py) / box.height) * 100);
+      });
+      const end = (e: PointerEvent) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        suppressClick = drag.moved;
+        drag = null;
+        node.removeAttribute('data-dragging');
+      };
+      handle.addEventListener('pointerup', end);
+      handle.addEventListener('pointercancel', end);
+      handle.addEventListener('lostpointercapture', end);
+
+      // A press without movement (mouse, touch, or Enter/Space) picks the node up for click-to-place.
+      handle.addEventListener('click', () => {
+        if (suppressClick) {
+          suppressClick = false;
+          return;
+        }
+        setPicked(picked === node ? null : node);
+      });
+
+      handle.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') return setPicked(null);
+        const d = ARROWS[e.key];
+        if (!d) return;
+        e.preventDefault();
+        const step = e.shiftKey ? 6 : 2;
+        const [x, y] = pos(node);
+        place(node, x + d[0] * step, y + d[1] * step);
+      });
+    }
+
+    root.addEventListener('click', (e) => {
+      if (!picked || (e.target as HTMLElement).closest('.fnode')) return;
+      const box = root.getBoundingClientRect();
+      const node = picked;
+      place(node, ((e.clientX - box.left - node.offsetWidth / 2) / box.width) * 100, ((e.clientY - box.top - node.offsetHeight / 2) / box.height) * 100);
+      setPicked(null);
+      node.querySelector<HTMLButtonElement>('.fnode-handle')!.focus();
+    });
+    document.addEventListener('keydown', (e) => e.key === 'Escape' && picked && setPicked(null));
+
+    // Every visible resize (window, text zoom, breakpoint) re-clamps every node, defaults included.
+    new ResizeObserver(placeAll).observe(root);
+
+    document.querySelector('[data-footer-reset]')?.addEventListener('click', () => {
+      setPicked(null);
+      for (const node of nodes) {
+        delete node.dataset.cx;
+        delete node.dataset.cy;
+      }
+      placeAll();
+    });
+  }
+</script>

@@ -1,0 +1,79 @@
+/**
+ * Julienna Batten brand tokens (v1, 2026).
+ * Source of truth: src/styles/global.css in the portfolio repo; this file mirrors it for reuse.
+ *
+ * Rules:
+ * - Light theme ships. Dark tokens are documented for future use; nothing toggles them yet.
+ * - One accent hue family (teal 188), and only teal: primary for actions, graphic-deep for
+ *   live state (packets, pulses, focus), tints for washes. Nothing else gets a color.
+ * - Persona/client colors never enter the UI; they appear only inside rendered-output previews.
+ */
+
+:root {
+  /* ── Color: light (shipped) ─────────────────────────────────────────── */
+  --color-bg: oklch(1 0 0);                    /* page. pure white */
+  --color-surface: oklch(0.978 0.004 200);     /* bands: proof rail, footers, tab bars */
+  --color-surface-2: oklch(0.955 0.006 200);   /* inset wells, segmented tracks, bento cells */
+  --color-line: oklch(0.9 0.01 200);           /* hairlines, dividers, idle edges, node strokes */
+  --color-ink: oklch(0.205 0.018 222);         /* headings, body. 17.9:1 on white */
+  --color-muted: oklch(0.47 0.02 215);         /* secondary text. 6.8:1 on white (AA) */
+  --color-primary: oklch(0.46 0.08 188);       /* button fills, key emphasis. white text on it: 6.8:1 */
+  --color-primary-hover: oklch(0.42 0.075 188);/* hover fill. white text on it: 7.8:1 */
+  --color-graphic: oklch(0.72 0.1 188);        /* non-text graphics: port fills, done edges. 2.4:1 */
+  --color-graphic-deep: oklch(0.6 0.09 188);   /* active edges, focus rings, progress. 3.8:1 non-text */
+  --color-graphic-tint: oklch(0.94 0.03 188);  /* teal washes behind strokes and swatches */
+  --color-danger: oklch(0.5 0.17 27);          /* form errors only. 6.55:1 on white (AA text) */
+  --color-dash: oklch(0.75 0.005 220);         /* placeholder dashed borders */
+  --color-dash-ink: oklch(0.52 0.01 220);      /* placeholder labels. 5.5:1 on white, 4.8:1 on surface-2 */
+  --color-grid: oklch(0.92 0.008 200);         /* node-canvas dot grid on white */
+  --color-white: oklch(1 0 0);
+  --color-on-ink-muted: oklch(0.78 0.02 215);  /* secondary text on ink bands. 9.0:1 on ink */
+
+  /* ── Type ───────────────────────────────────────────────────────────── */
+  --font-sans: "Host Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --text-display: clamp(2.5rem, 1.6rem + 3.4vw, 4rem);   /* lh 1.05, ls -0.03em, wt 650 */
+  --text-h2: clamp(2rem, 1.5rem + 1.8vw, 3rem);          /* lh 1.1, ls -0.025em, wt 600 */
+  --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);     /* lh 1.25, ls -0.015em, wt 600 */
+  --text-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);   /* lh 1.6, wt 400, max 65ch */
+  --text-small: 0.875rem;                                 /* lh 1.5, wt 400 */
+  --text-label: 0.75rem;                                  /* mono, lh 1.4, ls 0.08em, wt 500, uppercase */
+  --text-stat: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);   /* lh 1.1, ls -0.02em, wt 650, tabular nums */
+
+  /* ── Radius (nested elements step DOWN one radius) ──────────────────── */
+  --radius-inset: 8px;   /* inputs, swatches, segmented controls, nested media */
+  --radius-card: 12px;   /* cards, nodes, app windows, bento cells */
+  --radius-media: 16px;  /* feature imagery, graph canvases */
+  --radius-full: 999px;  /* buttons, chips, ports, packets, nav pill */
+
+  /* ── Elevation (border OR shadow, never both when blur > 8px) ───────── */
+  --shadow-raised: 0 1px 2px oklch(0.3 0.03 220 / 0.06), 0 4px 12px oklch(0.3 0.03 220 / 0.05);
+  --shadow-float: 0 2px 4px oklch(0.3 0.03 220 / 0.06), 0 12px 32px oklch(0.3 0.03 220 / 0.08);
+
+  /* ── Motion ─────────────────────────────────────────────────────────── */
+  --d1: 120ms;  /* hovers */
+  --d2: 200ms;  /* tabs, menus, chip toggles */
+  --d3: 350ms;  /* panels, popovers, page crossfade */
+  --d4: 600ms;  /* one pipeline choreography step */
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);  /* entrances */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);      /* exits */
+}
+
+/*
+ * ── Color: dark (documented, NOT shipped) ─────────────────────────────
+ * Apply by remapping the light names under a theme scope when dark mode ships.
+ * White text is NOT used on --dark-primary; pair it with --dark-ink-text.
+ */
+:root {
+  --dark-bg: oklch(0.16 0.015 220);
+  --dark-surface: oklch(0.195 0.015 220);
+  --dark-surface-2: oklch(0.235 0.02 220);
+  --dark-line: oklch(0.32 0.02 220);
+  --dark-ink: oklch(0.95 0.005 220);        /* 16.8:1 on dark-bg */
+  --dark-ink-muted: oklch(0.72 0.02 215);   /* 7.9:1 on dark-bg */
+  --dark-primary: oklch(0.7 0.11 188);      /* pair with --dark-ink-text: 7.1:1 */
+  --dark-ink-text: oklch(0.2 0.02 220);     /* text color ON dark-primary fills */
+  --dark-graphic: oklch(0.78 0.1 188);
+}

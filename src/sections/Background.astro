@@ -1,0 +1,184 @@
+---
+import { Icon } from 'astro-icon/components';
+import Wire from '../components/Wire.astro';
+import Slot from '../components/Slot.astro';
+import { seats } from '../data/site';
+
+// Grid columns: 1 = 2016 ... 11 = 2026, 12 = "Now". End is exclusive (CSS grid lines).
+const YEARS = Array.from({ length: 11 }, (_, i) => 2016 + i);
+type Entry = {
+  id: string;
+  lane: 'Roles' | 'Freelance' | 'Education';
+  title: string;
+  role: string;
+  years: string;
+  col: [number, number];
+  skills: string[];
+  feeds?: boolean; // last entry in its lane: wired into "Now"
+};
+const entries: Entry[] = [
+  { id: 'marshall', lane: 'Education', title: 'Marshall University', role: 'BA, Visual Arts & Media', years: '2016-2020', col: [1, 5], skills: ['Visual arts', 'Media'], feeds: true },
+  { id: 'freelance', lane: 'Freelance', title: 'Freelance', role: 'Multimedia designer & brand strategist', years: '2017 to now', col: [2, 12], skills: ['Brand identity', 'Release art', '3D visualizers', 'Social content', 'Live visuals'], feeds: true },
+  { id: 'geek', lane: 'Roles', title: 'Geek Inc.', role: 'Brand & multimedia visual designer', years: '2019-2022', col: [4, 7], skills: ['Art direction', 'Event branding', 'Apparel + signage'] },
+  { id: 'machine', lane: 'Roles', title: 'Machine Communications', role: 'Design production specialist', years: '2022-2025', col: [7, 10], skills: ['3D rendering', 'Technical drawing', 'AI tooling'] },
+  { id: 'ortho', lane: 'Roles', title: 'OrthoBoost', role: 'Graphic designer, then creative director', years: '2025 to now', col: [10, 12], skills: ['Design systems', 'Web + code', 'React tooling'], feeds: true },
+];
+const LANES = ['Roles', 'Freelance', 'Education'] as const;
+const certs = [
+  'Meta Certified Creative Strategy Professional',
+  'Adobe Certified Professional: Photoshop, Illustrator, InDesign',
+  'UI/UX Design Specialization',
+];
+---
+
+<section id="about" class="relative py-[clamp(80px,12vh,128px)]" data-wired aria-labelledby="about-title">
+  <Wire portTop="clamp(80px, 12vh, 128px)" />
+  <div class="shell">
+    <p class="label text-primary">Background</p>
+    <h2 id="about-title" class="mt-3 max-w-[20ch] text-h2">Nine years across every seat on the team</h2>
+    <p class="mt-4 max-w-[56ch] text-body text-muted">Each role added a discipline. The current one uses all of them.</p>
+
+    <div class="tl mt-12" data-graph data-timeline>
+      <svg data-edges class="tl-edges pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
+        {entries.filter((e) => e.feeds).map((e) => <path class="edge" pathLength="1" data-state="done" data-from={`${e.id}:out`} data-to="now:in" />)}
+      </svg>
+
+      <ol class="tl-axis" aria-hidden="true">
+        {YEARS.map((y) => <li>{y}</li>)}
+      </ol>
+      {LANES.map((lane, i) => <p class="tl-lane label text-muted" style={`grid-row:${i + 2}`}>{lane}</p>)}
+
+      <ol class="contents" aria-label="Career timeline">
+        {entries.map((e) => (
+          <li class="tl-item" style={`--c0:${e.col[0]};--c1:${e.col[1]};--row:${LANES.indexOf(e.lane) + 2}`}>
+            <div class="node tl-bar" data-node={e.id}>
+              <div class="px-3.5 py-2.5">
+                <p class="text-small font-semibold text-ink">{e.title}</p>
+                <p class="font-mono text-[0.6875rem] text-muted">{e.years}</p>
+                <p class="mt-1 text-[0.8125rem] leading-snug text-muted">{e.role}</p>
+              </div>
+              {e.feeds && <span class="port" data-side="out" />}
+            </div>
+            <ul role="list" class="mt-2 flex flex-wrap gap-1.5" aria-label={`Added at ${e.title}`}>
+              {e.skills.map((s) => <li class="chip h-6 px-2.5 text-[0.75rem]">{s}</li>)}
+            </ul>
+          </li>
+        ))}
+      </ol>
+
+      <div class="node tl-now" data-node="now" data-state="active">
+        <span class="port" data-side="in" />
+        <div class="node-bar">Now</div>
+        <ul role="list" class="grid gap-1.5 p-3" aria-label="Every discipline, today">
+          {seats.map((s) => (
+            <li class="flex items-center gap-2 text-[0.8125rem] font-medium text-ink">
+              <Icon name={s.icon} size={14} class="shrink-0 text-primary" aria-hidden="true" />
+              {s.label}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-20 grid gap-10 lg:grid-cols-12 lg:gap-8">
+      <Slot ratio="4 / 5" brief="4:5 · portrait of Jules" class="lg:col-span-4" />
+      <div class="lg:col-span-7 lg:col-start-6 lg:pt-4">
+        <div class="grid max-w-[62ch] gap-5 text-body text-ink">
+          <p>
+            Jules started in 2017 making release art and brand systems for musicians, including cover art for an artist with 10M+ Spotify plays.
+            At Geek Inc. she art-directed three conventions drawing 30,000+ attendees a year.
+          </p>
+          <p class="text-muted">
+            At Machine Communications she moved into 3D visualization and production at scale: 5,000+ technical drawings and a render library covering 2,000+ Wincore configurations.
+          </p>
+          <p class="text-muted">
+            In October 2025 she joined OrthoBoost as a graphic designer, built the 11-persona system and the ad generator, and was promoted to Web Designer & Creative Director in 2026.
+          </p>
+        </div>
+        <ul role="list" class="mt-8 grid gap-3" aria-label="Certifications">
+          {certs.map((c) => (
+            <li class="flex items-start gap-2.5 text-small text-ink">
+              <Icon name="ph:seal-check" size={18} class="mt-px shrink-0 text-primary" aria-hidden="true" />
+              {c}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Mobile / tablet: chronological list on a rail. */
+  .tl { position: relative; display: grid; gap: 28px; padding-left: 28px; }
+  .tl::before { content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: var(--color-line); }
+  .tl-axis, .tl-lane, .tl-edges { display: none; }
+  .tl-item { position: relative; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 22px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep);
+  }
+  .tl-bar .port { display: none; }
+  .tl-now .port { display: none; }
+
+  @media (min-width: 64rem) {
+    .tl {
+      grid-template-columns: repeat(11, minmax(0, 1fr)) minmax(220px, 1.9fr);
+      grid-template-rows: auto repeat(3, auto);
+      column-gap: 0;
+      row-gap: 20px;
+      padding-left: 0;
+      padding-top: 8px;
+    }
+    .tl::before, .tl-item::before { display: none; }
+    .tl-edges { display: block; }
+    .tl-axis {
+      display: grid;
+      grid-column: 1 / 12;
+      grid-row: 1;
+      grid-template-columns: subgrid;
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      color: var(--color-muted);
+      border-bottom: 1px solid var(--color-line);
+      padding-bottom: 8px;
+    }
+    /* Lane label sits in the 22px strip above that lane's bars. */
+    .tl-lane { display: block; grid-column: 1 / 4; align-self: start; line-height: 22px; font-size: 0.625rem; pointer-events: none; }
+    .tl-item { grid-column: var(--c0) / var(--c1); grid-row: var(--row); padding-right: 8px; padding-top: 22px; }
+    .tl-bar .port { display: block; }
+    .tl-now { grid-column: 12; grid-row: 2 / 5; align-self: center; margin-left: 36px; }
+    .tl-now .port { display: block; }
+  }
+
+  /* Edges into "Now" draw as the timeline scrolls through view. The named timeline lives on the
+     container because SVG paths have no box of their own to track. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .tl { view-timeline: --tl block; }
+      .tl-edges path {
+        stroke-dasharray: 1;
+        animation: tl-draw linear both;
+        animation-timeline: --tl;
+        animation-range: entry 40% cover 55%;
+      }
+    }
+  }
+  @keyframes tl-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+</style>
+
+<script>
+  import { layoutEdges } from '../scripts/graph';
+  const root = document.querySelector<HTMLElement>('[data-timeline]');
+  if (root) layoutEdges(root);
+</script>

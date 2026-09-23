@@ -1,0 +1,216 @@
+---
+import Base from '../layouts/Base.astro';
+import Mark from '../components/Mark.astro';
+import SectionMark from '../components/brand/SectionMark.astro';
+import SectionColor from '../components/brand/SectionColor.astro';
+import SectionType from '../components/brand/SectionType.astro';
+import SectionLayout from '../components/brand/SectionLayout.astro';
+import SectionRadius from '../components/brand/SectionRadius.astro';
+import SectionMotion from '../components/brand/SectionMotion.astro';
+import SectionIcons from '../components/brand/SectionIcons.astro';
+import SectionMotif from '../components/brand/SectionMotif.astro';
+import SectionComponents from '../components/brand/SectionComponents.astro';
+import SectionVoice from '../components/brand/SectionVoice.astro';
+import SectionDownloads from '../components/brand/SectionDownloads.astro';
+
+const index = [
+  { id: 'principles', label: 'Principles' },
+  { id: 'mark', label: 'The mark' },
+  { id: 'color', label: 'Color' },
+  { id: 'type', label: 'Typography' },
+  { id: 'layout', label: 'Layout' },
+  { id: 'radius', label: 'Radius and elevation' },
+  { id: 'motion', label: 'Motion' },
+  { id: 'icons', label: 'Iconography' },
+  { id: 'motif', label: 'The node graph' },
+  { id: 'components', label: 'Components' },
+  { id: 'voice', label: 'Voice and copy' },
+  { id: 'downloads', label: 'Downloads' },
+];
+
+const principles = [
+  {
+    title: 'Systems over one-offs',
+    body: 'Every asset is an instance of a system. If it cannot be regenerated from rules and tokens, it is not finished.',
+  },
+  {
+    title: 'Instrumentation, not decoration',
+    body: 'Node graphs, mono labels, and dot grids appear only where they organize real content. Nothing is texture.',
+  },
+  {
+    title: 'Proof before polish',
+    body: 'Verified numbers ship unmarked. Unknown numbers wear a dashed placeholder and wait for data, never a guess.',
+  },
+  {
+    title: 'One accent',
+    body: 'Teal carries the brand, and only teal: one hue family for actions, live state, and washes. Nothing else gets a color.',
+  },
+];
+---
+
+<Base
+  title="Brand guide | Julienna Batten"
+  description="The Julienna Batten identity: color tokens with measured contrast, type scale, motion rules, the node-graph motif, live component specimens, and downloadable assets."
+>
+  <header class="shell guide-head">
+    <Mark size={48} />
+    <h1 class="mt-5 text-display">Brand guide</h1>
+    <p class="mt-4 max-w-[60ch] text-body text-muted">
+      The tokens, rules, and components that keep every Julienna Batten surface consistent. Copy from here instead of
+      improvising; the kit is downloadable at the end.
+    </p>
+    <p class="mt-4 label text-dash-ink">v1, 2026</p>
+  </header>
+
+  <div class="shell guide-grid">
+    <aside class="guide-index" aria-label="On this page">
+      <p class="label text-muted">On this page</p>
+      <ol class="index-list">
+        {index.map((item) => (
+          <li><a href={`#${item.id}`} data-index-link={item.id}>{item.label}</a></li>
+        ))}
+      </ol>
+    </aside>
+
+    <div class="guide-flow">
+      <section id="principles" data-guide-section aria-labelledby="principles-title">
+        <h2 id="principles-title" class="text-h2">Principles</h2>
+        <div class="mt-8 principle-grid rounded-card border border-line">
+          {principles.map((p) => (
+            <div class="principle">
+              <h3 class="text-h3">{p.title}</h3>
+              <p class="mt-2 text-small text-muted">{p.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <SectionMark />
+      <SectionColor />
+      <SectionType />
+      <SectionLayout />
+      <SectionRadius />
+      <SectionMotion />
+      <SectionIcons />
+      <SectionMotif />
+      <SectionComponents />
+      <SectionVoice />
+      <SectionDownloads />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .guide-head {
+    padding-top: calc(var(--nav-top) + var(--nav-h) + clamp(48px, 8vh, 80px));
+  }
+  .guide-grid {
+    display: grid;
+    gap: 48px;
+    margin-top: clamp(40px, 6vh, 64px);
+    padding-bottom: clamp(80px, 12vh, 128px);
+  }
+  .guide-flow {
+    display: grid;
+    gap: clamp(64px, 9vh, 96px);
+    min-width: 0;
+  }
+  .guide-flow > :global(section) {
+    border-top: 1px solid var(--color-line);
+    padding-top: clamp(40px, 6vh, 56px);
+  }
+  .guide-flow > :global(section:first-child) {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .index-list {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+  }
+  .index-list a {
+    display: block;
+    position: relative;
+    padding-block: 0.25rem;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+    transition: color var(--d1) var(--ease-std);
+  }
+  .index-list a:hover { color: var(--color-ink); }
+  .index-list a[aria-current='true'] {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  @media (min-width: 64rem) {
+    .guide-grid {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 64px;
+      align-items: start;
+    }
+    .guide-index {
+      position: sticky;
+      top: calc(var(--nav-top) + var(--nav-h) + 32px);
+    }
+    .index-list {
+      display: block;
+      border-left: 1px solid var(--color-line);
+      padding-left: 1rem;
+    }
+    .index-list a[aria-current='true']::before {
+      content: '';
+      position: absolute;
+      left: calc(-1rem - 1.5px);
+      top: 0.375rem;
+      bottom: 0.375rem;
+      width: 2px;
+      background: var(--color-graphic-deep);
+    }
+  }
+
+  .principle-grid {
+    display: grid;
+  }
+  .principle { padding: 1.5rem 1.25rem; }
+  .principle + .principle { border-top: 1px solid var(--color-line); }
+  @media (min-width: 48rem) {
+    .principle-grid { grid-template-columns: 1fr 1fr; }
+    .principle { padding: 2rem 1.75rem; }
+    .principle + .principle { border-top: 0; }
+    .principle:nth-child(n + 3) { border-top: 1px solid var(--color-line); }
+    .principle:nth-child(even) { border-left: 1px solid var(--color-line); }
+  }
+</style>
+
+<script>
+  // Section index scrollspy: ordinary anchors, IO only marks the nearest section. No scroll hijacking.
+  const links = new Map<string, HTMLAnchorElement>();
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('[data-index-link]')) {
+    links.set(a.dataset.indexLink!, a);
+  }
+  if (links.size) {
+    const visible = new Set<string>();
+    const setCurrent = () => {
+      let current: string | undefined;
+      for (const id of links.keys()) if (visible.has(id)) { current = id; break; }
+      for (const [id, a] of links) {
+        if (id === current) a.setAttribute('aria-current', 'true');
+        else a.removeAttribute('aria-current');
+      }
+    };
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const id = (e.target as HTMLElement).id;
+          if (e.isIntersecting) visible.add(id);
+          else visible.delete(id);
+        }
+        setCurrent();
+      },
+      { rootMargin: '-15% 0px -55% 0px' }
+    );
+    for (const sec of document.querySelectorAll('[data-guide-section]')) io.observe(sec);
+  }
+</script>

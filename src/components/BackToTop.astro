@@ -1,0 +1,74 @@
+---
+import { Icon } from 'astro-icon/components';
+---
+
+<!-- Without JS this is a plain, always-visible link. With JS, visibility toggles from a top-of-page
+     sentinel. The ring is a scroll-timeline progress meter where supported (and motion is allowed),
+     and a full ring otherwise. -->
+<div id="top-sentinel" aria-hidden="true" class="pointer-events-none absolute top-0 left-0 h-[600px] w-px"></div>
+<a href="#main" id="to-top" class="to-top" aria-label="Back to top">
+  <svg class="to-top-ring" viewBox="0 0 44 44" aria-hidden="true">
+    <circle cx="22" cy="22" r="20.5" pathLength="100" />
+  </svg>
+  <Icon name="ph:arrow-up" size={18} />
+</a>
+
+<style>
+  .to-top {
+    position: fixed;
+    right: clamp(20px, 3vw, 24px);
+    bottom: clamp(20px, 3vw, 24px);
+    z-index: var(--z-chrome);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    box-shadow: var(--shadow-raised);
+    transition: opacity var(--d2) var(--ease-out), transform var(--d2) var(--ease-out), box-shadow var(--d2) var(--ease-std);
+  }
+  .to-top:hover { box-shadow: var(--shadow-float); }
+  .to-top[data-hidden] { opacity: 0; transform: translateY(8px); pointer-events: none; }
+  .to-top-ring {
+    position: absolute;
+    inset: 0;
+    transform: rotate(-90deg);
+    fill: none;
+    stroke: var(--color-graphic-deep);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-dasharray: 100 100;
+  }
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .to-top-ring {
+        animation: ring-progress linear both;
+        animation-timeline: scroll(root block);
+      }
+    }
+  }
+  @keyframes ring-progress {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('to-top')!;
+  const sentinel = document.getElementById('top-sentinel')!;
+  // Hidden buttons must not be tabbable. Set the first state synchronously (IO reports async).
+  const setHidden = (hidden: boolean) => {
+    btn.toggleAttribute('data-hidden', hidden);
+    btn.tabIndex = hidden ? -1 : 0;
+  };
+  setHidden(scrollY < 600);
+  new IntersectionObserver(([e]) => setHidden(e.isIntersecting)).observe(sentinel);
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    (document.querySelector('.site-nav a') as HTMLElement | null)?.focus({ preventScroll: true });
+  });
+</script>

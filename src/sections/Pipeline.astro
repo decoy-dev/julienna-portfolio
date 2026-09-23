@@ -1,0 +1,396 @@
+---
+import { Icon } from 'astro-icon/components';
+import Wire from '../components/Wire.astro';
+import AdFrame from '../components/AdFrame.astro';
+import { personas } from '../data/site';
+
+const persona = personas[0]; // Dr. V. Frizzle
+const client = 'SamplePractice'; // illustrative; real client names stay private
+
+type Stage = { icon: string; kind: string; title: string; meta: string };
+type Pipe = {
+  id: string;
+  tab: string;
+  file: string;
+  stages: Stage[];
+};
+
+const ads: Pipe = {
+  id: 'ads',
+  tab: 'Ad generator',
+  file: 'ad-generator.pipeline',
+  stages: [
+    { icon: 'ph:figma-logo', kind: 'Design', title: 'Figma layouts', meta: 'by Jules' },
+    { icon: 'ph:user-circle', kind: 'Persona', title: persona.name, meta: '1 of 11' },
+    { icon: 'ph:swatches', kind: 'Brand kit', title: 'Client overrides', meta: '1 of ~40' },
+    { icon: 'ph:layout', kind: 'Template', title: 'Split Stack', meta: '1 of 5' },
+    { icon: 'ph:text-aa', kind: 'Content', title: 'Copy, photo, logo', meta: 'Summer-2026' },
+    { icon: 'ph:cpu', kind: 'Render', title: 'Rules engine', meta: 'No LLM' },
+  ],
+};
+const photos: Pipe = {
+  id: 'photos',
+  tab: 'Photo intake',
+  file: 'photo-intake.pipeline',
+  stages: [
+    { icon: 'ph:camera', kind: 'Input', title: 'Raw client shoot', meta: 'Unsorted' },
+    // Intermediate steps are illustrative until Jules confirms them (CONTENT-TODO.md).
+    { icon: 'ph:tray-arrow-down', kind: 'Ingest', title: 'Import and back up', meta: 'Example' },
+    { icon: 'ph:funnel', kind: 'Cull', title: 'Keep the selects', meta: 'Example' },
+    { icon: 'ph:tag', kind: 'Name', title: 'Naming convention', meta: 'Example' },
+    { icon: 'ph:crop', kind: 'Prepare', title: 'Crop to spec', meta: 'Example' },
+    { icon: 'ph:folders', kind: 'Deliver', title: 'Production library', meta: 'Output' },
+  ],
+};
+
+// Real deliverable matrix: V1/V2 x Story/Post x Image/Video = 8 files per practice per campaign.
+const deliverables = (['V1', 'V2'] as const).flatMap((v) =>
+  (['Story', 'Post'] as const).flatMap((size) =>
+    (['Image', 'Video'] as const).map((type) => ({ v, size, type, name: `Seasonal_Summer-2026_${type}_${v}_${size}_${client}` })),
+  ),
+);
+const folders = [
+  { dir: 'web', file: 'hero_2400w.webp' },
+  { dir: 'ads', file: 'story_1080x1920.jpg' },
+  { dir: 'social', file: 'post_1080x1350.jpg' },
+  { dir: 'print', file: 'brochure_300dpi.tif' },
+];
+const handoffs = ['Ad generator content', 'Website templates', 'Social calendar'];
+const PRACTICES = 40;
+---
+
+<section id="systems" class="relative py-[clamp(80px,12vh,128px)]" data-wired aria-labelledby="systems-title">
+  <Wire portTop="clamp(80px, 12vh, 128px)" />
+  <div class="shell">
+    <p class="label text-primary">Systems</p>
+    <h2 id="systems-title" class="mt-3 max-w-[20ch] text-h2">Two pipelines that ship real work</h2>
+    <p class="mt-4 max-w-[56ch] text-body text-muted">
+      Her ad generator and photo intake line, step by step: one input goes in, a finished on-brand library comes out.
+    </p>
+
+    <!-- Without JS both panels render stacked with their own titles; the script enhances into tabs. -->
+    <div class="window mt-10" data-pipeline>
+      <div class="pl-chrome flex flex-wrap items-center gap-3 border-b border-line bg-surface px-3 py-2.5">
+        <div role="tablist" aria-label="Pipelines" class="pl-js-only flex rounded-inset bg-surface-2 p-1">
+          {[ads, photos].map((p, i) => (
+            <button
+              type="button"
+              role="tab"
+              id={`tab-${p.id}`}
+              aria-controls={`panel-${p.id}`}
+              aria-selected={i === 0 ? 'true' : 'false'}
+              tabindex={i === 0 ? 0 : -1}
+              data-file={p.file}
+              class="pl-tab rounded-[6px] px-3.5 py-1.5 text-small font-medium text-muted"
+            >
+              {p.tab}
+            </button>
+          ))}
+        </div>
+        <p class="label mx-auto hidden text-muted md:block" data-file-title aria-hidden="true">{ads.file}</p>
+        <button type="button" class="pl-js-only btn btn-primary btn-sm ml-auto md:ml-0" data-run>
+          <Icon name="ph:play-fill" size={14} aria-hidden="true" /> Run pipeline
+        </button>
+      </div>
+
+      {[ads, photos].map((p) => (
+        <div role="tabpanel" id={`panel-${p.id}`} aria-labelledby={`tab-${p.id}`} tabindex="0" data-panel={p.id}>
+          <h3 class="pl-panel-title label border-b border-line bg-surface px-4 py-3 text-ink">{p.tab}</h3>
+          <div class="pl-wrap">
+            <div class="pl-graph grid-canvas" data-graph>
+              <svg data-edges class="pointer-events-none absolute inset-0 z-[1] size-full" aria-hidden="true">
+                {p.stages.slice(0, -1).map((_, s) => (
+                  <path class="edge" data-state="done" data-stage-edge data-from={`${p.id}-s${s}:down`} data-to={`${p.id}-s${s + 1}:up`} />
+                ))}
+                <path class="edge" data-state="done" data-link data-from={`${p.id}-s5:out`} data-to={`${p.id}-o0:in`} data-from-compact={`${p.id}-s5:down`} data-to-compact={`${p.id}-o0:up`} />
+                <path class="edge" data-state="done" data-link data-from={`${p.id}-o0:down`} data-to={`${p.id}-o1:up`} />
+                <circle class="packet" r="3" opacity="0" />
+                <circle class="packet" r="3" opacity="0" />
+              </svg>
+
+              <ol class="pl-stages" aria-label={`${p.tab} stages`}>
+                {p.stages.map((s, n) => (
+                  <li class="node pl-stage" data-node={`${p.id}-s${n}`} data-stage data-state="done">
+                    {n > 0 && <span class="port" data-side="up" />}
+                    <Icon name={s.icon} size={18} class="shrink-0 text-primary" aria-hidden="true" />
+                    <div class="min-w-0">
+                      <p class="pl-kind label text-muted">{s.kind}</p>
+                      <p class="truncate text-small font-semibold text-ink">{s.title}</p>
+                    </div>
+                    <span class="ml-auto shrink-0 font-mono text-[0.6875rem] text-muted">{s.meta}</span>
+                    <Icon name="ph:check-bold" size={12} class="node-check shrink-0" aria-hidden="true" />
+                    <span class="port pl-port-out" data-side="down" />
+                  </li>
+                ))}
+              </ol>
+
+              <div class="pl-outputs">
+                {p.id === 'ads' ? (
+                  <>
+                    <div class="node" data-node="ads-o0" data-output data-state="done">
+                      <span class="port pl-in" data-side="in" />
+                      <div class="node-bar">
+                        One practice, one campaign <span class="ml-auto text-muted normal-case tracking-normal">8 files</span>
+                      </div>
+                      <div class="p-4">
+                        <ul role="list" class="pl-frames" aria-label="Deliverables">
+                          {deliverables.map((d) => (
+                            <li class="pl-item" data-item data-state="done" data-name={d.name}>
+                              <AdFrame size={d.size} color={persona.color} />
+                              <p class="mt-1.5 flex items-center gap-1 font-mono text-[0.625rem] leading-tight text-muted">
+                                <Icon name={d.type === 'Video' ? 'ph:film-strip' : 'ph:image'} size={11} aria-hidden="true" />
+                                {d.v} {d.size}
+                                <span class="sr-only">{d.type}</span>
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                        <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-line pt-3">
+                          <Icon name="ph:file" size={14} class="shrink-0 text-muted" aria-hidden="true" />
+                          <p class="pl-ticker min-w-0 flex-1 font-mono text-[0.75rem] wrap-anywhere text-ink" data-ticker data-idle="Waiting for render" data-final={deliverables.at(-1)!.name} aria-hidden="true">
+                            {deliverables.at(-1)!.name}
+                          </p>
+                          <span class="sr-only">Example file name: {deliverables.at(-1)!.name}</span>
+                          <span class="ph-chip">Illustrative</span>
+                        </div>
+                      </div>
+                      <span class="port" data-side="down" />
+                    </div>
+
+                    <div class="node" data-node="ads-o1" data-output data-state="done">
+                      <span class="port" data-side="up" />
+                      <div class="node-bar">Across the portfolio</div>
+                      <div class="grid gap-4 p-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                        <div class="pl-wave" data-wave data-state="done" aria-hidden="true">
+                          {Array.from({ length: PRACTICES * 8 }, (_, t) => (
+                            <span style={`--c:${t % PRACTICES}`} />
+                          ))}
+                        </div>
+                        <div class="sm:text-right">
+                          <p class="text-stat tabular-nums text-ink">
+                            ~<span data-count="320">320</span>
+                          </p>
+                          <p class="text-small text-muted">files per campaign</p>
+                          <span class="ph-chip mt-2" data-todo="verify">Estimate, verify</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div class="node" data-node="photos-o0" data-output data-state="done">
+                      <span class="port pl-in" data-side="in" />
+                      <div class="node-bar">Production library</div>
+                      <ul role="list" class="grid gap-2.5 p-4">
+                        {folders.map((f) => (
+                          <li class="pl-item pl-folder" data-item data-state="done" data-name={`library/${f.dir}/${f.file}`}>
+                            <Icon name="ph:folder-simple" size={16} class="shrink-0 text-primary" aria-hidden="true" />
+                            <span class="w-14 font-mono text-[0.75rem] text-ink">/{f.dir}</span>
+                            <span class="pl-thumbs" aria-hidden="true">
+                              {Array.from({ length: 6 }, () => <span />)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div class="flex flex-wrap items-center gap-3 border-t border-line px-4 py-3">
+                        <Icon name="ph:file" size={14} class="shrink-0 text-muted" aria-hidden="true" />
+                        <p class="min-w-0 flex-1 font-mono text-[0.75rem] wrap-anywhere text-ink" data-ticker data-idle="Waiting for shoot" data-final={`library/${folders.at(-1)!.dir}/${folders.at(-1)!.file}`} aria-hidden="true">
+                          library/{folders.at(-1)!.dir}/{folders.at(-1)!.file}
+                        </p>
+                        <span class="sr-only">Example file path: library/{folders.at(-1)!.dir}/{folders.at(-1)!.file}</span>
+                        <span class="ph-chip">Illustrative</span>
+                      </div>
+                      <span class="port" data-side="down" />
+                    </div>
+
+                    <div class="node" data-node="photos-o1" data-output data-state="done">
+                      <span class="port" data-side="up" />
+                      <div class="node-bar">Ready for</div>
+                      <ul role="list" class="flex flex-wrap gap-2 p-4">
+                        {handoffs.map((h) => (
+                          <li class="pl-item chip" data-item data-state="done">
+                            <Icon name="ph:check" size={14} class="text-primary" aria-hidden="true" /> {h}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <dl class="pl-results">
+              {p.id === 'ads' ? (
+                <>
+                  <div><dt>Per practice, per campaign</dt><dd>8 deliverables: V1 and V2, Story and Post, static and animated</dd></div>
+                  <div><dt>Ships alongside</dt><dd>A matching site template: nav, hero, and footer</dd></div>
+                  <div><dt>Production time per campaign</dt><dd><span class="ph-chip" data-todo="metric">add before</span> <Icon name="ph:arrow-right" size={12} class="inline text-muted" aria-label="to" /> <span class="ph-chip" data-todo="metric">add after</span></dd></div>
+                </>
+              ) : (
+                <>
+                  <div><dt>Input</dt><dd>Raw client shoots, straight from the photographer</dd></div>
+                  <div><dt>Output</dt><dd>Organized, production-ready libraries</dd></div>
+                  <div><dt>Hours per shoot</dt><dd><span class="ph-chip" data-todo="metric">add before</span> <Icon name="ph:arrow-right" size={12} class="inline text-muted" aria-label="to" /> <span class="ph-chip" data-todo="metric">add after</span></dd></div>
+                </>
+              )}
+            </dl>
+            <p class="sr-only" role="status" data-status data-message={p.id === 'ads' ? 'Pipeline complete: 8 deliverables for one practice, an estimated 320 across the portfolio.' : 'Pipeline complete: raw shoot delivered as a production library.'}></p>
+          </div>
+        </div>
+      ))}
+    </div>
+    <p class="mt-4 text-small text-muted">
+      Ad generator stages mirror the production tool. Practice names, file examples, and photo intake step names are illustrative, to keep client work private.
+    </p>
+  </div>
+</section>
+
+<style>
+  /* Progressive enhancement: tabs and Run exist only once the script has taken over. */
+  [data-pipeline]:not([data-enhanced]) .pl-chrome { display: none; }
+  [data-pipeline]:not([data-enhanced]) [role='tabpanel'] + [role='tabpanel'] { border-top: 1px solid var(--color-line); }
+  [data-pipeline][data-enhanced] .pl-panel-title { display: none; }
+  .pl-tab[aria-selected='true'] { background: var(--color-bg); color: var(--color-ink); box-shadow: var(--shadow-raised); }
+  .pl-tab { transition: color var(--d2) var(--ease-std), background-color var(--d2) var(--ease-std); }
+  .pl-tab:hover { color: var(--color-ink); }
+
+  .pl-wrap { container-type: inline-size; }
+  .pl-graph {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: 72px;
+    padding: 32px;
+  }
+  .pl-stages { display: grid; gap: 26px; align-content: start; position: relative; z-index: 2; }
+  .pl-stage { display: flex; align-items: center; gap: 0.75rem; min-height: 58px; padding: 0.5rem 0.875rem; }
+  .pl-kind { font-size: 0.625rem; }
+  .pl-stage .port[data-side='down'] { display: block; }
+  .pl-stage:last-child .pl-port-out { right: var(--port-off); bottom: auto; top: calc(50% - 4px); left: auto; }
+  .pl-outputs { display: grid; gap: 48px; align-content: start; position: relative; z-index: 2; }
+  .pl-in { display: block; }
+
+  .pl-frames { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; align-items: end; }
+  /* Ready state dims only the graphics; labels keep full contrast so the idle panel stays readable. */
+  .pl-item { transition: transform var(--d3) var(--ease-out); }
+  .pl-item :global(:is(.ad-frame, svg)), .pl-item .pl-thumbs { transition: opacity var(--d3) var(--ease-std); }
+  .pl-item:not([data-state='done']) :global(:is(.ad-frame, svg)),
+  .pl-item:not([data-state='done']) .pl-thumbs { opacity: 0.35; }
+  .pl-frames .pl-item:not([data-state='done']) { transform: translateY(4px); }
+
+  .pl-folder { display: flex; align-items: center; gap: 0.75rem; }
+  .pl-thumbs { display: flex; gap: 4px; }
+  .pl-thumbs span { width: 22px; height: 16px; border-radius: 3px; background: var(--color-graphic-tint); }
+
+  .pl-wave { display: grid; grid-template-columns: repeat(40, minmax(0, 1fr)); gap: 2px; max-width: 520px; }
+  .pl-wave span {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--color-surface-2);
+    transition: background-color var(--d3) var(--ease-std);
+    transition-delay: calc(var(--c) * 22ms);
+  }
+  .pl-wave[data-state='done'] span { background: var(--color-graphic); }
+
+  .pl-results {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--color-line);
+  }
+  .pl-results > div { padding: 1.25rem 1.5rem; }
+  .pl-results > div + div { border-left: 1px solid var(--color-line); }
+  .pl-results dt { font-size: var(--text-small); color: var(--color-muted); }
+  .pl-results dd { margin-top: 0.25rem; font-weight: 600; color: var(--color-ink); font-size: var(--text-small); line-height: 1.5; }
+
+  /* Compact: single column, the last stage drops into the outputs. */
+  @container (max-width: 760px) {
+    .pl-graph { --graph-compact: 1; grid-template-columns: minmax(0, 1fr); gap: 48px; padding: 20px; }
+    .pl-stage:last-child .pl-port-out { right: auto; top: auto; bottom: var(--port-off); left: calc(50% - 4px); }
+    .pl-in { left: calc(50% - 4px); top: var(--port-off); }
+    .pl-frames { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .pl-results { grid-template-columns: minmax(0, 1fr); }
+    .pl-results > div + div { border-left: 0; border-top: 1px solid var(--color-line); }
+  }
+</style>
+
+<script>
+  import { layoutEdges, reducedMotion, watchVisibility } from '../scripts/graph';
+  import { createPipelineRunner } from '../scripts/pipeline';
+
+  const root = document.querySelector<HTMLElement>('[data-pipeline]');
+  if (root) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = tabs.map((t) => document.getElementById(t.getAttribute('aria-controls')!)!);
+    const relayouts = panels.map((p) => layoutEdges(p.querySelector<HTMLElement>('[data-graph]')!));
+    const runners = panels.map(createPipelineRunner);
+    const title = root.querySelector<HTMLElement>('[data-file-title]');
+    const ARROW_NEXT: Record<string, (i: number, last: number) => number> = {
+      ArrowRight: (i, last) => (i === last ? 0 : i + 1),
+      ArrowLeft: (i, last) => (i === 0 ? last : i - 1),
+      Home: () => 0,
+      End: (_, last) => last,
+    };
+    let current = 0;
+    let started = false;
+    let queued = 0;
+
+    // Layout runs in the rAF queued by relayout; play is queued after it in the same frame.
+    // Only one pending start exists at a time, and it is bound to the panel that asked for it.
+    const playAfterLayout = () => {
+      cancelAnimationFrame(queued);
+      const runner = runners[current];
+      relayouts[current]();
+      queued = requestAnimationFrame(() => runner.play());
+    };
+
+    const select = (i: number, focus = false) => {
+      if (i === current) return;
+      cancelAnimationFrame(queued);
+      runners[current].finish();
+      tabs.forEach((t, j) => {
+        t.setAttribute('aria-selected', String(j === i));
+        t.tabIndex = j === i ? 0 : -1;
+      });
+      panels.forEach((p, j) => (p.hidden = j !== i));
+      current = i;
+      if (title) title.textContent = tabs[i].dataset.file ?? '';
+      if (focus) tabs[i].focus();
+      if (started) playAfterLayout();
+    };
+
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        const next = ARROW_NEXT[e.key];
+        if (!next) return;
+        e.preventDefault();
+        select(next(i, tabs.length - 1), true);
+      });
+    });
+
+    root.querySelector('[data-run]')?.addEventListener('click', () => {
+      started = true;
+      playAfterLayout();
+    });
+
+    // Enhance: tabs on, inactive panel hidden, ready state below the fold. The finished markup
+    // stays in place for no-JS and reduced motion.
+    root.toggleAttribute('data-enhanced', true);
+    panels.forEach((p, j) => (p.hidden = j !== current));
+    if (!reducedMotion.matches) runners.forEach((r) => r.reset());
+    watchVisibility(root, (visible) => {
+      if (!visible || started) return;
+      started = true;
+      playAfterLayout();
+    }, 0.3);
+    // Fully offscreen or tab hidden: settle the run into its final state instead of animating
+    // unseen. `started` stays true, so coming back never restarts autoplay (Run replays).
+    const settle = () => {
+      if (!started) return; // before the first run, the ready state must stay as it is
+      cancelAnimationFrame(queued);
+      runners[current].finish();
+    };
+    watchVisibility(root, (onScreen) => onScreen || settle(), 0);
+    document.addEventListener('visibilitychange', () => document.hidden && settle());
+  }
+</script>

@@ -1,0 +1,147 @@
+---
+import Guide from './Guide.astro';
+import Spec from './Spec.astro';
+import { personas } from '../../data/site';
+
+type Row = {
+  name: string;
+  value: string;
+  role: string;
+  contrast?: string; // measured WCAG ratio + what it is measured against
+  light?: boolean; // needs a hairline ring to read on white
+};
+
+const light: Row[] = [
+  { name: 'bg / white', value: 'oklch(1 0 0)', role: 'Page background. Pure white, light theme only.', light: true },
+  { name: 'ink', value: 'oklch(0.205 0.018 222)', role: 'Headings and body text.', contrast: '17.9:1 on white, AAA' },
+  { name: 'muted', value: 'oklch(0.47 0.02 215)', role: 'Secondary text, captions, logo rail.', contrast: '6.8:1 on white, AA' },
+  { name: 'primary', value: 'oklch(0.46 0.08 188)', role: 'Button fills, key emphasis, primary-colored text.', contrast: 'white text on it 6.8:1, AA' },
+  { name: 'primary-hover', value: 'oklch(0.42 0.075 188)', role: 'Hover state of primary fills.', contrast: 'white text on it 7.8:1' },
+  { name: 'graphic-deep', value: 'oklch(0.6 0.09 188)', role: 'Active edges, focus rings, progress, port strokes.', contrast: '3.8:1 on white, non-text only' },
+  { name: 'graphic', value: 'oklch(0.72 0.1 188)', role: 'Port fills, done edges, wire tint. The seed teal, demoted to graphics.', contrast: '2.4:1 on white, non-text only' },
+  { name: 'graphic-tint', value: 'oklch(0.94 0.03 188)', role: 'Teal wash behind strokes, swatches, selection.', light: true },
+  { name: 'danger', value: 'oklch(0.5 0.17 27)', role: 'Form errors only: error borders and error message text. State semantics, never decoration.', contrast: '6.55:1 on white, AA' },
+  { name: 'surface', value: 'oklch(0.978 0.004 200)', role: 'Bands: proof rail, footer base, tab bars.', light: true },
+  { name: 'surface-2', value: 'oklch(0.955 0.006 200)', role: 'Inset wells, segmented tracks, bento cells, chips.', light: true },
+  { name: 'line', value: 'oklch(0.9 0.01 200)', role: 'Hairlines, dividers, idle edges, node borders.', light: true },
+  { name: 'grid', value: 'oklch(0.92 0.008 200)', role: 'Node-canvas dot grid. Only behind real graph surfaces.', light: true },
+  { name: 'dash', value: 'oklch(0.75 0.005 220)', role: 'Placeholder dashed borders.', light: true },
+  { name: 'dash-ink', value: 'oklch(0.52 0.01 220)', role: 'Placeholder labels and specimen captions.', contrast: '5.5:1 on white, AA' },
+  { name: 'on-ink-muted', value: 'oklch(0.78 0.02 215)', role: 'Secondary text on ink bands.', contrast: '9.0:1 on ink, AA' },
+];
+
+const dark: Row[] = [
+  { name: 'dark-bg', value: 'oklch(0.16 0.015 220)', role: 'Page' },
+  { name: 'dark-surface', value: 'oklch(0.195 0.015 220)', role: 'Bands' },
+  { name: 'dark-surface-2', value: 'oklch(0.235 0.02 220)', role: 'Wells' },
+  { name: 'dark-line', value: 'oklch(0.32 0.02 220)', role: 'Hairlines' },
+  { name: 'dark-ink', value: 'oklch(0.95 0.005 220)', role: 'Text', contrast: '16.8:1' },
+  { name: 'dark-ink-muted', value: 'oklch(0.72 0.02 215)', role: 'Secondary text', contrast: '7.9:1' },
+  { name: 'dark-primary', value: 'oklch(0.7 0.11 188)', role: 'Fills, dark text on it', contrast: '7.1:1' },
+  { name: 'dark-graphic', value: 'oklch(0.78 0.1 188)', role: 'Graph graphics' },
+];
+---
+
+<Guide
+  id="color"
+  title="Color"
+  intro="One teal family carries the brand: fills for actions, deep strokes for live state, tints for washes. Every ratio below is measured, not guessed."
+>
+  <div class="rounded-card border border-line">
+    {light.map((row) => (
+      <div class="swatch-row">
+        <span
+          class:list={['swatch', row.light && 'ring-line ring-1 ring-inset']}
+          style={`background: ${row.value}`}
+          aria-hidden="true"
+        ></span>
+        <span class="grid min-w-0 gap-0.5">
+          <code class="font-mono text-[0.8125rem] font-medium text-ink">{row.name}</code>
+          <code class="font-mono text-[0.6875rem] text-dash-ink">{row.value}</code>
+        </span>
+        <span class="min-w-0 text-small text-muted">{row.role}</span>
+        <span class="justify-self-start sm:justify-self-end">
+          {row.contrast && <span class="chip font-mono text-[0.6875rem]">{row.contrast}</span>}
+        </span>
+      </div>
+    ))}
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <Spec label="dark tokens" note="Documented for a future dark mode. Nothing ships them yet." pad={false}>
+      <div class="dark-card">
+        <p class="label" style="color: oklch(0.72 0.02 215)">Dark, documented only</p>
+        <p class="mt-3 text-body" style="color: oklch(0.95 0.005 220)">Text on dark reads at 16.8:1.</p>
+        <p class="mt-1 text-small" style="color: oklch(0.72 0.02 215)">
+          Secondary text reads at 7.9:1. White text is never used on dark-primary; pair it with dark text at 7.1:1.
+        </p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          {dark.map((row) => (
+            <span class="grid justify-items-center gap-1">
+              <span class="dark-swatch" style={`background: ${row.value}`} aria-hidden="true"></span>
+              <code class="font-mono text-[0.625rem]" style="color: oklch(0.72 0.02 215)">{row.name.replace('dark-', '')}</code>
+            </span>
+          ))}
+        </div>
+        <p class="mt-4 font-mono text-[0.6875rem]" style="color: oklch(0.72 0.02 215)">
+          {dark.filter((r) => r.contrast).map((r) => `${r.name} ${r.contrast}`).join(' / ')}
+        </p>
+      </div>
+    </Spec>
+
+    <Spec label="client color" note="Persona and client palettes exist only inside rendered-output previews.">
+      <div class="ph-frame rounded-inset p-4">
+        <p class="label text-dash-ink">Rendered-output preview</p>
+        <div class="mt-3 flex flex-wrap gap-1.5">
+          {personas.map((p) => (
+            <span
+              class="h-8 w-8 rounded-[4px]"
+              style={`background: ${p.color}`}
+              title={`${p.name}, ${p.archetype}`}
+            ></span>
+          ))}
+        </div>
+      </div>
+      <p class="mt-4 max-w-[60ch] text-small text-muted">
+        The 11 OrthoBoost persona accents above may tint ad tiles, mock renders, and brand-kit previews. They never
+        color UI: no persona-tinted buttons, chips, headings, or borders anywhere else.
+      </p>
+    </Spec>
+  </div>
+</Guide>
+
+<style>
+  .swatch-row {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 0.5rem 1rem;
+    align-items: center;
+    padding: 0.875rem 1.25rem;
+  }
+  .swatch-row + .swatch-row { border-top: 1px solid var(--color-line); }
+  @media (max-width: 47.99rem) {
+    .swatch-row > :nth-child(3),
+    .swatch-row > :nth-child(4) { grid-column: 1 / -1; }
+    .swatch-row .chip { white-space: normal; height: auto; min-height: 28px; padding-block: 0.125rem; }
+  }
+  @media (min-width: 48rem) {
+    .swatch-row { grid-template-columns: 48px 200px minmax(0, 1fr) auto; }
+  }
+  .swatch {
+    width: 48px;
+    height: 40px;
+    border-radius: var(--radius-inset);
+  }
+  .dark-card {
+    background: oklch(0.16 0.015 220);
+    border-radius: var(--radius-card);
+    padding: 1.5rem;
+    height: 100%;
+  }
+  .dark-swatch {
+    width: 36px;
+    height: 28px;
+    border-radius: 6px;
+    box-shadow: inset 0 0 0 1px oklch(0.32 0.02 220);
+  }
+</style>

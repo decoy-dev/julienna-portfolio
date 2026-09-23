@@ -1,0 +1,85 @@
+---
+import { Icon } from 'astro-icon/components';
+import Slot from '../components/Slot.astro';
+import { href } from '../lib/url';
+
+const feature = {
+  title: 'One brand system for ~40 orthodontic practices',
+  client: 'OrthoBoost',
+  years: '2025 to now',
+  summary: 'An 11-persona brand and web system. Every practice gets distinct, on-brand sites, ads, and copy from the same foundation.',
+  outcomes: ['~40 practices', '11 personas', 'Promoted to Creative Director'],
+  brief: '16:9 · 2-3 client sites in browser frames + persona grid sheet',
+};
+const pair = [
+  {
+    title: 'Product visualization at catalog scale',
+    client: 'Wincore, via Machine Communications',
+    years: '2022-2025',
+    summary: 'Photoreal renders built from DWG and STEP engineering files, delivered as a template library for every finish and glass option.',
+    outcomes: ['+25% online sales', '2,000+ configurations'],
+    ratio: '4 / 3',
+    brief: '4:3 · hero product render + finish variations strip',
+    span: 'lg:col-span-7',
+  },
+  {
+    title: 'A convention brand people wear',
+    client: 'Geek Inc.',
+    years: '2019-2022',
+    summary: 'One identity across three comic and toy conventions: website, apparel, signage, badges, bracelets, and billboards.',
+    outcomes: ['30,000+ attendees a year', '+27% pre-registration'],
+    ratio: '4 / 5',
+    brief: '4:5 · billboard or convention floor + badge flat-lay',
+    span: 'lg:col-span-5',
+  },
+];
+---
+
+<section id="work" class="relative py-[clamp(80px,12vh,128px)]" aria-labelledby="work-title">
+  <div class="shell">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h2 id="work-title" class="text-h2">Selected work</h2>
+        <p class="mt-4 max-w-[52ch] text-body text-muted">Brand, web, and visualization for healthcare, manufacturing, and live events.</p>
+      </div>
+      <a href={href('/work')} class="link">All projects <Icon name="ph:arrow-right" size={16} class="link-arrow" aria-hidden="true" /></a>
+    </div>
+
+    <article class="work-card group mt-10">
+      <a href={href('/work')} class="block rounded-media" tabindex="-1" aria-hidden="true">
+        <div class="overflow-hidden rounded-media"><Slot ratio="16 / 9" brief={feature.brief} class="work-media" /></div>
+      </a>
+      <div class="mt-6 grid gap-6 lg:grid-cols-12">
+        <div class="lg:col-span-5">
+          <p class="label text-muted">{feature.client} <span aria-hidden="true">/</span> {feature.years}</p>
+          <h3 class="mt-2 text-h3"><a href={href('/work')} class="hover:text-primary">{feature.title}</a></h3>
+        </div>
+        <p class="text-small text-muted lg:col-span-4">{feature.summary}</p>
+        <ul role="list" class="flex flex-wrap content-start gap-2 lg:col-span-3 lg:justify-end">
+          {feature.outcomes.map((o) => <li class="chip">{o}</li>)}
+        </ul>
+      </div>
+    </article>
+
+    <div class="mt-16 grid gap-16 lg:grid-cols-12 lg:gap-8">
+      {pair.map((p, i) => (
+        <article class:list={['work-card group', p.span, { 'lg:mt-24': i === 1 }]}>
+          <a href={href('/work')} class="block rounded-media" tabindex="-1" aria-hidden="true">
+            <div class="overflow-hidden rounded-media"><Slot ratio={p.ratio} brief={p.brief} class="work-media" /></div>
+          </a>
+          <p class="label mt-6 text-muted">{p.client} <span aria-hidden="true">/</span> {p.years}</p>
+          <h3 class="mt-2 text-h3"><a href={href('/work')} class="hover:text-primary">{p.title}</a></h3>
+          <p class="mt-2 max-w-[52ch] text-small text-muted">{p.summary}</p>
+          <ul role="list" class="mt-4 flex flex-wrap gap-2">
+            {p.outcomes.map((o) => <li class="chip">{o}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .work-card :global(.work-media) { transition: transform var(--d3) var(--ease-out); }
+  .work-card:hover :global(.work-media) { transform: scale(1.02); }
+</style>

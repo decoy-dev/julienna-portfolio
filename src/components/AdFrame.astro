@@ -1,0 +1,40 @@
+---
+/**
+ * Schematic of one rendered deliverable, drawn from the real Split Stack template zones
+ * (src/data/split-stack.json, copied from the OrthoBoost ad generator). Persona color is client
+ * content, so it is allowed here and nowhere in the UI.
+ */
+import template from '../data/split-stack.json';
+
+interface Props {
+  size: 'Story' | 'Post';
+  color: string;
+}
+const { size, color } = Astro.props;
+const canvas = size === 'Story' ? { w: 1080, h: 1920 } : { w: 1080, h: 1350 };
+const zones = template.zones[size];
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(2)}%`;
+const FILL: Record<string, string> = {
+  photo: `color-mix(in oklab, ${color} 22%, white)`,
+  logo: 'oklch(0.205 0.018 222 / 0.18)',
+  headline: 'oklch(0.205 0.018 222 / 0.75)',
+  subhead: 'oklch(0.47 0.02 215 / 0.4)',
+  cta: color,
+};
+---
+
+<div class="ad-frame relative overflow-hidden rounded-[6px] bg-white" style={`aspect-ratio:${canvas.w}/${canvas.h}`} aria-hidden="true">
+  {zones.map((z) => (
+    <span
+      class:list={['zone absolute', `zone-${z.slot}`]}
+      style={`left:${pct(z.x, canvas.w)};top:${pct(z.y, canvas.h)};width:${pct(z.w, canvas.w)};height:${pct(z.h, canvas.h)};background:${FILL[z.slot]}`}
+    />
+  ))}
+</div>
+
+<style>
+  .ad-frame { box-shadow: inset 0 0 0 1px var(--color-line); }
+  .zone-cta, .zone-logo { border-radius: 999px; }
+  .zone-headline { border-radius: 2px; clip-path: inset(8% 0 8% 0); }
+  .zone-subhead { border-radius: 2px; clip-path: inset(20% 12% 20% 0); }
+</style>

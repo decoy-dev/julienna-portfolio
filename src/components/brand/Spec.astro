@@ -1,0 +1,20 @@
+---
+/** A live specimen: the rendered thing on top, its class or component name below in mono. */
+interface Props {
+  label: string; // class / component reference, e.g. ".btn.btn-primary"
+  note?: string; // one-line usage rule
+  class?: string; // extra classes for the specimen surface (e.g. bg-ink, grid-canvas)
+  pad?: boolean;
+}
+const { label, note, class: className, pad = true, ...rest } = Astro.props;
+---
+
+<figure class="m-0 min-w-0" {...rest}>
+  <div class:list={['rounded-card border border-line', className ?? 'bg-bg', pad && 'p-5 sm:p-6']}>
+    <slot />
+  </div>
+  <figcaption class="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+    <code class="font-mono text-[0.75rem] tracking-[0.02em] text-dash-ink">{label}</code>
+    {note && <span class="text-small text-muted">{note}</span>}
+  </figcaption>
+</figure>

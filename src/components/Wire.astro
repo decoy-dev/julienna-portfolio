@@ -1,0 +1,12 @@
+---
+/** Left-gutter section wire. Parent section needs `data-wired`. `portTop` aligns the port to the H2. */
+interface Props {
+  portTop?: string;
+}
+const { portTop } = Astro.props;
+---
+
+<div class="wire" aria-hidden="true" style={portTop ? `--port-top: ${portTop}` : undefined}>
+  <div class="wire-fill"></div>
+  <span class="wire-port"></span>
+</div>

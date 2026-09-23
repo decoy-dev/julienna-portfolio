@@ -1,0 +1,406 @@
+@import "tailwindcss";
+
+/* ───────────────────────── Fonts (self-hosted, latin subset) ───────────────────────── */
+@font-face {
+  font-family: "Host Grotesk";
+  src: url("../assets/fonts/host-grotesk-var.woff2") format("woff2");
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Commit Mono";
+  src: url("../assets/fonts/commit-mono-500.woff2") format("woff2");
+  font-weight: 400 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ───────────────────────── Tokens (DESIGN.md is the contract) ───────────────────────── */
+@theme {
+  --color-*: initial;
+  --color-bg: oklch(1 0 0);
+  --color-surface: oklch(0.978 0.004 200);
+  --color-surface-2: oklch(0.955 0.006 200);
+  --color-line: oklch(0.9 0.01 200);
+  --color-ink: oklch(0.205 0.018 222);
+  --color-muted: oklch(0.47 0.02 215);
+  --color-primary: oklch(0.46 0.08 188);
+  --color-primary-hover: oklch(0.42 0.075 188);
+  --color-graphic: oklch(0.72 0.1 188);
+  --color-graphic-deep: oklch(0.6 0.09 188);
+  --color-graphic-tint: oklch(0.94 0.03 188);
+  --color-dash: oklch(0.75 0.005 220);
+  --color-dash-ink: oklch(0.52 0.01 220); /* ≥4.8:1 on bg, surface and surface-2 */
+  --color-grid: oklch(0.92 0.008 200);
+  --color-white: oklch(1 0 0);
+  --color-on-ink-muted: oklch(0.78 0.02 215);
+  --color-danger: oklch(0.5 0.17 27); /* form errors only; state semantics, never decoration */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --font-*: initial;
+  --font-sans: "Host Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --text-display: clamp(2.5rem, 1.6rem + 3.4vw, 4rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+  --text-display--font-weight: 650;
+  --text-h2: clamp(2rem, 1.5rem + 1.8vw, 3rem);
+  --text-h2--line-height: 1.1;
+  --text-h2--letter-spacing: -0.025em;
+  --text-h2--font-weight: 600;
+  --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: -0.015em;
+  --text-h3--font-weight: 600;
+  --text-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  --text-body--line-height: 1.6;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+  --text-label: 0.75rem;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.08em;
+  --text-label--font-weight: 500;
+  --text-stat: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+  --text-stat--line-height: 1.1;
+  --text-stat--letter-spacing: -0.02em;
+  --text-stat--font-weight: 650;
+
+  --radius-*: initial;
+  --radius-inset: 8px;
+  --radius-card: 12px;
+  --radius-media: 16px;
+  --radius-full: 999px;
+
+  --shadow-*: initial;
+  --shadow-raised: 0 1px 2px oklch(0.3 0.03 220 / 0.06), 0 4px 12px oklch(0.3 0.03 220 / 0.05);
+  --shadow-float: 0 2px 4px oklch(0.3 0.03 220 / 0.06), 0 12px 32px oklch(0.3 0.03 220 / 0.08);
+
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --breakpoint-wire: 85rem;
+}
+
+:root {
+  --d1: 120ms;
+  --d2: 200ms;
+  --d3: 350ms;
+  --d4: 600ms;
+  --gutter: clamp(20px, 4vw, 24px);
+  --nav-h: 56px;
+  --nav-top: 16px;
+  /* z-index scale: content < wire < sticky chrome < popover */
+  --z-wire: 1;
+  --z-chrome: 20;
+  --z-popover: 30;
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: calc(var(--nav-h) + var(--nav-top) + 24px);
+    scrollbar-color: var(--color-surface-2) transparent;
+    scrollbar-width: thin;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html:focus-within { scroll-behavior: smooth; }
+  }
+  body {
+    font-size: var(--text-body);
+    line-height: 1.6;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  ::selection { background: var(--color-graphic-tint); color: var(--color-ink); }
+  :focus-visible {
+    outline: 2px solid var(--color-graphic-deep);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  /* Custom scrollbar (WebKit/Blink). Firefox uses scrollbar-color above. */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-2);
+    border: 2px solid var(--color-bg);
+    border-radius: 999px;
+    transition: background-color var(--d2) var(--ease-std);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-graphic-deep); }
+  ::-webkit-scrollbar-thumb:active { background: var(--color-primary); }
+}
+
+/* Cross-document view transitions: native, progressive, off for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root) { animation: vt-out var(--d3) var(--ease-in) both; }
+  ::view-transition-new(root) { animation: vt-in var(--d3) var(--ease-out) both; }
+}
+@keyframes vt-out { to { opacity: 0; transform: translateY(-6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+
+/* ───────────────────────── Components ───────────────────────── */
+@layer components {
+  .shell {
+    width: min(1200px, 100% - 2 * var(--gutter));
+    margin-inline: auto;
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    line-height: 1.4;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    text-transform: uppercase;
+  }
+
+  /* Buttons: pill, one height scale. Primary = teal fill + white text (6.8:1). */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 44px;
+    padding-inline: 1.25rem;
+    border-radius: var(--radius-full);
+    font-size: var(--text-small);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color var(--d1) var(--ease-std), color var(--d1) var(--ease-std),
+      box-shadow var(--d2) var(--ease-std), transform var(--d1) var(--ease-std);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: translateY(1px) scale(0.99); }
+  .btn-sm { height: 36px; padding-inline: 1rem; }
+  .btn-primary { background: var(--color-primary); color: var(--color-white); }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-ghost { color: var(--color-ink); box-shadow: inset 0 0 0 1.5px var(--color-line); background: var(--color-bg); }
+  .btn-ghost:hover { box-shadow: inset 0 0 0 1.5px var(--color-ink); }
+  .btn-invert { background: var(--color-white); color: var(--color-ink); }
+  .btn-invert:hover { background: var(--color-graphic-tint); }
+  .btn-outline-invert { color: var(--color-white); box-shadow: inset 0 0 0 1.5px oklch(1 0 0 / 0.6); }
+  .btn-outline-invert:hover { box-shadow: inset 0 0 0 1.5px var(--color-white); }
+  .btn .btn-arrow { transition: transform var(--d2) var(--ease-out); }
+  .btn:hover .btn-arrow { transform: translateX(2px); }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1.5px;
+  }
+  .link:hover { text-decoration-line: underline; }
+  .link .link-arrow { transition: transform var(--d2) var(--ease-out); }
+  .link:hover .link-arrow { transform: translateX(3px); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 28px;
+    padding-inline: 0.75rem;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-2);
+    color: var(--color-ink);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Placeholder system: data wells waiting for input. Never confused with real content. */
+  .ph-frame {
+    border: 1.5px dashed var(--color-dash);
+    background: oklch(0.97 0.004 200 / 0.5);
+    color: var(--color-dash-ink);
+  }
+  .ph-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.125rem 0.5rem;
+    border: 1.5px dashed var(--color-dash);
+    border-radius: var(--radius-full);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-dash-ink);
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  /* Node-graph canvas grid. Only ever behind real graph surfaces (DESIGN.md → Motif). */
+  .grid-canvas {
+    background-color: var(--color-bg);
+    background-image: radial-gradient(circle at center, var(--color-grid) 1.5px, transparent 1.6px);
+    background-size: 24px 24px;
+    background-position: 12px 12px;
+  }
+  .grid-canvas-ink {
+    background-color: var(--color-ink);
+    background-image: radial-gradient(circle at center, oklch(1 0 0 / 0.07) 1.5px, transparent 1.6px);
+    background-size: 24px 24px;
+    background-position: 12px 12px;
+  }
+
+  /* Node anatomy. A real border (not an inset shadow) so the title bar can't paint over it.
+     Ports are offset by half their size plus the border, centering them on the border-box edge
+     that the edge router measures. */
+  .node {
+    --port-off: -5.5px;
+    position: relative;
+    background: var(--color-bg);
+    border: 1.5px solid var(--color-line);
+    border-radius: var(--radius-card);
+    transition: border-color var(--d3) var(--ease-std), box-shadow var(--d3) var(--ease-std);
+  }
+  .node-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 28px;
+    padding: 0 0.75rem;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+    border-radius: calc(var(--radius-card) - 1.5px) calc(var(--radius-card) - 1.5px) 0 0;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+    color: var(--color-ink);
+  }
+  .node[data-state="active"] { border-color: var(--color-graphic-deep); box-shadow: var(--shadow-raised); }
+  .node[data-state="done"] { border-color: var(--color-graphic); }
+  .node .node-check { opacity: 0; transition: opacity var(--d2) var(--ease-std); color: var(--color-graphic-deep); }
+  .node[data-state="done"] .node-check { opacity: 1; }
+
+  .port {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep);
+  }
+  .port[data-side="in"] { left: var(--port-off); top: calc(50% - 4px); }
+  .port[data-side="out"] { right: var(--port-off); top: calc(50% - 4px); }
+  .port[data-side="down"] { bottom: var(--port-off); left: calc(50% - 4px); }
+  .port[data-side="up"] { top: var(--port-off); left: calc(50% - 4px); }
+
+  .edge { fill: none; stroke: var(--color-line); stroke-width: 1.5; transition: stroke var(--d3) var(--ease-std); }
+  .edge[data-state="active"] { stroke: var(--color-graphic-deep); }
+  .edge[data-state="done"] { stroke: var(--color-graphic); }
+  /* Packets use the brand teal: one accent sitewide. The white ring separates them from the wire. */
+  .packet { fill: var(--color-graphic-deep); stroke: var(--color-bg); stroke-width: 2; }
+
+  /* App-window frame used by the pipeline demo */
+  .window {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-line);
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .sr-only-focusable:not(:focus) {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
+}
+
+/* Section wire: the page is a pipeline. Desktop ≥ 1360px only; drawn by scroll where supported.
+   Wired sections are full-bleed, so 50% - 600px is the content column's left edge. */
+.wire { display: none; }
+@media (min-width: 85rem) {
+  [data-wired] { position: relative; }
+  .wire {
+    display: block;
+    position: absolute;
+    z-index: var(--z-wire);
+    left: calc(50% - 640px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    pointer-events: none;
+  }
+  .wire::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-line);
+  }
+  .wire-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--color-graphic-deep);
+    transform-origin: top;
+  }
+  .wire-port {
+    position: absolute;
+    left: -4px;
+    top: var(--port-top, 7.5rem);
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep);
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .wire-fill {
+        animation: wire-draw linear both;
+        animation-timeline: view();
+        animation-range: cover 10% cover 75%;
+      }
+      .wire-port {
+        animation: port-fill linear both;
+        animation-timeline: view();
+        animation-range: cover 30% cover 45%;
+      }
+    }
+  }
+}
+@keyframes wire-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes port-fill {
+  from { background: var(--color-bg); }
+  to { background: var(--color-graphic-deep); }
+}
+
+/* Entry drift driven by the element's own view timeline. Zero JS, transform only: content is
+   always fully opaque and readable, with or without support, and under reduced motion. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+  }
+}
+@keyframes reveal {
+  from { transform: translateY(28px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

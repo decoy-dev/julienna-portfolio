@@ -1,0 +1,80 @@
+---
+import Guide from './Guide.astro';
+import Spec from './Spec.astro';
+
+const scale = [
+  { name: 'display', cls: 'text-display', sample: 'Put a system behind it', spec: 'clamp(2.5rem, 4rem) / 1.05 / 650 / -0.03em' },
+  { name: 'h2', cls: 'text-h2', sample: 'Selected work', spec: 'clamp(2rem, 3rem) / 1.1 / 600 / -0.025em' },
+  { name: 'h3', cls: 'text-h3', sample: 'One brand system, forty practices', spec: 'clamp(1.25rem, 1.5rem) / 1.25 / 600 / -0.015em' },
+  { name: 'body', cls: 'text-body', sample: 'Brand, web, motion, and automation shipped by one person.', spec: 'clamp(1rem, 1.125rem) / 1.6 / 400 / 0, max 65ch' },
+  { name: 'small', cls: 'text-small text-muted', sample: 'Secondary copy, captions, and metadata sit one step down.', spec: '0.875rem / 1.5 / 400' },
+  { name: 'label', cls: 'label', sample: 'Worked with', spec: 'mono 0.75rem / 1.4 / 500 / +0.08em / uppercase' },
+  { name: 'stat', cls: 'text-stat tabular-nums', sample: '+25%', spec: 'clamp(1.75rem, 2.5rem) / 1.1 / 650 / -0.02em / tnum' },
+];
+---
+
+<Guide
+  id="type"
+  title="Typography"
+  intro="Host Grotesk does all the talking. Commit Mono marks data: node titles, file names, labels, excerpts. Nothing else."
+>
+  <div class="grid gap-4 md:grid-cols-2">
+    <Spec label="Host Grotesk" note="Variable, self-hosted, latin subset. Weights 400 to 650.">
+      <p class="text-[3rem] leading-none font-[650] tracking-[-0.03em]">Aa</p>
+      <p class="mt-4 text-body break-words">ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789</p>
+      <p class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-body">
+        <span class="font-normal">Regular 400</span>
+        <span class="font-medium">Medium 500</span>
+        <span class="font-semibold">Semibold 600</span>
+        <span class="font-[650]">Display 650</span>
+      </p>
+    </Spec>
+    <Spec label="Commit Mono" note="Weight 500. Data only, never prose or headlines.">
+      <p class="font-mono text-[3rem] leading-none font-medium">Aa</p>
+      <p class="mt-4 font-mono text-[0.8125rem] break-words">Seasonal_Spring-2026_Image_V1_Story_Client</p>
+      <p class="mt-2 font-mono text-[0.8125rem] text-muted break-words">
+        {'{ "archetype": "The Wellness Educator" }'}
+      </p>
+      <p class="mt-3 label text-muted">Uppercase label at +0.08em</p>
+    </Spec>
+  </div>
+
+  <div class="rounded-card border border-line">
+    {scale.map((row) => (
+      <div class="type-row">
+        <code class="font-mono text-[0.75rem] text-dash-ink">{row.name}</code>
+        <p class:list={['min-w-0', row.cls]}>{row.sample}</p>
+        <code class="font-mono text-[0.6875rem] text-muted">{row.spec}</code>
+      </div>
+    ))}
+  </div>
+
+  <ul class="rules">
+    <li>Letter-spacing never goes tighter than -0.04em; only display, h2, and stat track negative.</li>
+    <li>Stats always set <code class="font-mono text-[0.8125rem]">font-feature-settings: "tnum"</code> so digits align in columns.</li>
+    <li>Body measure caps at 65ch. Headlines are sentence case, eight words or fewer.</li>
+    <li>Mono never escapes graph surfaces, captions, or data into prose. If it reads as a sentence, it is sans.</li>
+  </ul>
+</Guide>
+
+<style>
+  .type-row {
+    display: grid;
+    gap: 0.375rem 1.5rem;
+    align-items: baseline;
+    padding: 1rem 1.25rem;
+  }
+  .type-row + .type-row { border-top: 1px solid var(--color-line); }
+  @media (min-width: 48rem) {
+    .type-row { grid-template-columns: 72px minmax(0, 1fr) 260px; }
+  }
+  .rules {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+    max-width: 70ch;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+</style>

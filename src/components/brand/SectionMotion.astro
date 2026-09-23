@@ -1,0 +1,153 @@
+---
+import Guide from './Guide.astro';
+
+const durations = [
+  { token: '--d1', value: '120ms', use: 'hovers, color shifts' },
+  { token: '--d2', value: '200ms', use: 'tabs, menus, chip toggles' },
+  { token: '--d3', value: '350ms', use: 'panels, popovers, page crossfade' },
+  { token: '--d4', value: '600ms', use: 'one pipeline choreography step' },
+];
+
+const easings = [
+  { name: 'standard', value: 'cubic-bezier(0.4, 0, 0.2, 1)', use: 'state morphs' },
+  { name: 'out', value: 'cubic-bezier(0.16, 1, 0.3, 1)', use: 'entrances' },
+  { name: 'in', value: 'cubic-bezier(0.4, 0, 1, 1)', use: 'exits' },
+  { name: 'linear', value: 'linear', use: 'packet travel' },
+];
+---
+
+<Guide
+  id="motion"
+  title="Motion"
+  intro="Four durations, three curves, and packets on linear. Everything animates transform or opacity; nothing bounces."
+>
+  <div class="grid gap-4 lg:grid-cols-2">
+    <div class="rounded-card border border-line">
+      {durations.map((d) => (
+        <div class="tok-row">
+          <code class="font-mono text-[0.8125rem] font-medium">{d.token}</code>
+          <code class="font-mono text-[0.75rem] text-dash-ink">{d.value}</code>
+          <span class="text-small text-muted">{d.use}</span>
+        </div>
+      ))}
+    </div>
+    <div class="rounded-card border border-line">
+      {easings.map((e) => (
+        <div class="tok-row">
+          <code class="font-mono text-[0.8125rem] font-medium">{e.name}</code>
+          <code class="font-mono text-[0.75rem] text-dash-ink">{e.value}</code>
+          <span class="text-small text-muted">{e.use}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <figure class="m-0" data-ease-demo>
+    <div class="rounded-card border border-line p-5 sm:p-6">
+      <div class="flex items-center justify-between gap-4">
+        <p class="text-small font-semibold">Each curve over 600ms</p>
+        <button type="button" class="btn btn-ghost btn-sm" data-ease-replay>Replay</button>
+      </div>
+      <div class="mt-4 grid gap-3">
+        {easings.map((e) => (
+          <div class="ease-lane" style={`--lane-ease: ${e.value}`}>
+            <code class="font-mono text-[0.6875rem] text-dash-ink">{e.name}</code>
+            <div class="ease-track" data-ease-track>
+              <span class="ease-dot"></span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    <figcaption class="mt-2 text-small text-muted">
+      Plays once when it scrolls into view. With reduced motion, dots sit at their end state.
+    </figcaption>
+  </figure>
+
+  <ul class="rules">
+    <li>Animate transform and opacity only, plus SVG stroke-dashoffset and packet position on graph surfaces.</li>
+    <li>Choreography starts from an IntersectionObserver, plays once, and pauses offscreen. Never scroll-driven, never scroll-locked.</li>
+    <li>Every loop is finite or pausable. Under prefers-reduced-motion, show the completed end state.</li>
+    <li>No overshoot, spring, or bounce. anime.js mappings: easeOutExpo for entrances, easeInOutQuad for morphs, linear for packets.</li>
+    <li>The CSS-only <code class="font-mono text-[0.8125rem]">.reveal</code> entry (transform-only rise, no opacity) belongs to the home gallery; never put it on elements graph edges attach to.</li>
+  </ul>
+</Guide>
+
+<style>
+  .tok-row {
+    display: grid;
+    gap: 0.25rem 1.25rem;
+    padding: 0.75rem 1.25rem;
+    align-items: baseline;
+  }
+  .tok-row + .tok-row { border-top: 1px solid var(--color-line); }
+  .tok-row > * { min-width: 0; overflow-wrap: anywhere; }
+  @media (min-width: 40rem) {
+    .tok-row { grid-template-columns: minmax(0, 90px) minmax(0, 220px) minmax(0, 1fr); }
+  }
+  .rules {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+    max-width: 70ch;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+  .ease-lane {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+  }
+  .ease-track {
+    position: relative;
+    height: 32px;
+    border-radius: var(--radius-full);
+    background: var(--color-surface);
+  }
+  .ease-dot {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: var(--color-graphic-deep);
+    transition: transform 600ms var(--lane-ease, linear);
+  }
+  [data-ease-demo].run .ease-dot { transform: translateX(var(--travel, 0px)); }
+</style>
+
+<script>
+  const demo = document.querySelector<HTMLElement>('[data-ease-demo]');
+  if (demo) {
+    const tracks = [...demo.querySelectorAll<HTMLElement>('[data-ease-track]')];
+    const measure = () => {
+      for (const t of tracks) t.style.setProperty('--travel', `${Math.max(0, t.clientWidth - 32)}px`);
+    };
+    const play = () => {
+      measure();
+      demo.classList.remove('run');
+      // Force a style flush so removing and re-adding the class restarts the transition.
+      void demo.offsetWidth;
+      demo.classList.add('run');
+    };
+    demo.querySelector('[data-ease-replay]')?.addEventListener('click', play);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      measure();
+      demo.classList.add('run');
+    } else {
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((e) => e.isIntersecting)) {
+            io.disconnect();
+            play();
+          }
+        },
+        { threshold: 0.4 }
+      );
+      io.observe(demo);
+    }
+  }
+</script>

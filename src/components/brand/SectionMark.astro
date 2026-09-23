@@ -1,0 +1,66 @@
+---
+import Mark from '../Mark.astro';
+import Guide from './Guide.astro';
+import Spec from './Spec.astro';
+import DoDont from './DoDont.astro';
+
+const sizes = [16, 28, 48, 96];
+---
+
+<Guide
+  id="mark"
+  title="The mark"
+  intro="The jb monogram is a one-node pipeline: the stem is an edge, its terminals are ports, the b bowl is a node boundary."
+>
+  <div class="grid gap-4 md:grid-cols-2">
+    <Spec label="<Mark size={n} />" note="Scales from favicon to hero. Min size 16px.">
+      <div class="flex flex-wrap items-end gap-8">
+        {sizes.map((s) => (
+          <div class="grid justify-items-center gap-2">
+            <Mark size={s} />
+            <span class="font-mono text-[0.6875rem] text-dash-ink">{s}px</span>
+          </div>
+        ))}
+      </div>
+    </Spec>
+    <Spec label="<Mark tile />" note="App-icon variant: primary tile, white strokes, tint ports. Min 24px.">
+      <div class="flex flex-wrap items-end gap-8">
+        <div class="grid justify-items-center gap-2">
+          <Mark size={48} tile />
+          <span class="font-mono text-[0.6875rem] text-dash-ink">48px</span>
+        </div>
+        <div class="grid justify-items-center gap-2">
+          <Mark size={96} tile />
+          <span class="font-mono text-[0.6875rem] text-dash-ink">96px</span>
+        </div>
+      </div>
+    </Spec>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2">
+    <Spec label="lockup" note="Mark, 10px gap, name in Host Grotesk 600 at -0.01em.">
+      <div class="flex items-center gap-2.5">
+        <Mark size={32} />
+        <span class="text-[1.125rem] font-semibold tracking-[-0.01em]">Julienna Batten</span>
+      </div>
+    </Spec>
+    <Spec label="clear space" note="One port height (13% of the mark) on all sides, shown dashed.">
+      <div class="ph-frame inline-grid place-items-center rounded-inset p-[12.5px]">
+        <Mark size={96} />
+      </div>
+    </Spec>
+  </div>
+
+  <DoDont topic="mark">
+    <div slot="do">
+      <p>Set the mark in ink on white or surface tints; the ports stay graphic teal.</p>
+      <p>Use the tile variant wherever the mark needs its own bounding shape (favicons, avatars).</p>
+      <p>Keep one port height of clear space; drop to the tile below 16px.</p>
+    </div>
+    <div slot="dont">
+      <p>Never recolor the ports, rotate the mark, or add a shadow or outline.</p>
+      <p>Never place it over photography without a solid or tile background.</p>
+      <p>Never redraw the strokes; the geometry is fixed (viewBox 0 0 40 40, 3.2 stroke).</p>
+    </div>
+  </DoDont>
+</Guide>

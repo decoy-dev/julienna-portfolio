@@ -1,0 +1,52 @@
+---
+import { Icon } from 'astro-icon/components';
+import Guide from './Guide.astro';
+import { href } from '../../lib/url';
+
+const files = [
+  { file: 'jb-mark.svg', desc: 'The monogram, ink on transparent. Fixed geometry, hex colors baked in.' },
+  { file: 'jb-mark-tile.svg', desc: 'App-icon tile: primary teal, white strokes, tint ports.' },
+  { file: 'jb-lockup.svg', desc: 'Mark plus wordmark. Live text; convert to outlines before print handoff.' },
+  { file: 'tokens.css', desc: 'Every custom property: light shipped set plus the documented dark set.' },
+  { file: 'tokens.json', desc: 'The same tokens in W3C design-tokens format for tooling.' },
+  { file: 'fonts.md', desc: 'Host Grotesk and Commit Mono: sources, weights, OFL licenses, serving rules.' },
+];
+---
+
+<Guide
+  id="downloads"
+  title="Downloads"
+  intro="The kit. Same tokens, same geometry, no redrawing. If a value here disagrees with global.css, global.css wins."
+>
+  <ul class="rounded-card border border-line">
+    {files.map((f) => (
+      <li class="dl-row">
+        <a href={href(`/brand-kit/${f.file}`)} download class="dl-link">
+          <Icon name="ph:download-simple" size={18} aria-hidden="true" />
+          <code class="font-mono text-[0.8125rem] font-medium">{f.file}</code>
+        </a>
+        <span class="text-small text-muted">{f.desc}</span>
+      </li>
+    ))}
+  </ul>
+</Guide>
+
+<style>
+  .dl-row {
+    display: grid;
+    gap: 0.25rem 1.5rem;
+    padding: 0.875rem 1.25rem;
+    align-items: baseline;
+  }
+  .dl-row + .dl-row { border-top: 1px solid var(--color-line); }
+  @media (min-width: 48rem) {
+    .dl-row { grid-template-columns: 220px minmax(0, 1fr); }
+  }
+  .dl-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+  }
+  .dl-link:hover code { text-decoration: underline; text-underline-offset: 3px; }
+</style>

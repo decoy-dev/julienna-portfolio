@@ -1,0 +1,147 @@
+---
+import { Icon } from 'astro-icon/components';
+import Guide from './Guide.astro';
+---
+
+<Guide
+  id="motif"
+  title="The node graph"
+  intro="The motif is a patch bay, not a circuit board: labeled nodes, wired ports, right-tangent edges. It appears only where it organizes real content."
+>
+  <figure class="m-0 min-w-0 max-w-full">
+    <div class="max-w-full overflow-x-auto rounded-media border border-line">
+      <div class="stage grid-canvas">
+        <svg class="stage-edges" width="600" height="240" viewBox="0 0 600 240" fill="none" aria-hidden="true">
+          <path class="edge" data-state="active" d="M174 64 C 207 64 207 172 240 172" />
+          <path class="edge" d="M390 172 C 408 172 408 64 426 64" />
+        </svg>
+        <div class="node absolute h-16 w-[150px]" style="left: 24px; top: 32px;" data-state="done">
+          <div class="node-bar">campaign-brief <Icon name="ph:check" size={14} class="node-check ml-auto" aria-hidden="true" /></div>
+          <div class="node-body">Spring-2026</div>
+          <span class="port" data-side="out"></span>
+        </div>
+        <div class="node absolute h-16 w-[150px]" style="left: 240px; top: 140px;" data-state="active">
+          <div class="node-bar">render</div>
+          <div class="node-body">8 / 320 tiles</div>
+          <span class="port" data-side="in"></span>
+          <span class="port" data-side="out"></span>
+        </div>
+        <div class="node absolute h-16 w-[150px]" style="left: 426px; top: 32px;">
+          <div class="node-bar">library</div>
+          <div class="node-body">queued</div>
+          <span class="port" data-side="in"></span>
+        </div>
+        <span class="stage-packet" aria-hidden="true"></span>
+      </div>
+    </div>
+    <figcaption class="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+      <span class="legend"><span class="key key-line"></span> idle edge</span>
+      <span class="legend"><span class="key key-active"></span> active edge</span>
+      <span class="legend"><span class="key key-done"></span> done node</span>
+      <span class="legend"><span class="key key-packet"></span> packet</span>
+      <span class="legend"><span class="key key-port"></span> port</span>
+      <span class="legend"><span class="key key-grid"></span> canvas grid, 24px pitch</span>
+    </figcaption>
+  </figure>
+
+  <div class="grid gap-8 md:grid-cols-2">
+    <ul class="rules">
+      <li><strong class="text-ink">Node</strong>: card radius, 1.5px border, minimum 160x56 on desktop. Mono title bar on surface with a bottom hairline. Idle border is line; active is graphic-deep plus shadow-raised; done is graphic with a 14px check in the bar.</li>
+      <li><strong class="text-ink">Port</strong>: 8px circle centered on the border edge (offset <code class="font-mono text-[0.8125rem]">var(--port-off)</code>), white fill, 1.5px graphic-deep stroke. A port exists only where an edge attaches.</li>
+      <li><strong class="text-ink">Edge</strong>: cubic bezier with horizontal tangents: exit right, enter left (or exit bottom, enter top). 1.5px stroke. Edges never cross and never loop.</li>
+      <li><strong class="text-ink">Packet</strong>: 6px graphic-deep dot with a 2px white ring, linear travel, one per active edge, staggered 600ms. Packets only move; a packet at rest is a bug.</li>
+    </ul>
+    <ul class="rules">
+      <li>The dot-grid canvas appears only behind genuine graph surfaces: hero graph, pipeline stage, footer sitemap, closing band. Never as texture elsewhere.</li>
+      <li>Maximum six nodes per graph outside the pipeline demo.</li>
+      <li>Every node label is real production vocabulary (persona names, pipeline steps, the file naming convention). No lorem nodes.</li>
+      <li>Mono stays on graph surfaces and captions; it never leaks into prose.</li>
+      <li>No gradients, glows, or neon on wires. State reads from stroke color and the check, not from effects.</li>
+    </ul>
+  </div>
+</Guide>
+
+<style>
+  .stage {
+    position: relative;
+    width: 600px;
+    margin-inline: auto;
+    height: 240px;
+  }
+  .stage-edges {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .node-body {
+    padding: 0.375rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+  }
+  .stage-packet {
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-graphic-deep);
+    box-shadow: 0 0 0 2px var(--color-white);
+    offset-path: path('M174 64 C 207 64 207 172 240 172');
+    offset-rotate: 0deg;
+    animation: motif-packet 2.4s linear infinite;
+  }
+  @keyframes motif-packet {
+    0% { offset-distance: 0%; opacity: 0; }
+    12% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage-packet { display: none; }
+  }
+  .legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--color-dash-ink);
+  }
+  .key { display: inline-block; }
+  .key-line { width: 20px; height: 2px; background: var(--color-line); }
+  .key-active { width: 20px; height: 2px; background: var(--color-graphic-deep); }
+  .key-done { width: 20px; height: 2px; background: var(--color-graphic); }
+  .key-packet {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-graphic-deep);
+    box-shadow: 0 0 0 2px var(--color-white), 0 0 0 3px var(--color-line);
+  }
+  .key-port {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-white);
+    box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep);
+  }
+  .key-grid {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background-image: radial-gradient(circle at center, var(--color-grid) 1.5px, transparent 1.6px);
+    background-size: 7px 7px;
+    border: 1px solid var(--color-line);
+  }
+  .rules {
+    display: grid;
+    gap: 0.625rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+</style>

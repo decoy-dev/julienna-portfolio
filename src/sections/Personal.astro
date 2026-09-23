@@ -1,0 +1,41 @@
+---
+import Slot from '../components/Slot.astro';
+
+type Piece = { title: string; meta: string; ratio: string; brief: string; note?: string; placeholder?: boolean };
+const pieces: Piece[] = [
+  { title: 'GLEAM visualizers', meta: '3D, loop', ratio: '1 / 1', brief: '1:1 · GLEAM visualizer still, low-poly room', note: 'Includes work for an artist with 10M+ Spotify plays' },
+  { title: 'Show posters', meta: 'Print', ratio: '4 / 5', brief: '4:5 · strongest poster, straight-on scan', note: 'Grassroots and LGBTQ+-friendly shows' },
+  { title: 'Live visuals', meta: 'TouchDesigner', ratio: '16 / 10', brief: '16:10 · live-set still or patch screenshot', note: 'Audio-reactive, for rooms up to 500' },
+  { title: 'Spotify Canvas loops', meta: 'Motion', ratio: '9 / 16', brief: '9:16 · Canvas loop still', note: 'Release content for musicians' },
+  { title: 'DECOY Ltd', meta: 'Streetwear direction', ratio: '4 / 5', brief: '4:5 · DECOY campaign shot', note: 'Shoot direction and social across three platforms' },
+  { title: 'Commissions', meta: 'Illustration and brand', ratio: '1 / 1', brief: '1:1 · favorite commission', placeholder: true },
+];
+---
+
+<section class="py-[clamp(80px,12vh,128px)]" aria-labelledby="personal-title">
+  <div class="shell">
+    <h2 id="personal-title" class="max-w-[22ch] text-h2">Off the clock: self-initiated work and commissions</h2>
+    <p class="mt-4 max-w-[56ch] text-body text-muted">Visualizers, live visuals, streetwear, and posters, made for artists, venues, and herself.</p>
+
+    <ul role="list" class="gallery mt-10">
+      {pieces.map((p) => (
+        <li class="piece reveal">
+          <Slot ratio={p.ratio} brief={p.brief} radius="card" />
+          <p class="label mt-3 text-muted">{p.meta}</p>
+          <p class="mt-1 text-small font-semibold text-ink">{p.title}</p>
+          {p.note && <p class="mt-0.5 text-small text-muted">{p.note}</p>}
+          {p.placeholder && <span class="ph-chip mt-1.5" data-todo="commission">add piece and client</span>}
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .gallery { columns: 1; }
+  @media (min-width: 40rem) { .gallery { columns: 2; column-gap: 16px; } }
+  @media (min-width: 64rem) { .gallery { columns: 3; column-gap: 24px; } }
+  .piece { break-inside: avoid; margin-bottom: 32px; }
+  .piece :global(.ph-frame) { transition: transform var(--d3) var(--ease-out), box-shadow var(--d3) var(--ease-std); }
+  .piece:hover :global(.ph-frame) { transform: translateY(-2px); }
+</style>

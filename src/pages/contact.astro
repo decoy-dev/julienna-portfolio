@@ -1,0 +1,338 @@
+---
+import Base from '../layouts/Base.astro';
+import { Icon } from 'astro-icon/components';
+import { href } from '../lib/url';
+import { person } from '../data/site';
+---
+
+<Base
+  title="Contact | Julienna Batten"
+  description="Contact Julienna Batten about full-time roles, contracts, or freelance design and creative direction work."
+>
+  <header class="page-head shell">
+    <h1 class="text-display">Tell Jules what you're building</h1>
+    <p class="mt-4 max-w-[52ch] text-body text-muted">
+      Hiring for a full-time seat, a contract, or a one-off project? Start here.
+    </p>
+  </header>
+
+  <div class="contact-grid shell mt-12 mb-24">
+    <form class="contact-form" data-contact-form novalidate aria-label="Contact form">
+      <div class="field" data-field>
+        <label class="field-label" for="c-name">Name</label>
+        <input
+          class="input"
+          id="c-name"
+          name="name"
+          type="text"
+          autocomplete="name"
+          required
+          aria-describedby="c-name-error"
+        />
+        <p class="field-error" id="c-name-error">Add your name so Jules knows who is writing.</p>
+      </div>
+
+      <div class="field" data-field>
+        <label class="field-label" for="c-email">Email</label>
+        <input
+          class="input"
+          id="c-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          aria-describedby="c-email-help c-email-error"
+        />
+        <p class="field-help" id="c-email-help">Replies go here, so double-check it.</p>
+        <p class="field-error" id="c-email-error">Add an email address for the reply.</p>
+      </div>
+
+      <div class="field" data-field>
+        <label class="field-label" for="c-company">Company <span class="optional">optional</span></label>
+        <input class="input" id="c-company" name="company" type="text" autocomplete="organization" />
+      </div>
+
+      <div class="field" data-field>
+        <label class="field-label" for="c-type">What are you hiring for?</label>
+        <div class="select-wrap">
+          <select class="input" id="c-type" name="type">
+            <option value="full-time">Full-time role</option>
+            <option value="contract">Contract</option>
+            <option value="freelance">Freelance project</option>
+            <option value="other">Something else</option>
+          </select>
+          <Icon name="ph:caret-down" size={16} class="select-caret" aria-hidden="true" />
+        </div>
+      </div>
+
+      <div class="field" data-field>
+        <label class="field-label" for="c-message">Message</label>
+        <textarea
+          class="input"
+          id="c-message"
+          name="message"
+          rows="6"
+          required
+          aria-describedby="c-message-help c-message-error"></textarea>
+        <p class="field-help" id="c-message-help">The role or project, the timeline, and anything you want Jules to look at first.</p>
+        <p class="field-error" id="c-message-error">Add a message, even a short one.</p>
+      </div>
+
+      <button type="submit" class="btn btn-primary self-start">Send message</button>
+
+      <p class="form-notice" id="form-notice" role="status" hidden>
+        <Icon name="ph:info" size={18} aria-hidden="true" />
+        <span>
+          Preview only. This form does not send messages yet. Email Jules directly at{' '}
+          <a class="link" href={`mailto:${person.email}`}>{person.email}</a>.
+        </span>
+      </p>
+
+      <noscript>
+        <p class="form-notice">
+          Preview only. This form does not send messages yet. Email Jules directly at{' '}
+          <a class="link" href={`mailto:${person.email}`}>{person.email}</a>.
+        </p>
+      </noscript>
+    </form>
+
+    <aside class="contact-aside" aria-label="Direct contact details">
+      <div class="aside-block">
+        <p class="label text-muted">Email</p>
+        <a class="email-link" href={`mailto:${person.email}`}>{person.email}</a>
+        <button type="button" class="btn btn-ghost btn-sm mt-3" data-copy-email={person.email}>
+          <Icon name="ph:copy" size={16} aria-hidden="true" />
+          <span data-copy-label aria-live="polite">Copy address</span>
+        </button>
+      </div>
+
+      <div class="aside-block">
+        <p class="label text-muted">Resume</p>
+        <a class="link mt-2" href={href(person.resume)} download>
+          Download resume
+          <Icon name="ph:download-simple" size={16} class="link-arrow" aria-hidden="true" />
+        </a>
+      </div>
+
+      <div class="aside-block">
+        <p class="label text-muted">LinkedIn</p>
+        <p class="mt-2"><span class="ph-chip">add link</span></p>
+      </div>
+
+      <div class="aside-block">
+        <p class="label text-muted">Availability</p>
+        <p class="mt-2"><span class="ph-chip">add status</span></p>
+      </div>
+
+      <div class="aside-block">
+        <p class="label text-muted">What to expect</p>
+        <ul class="expect-list">
+          <li>A reply within <span class="ph-chip">add number</span> business days</li>
+          <li>A short call to scope the role or project</li>
+          <li>Work samples beyond this site, on request</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</Base>
+
+<script>
+  // Form: honest preview. Validates empty required fields; never pretends to send.
+  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+  const notice = document.getElementById('form-notice');
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let firstInvalid: HTMLElement | null = null;
+    for (const field of form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('[required]')) {
+      const wrap = field.closest<HTMLElement>('[data-field]');
+      const invalid = field.value.trim() === '';
+      field.setAttribute('aria-invalid', String(invalid));
+      if (wrap) wrap.dataset.invalid = String(invalid);
+      if (invalid && !firstInvalid) firstInvalid = field;
+    }
+    if (firstInvalid) {
+      if (notice) notice.hidden = true;
+      firstInvalid.focus();
+    } else if (notice) {
+      notice.hidden = false;
+    }
+  });
+
+  // Clear a field's error as soon as it gets content.
+  form?.addEventListener('input', (e) => {
+    const field = e.target;
+    if (!(field instanceof HTMLInputElement) && !(field instanceof HTMLTextAreaElement)) return;
+    if (!field.required || field.value.trim() === '') return;
+    field.setAttribute('aria-invalid', 'false');
+    const wrap = field.closest<HTMLElement>('[data-field]');
+    if (wrap) wrap.dataset.invalid = 'false';
+  });
+
+  // Copy email: clipboard API with an execCommand fallback.
+  const copyBtn = document.querySelector<HTMLButtonElement>('[data-copy-email]');
+  const copyLabel = copyBtn?.querySelector<HTMLElement>('[data-copy-label]');
+  let copyTimer: number | undefined;
+
+  copyBtn?.addEventListener('click', async () => {
+    const email = copyBtn.dataset.copyEmail ?? '';
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(email);
+      ok = true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = email;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.append(ta);
+      ta.select();
+      try {
+        ok = document.execCommand('copy');
+      } catch {
+        ok = false;
+      }
+      ta.remove();
+    }
+    if (copyLabel) copyLabel.textContent = ok ? 'Copied' : 'Copy failed, select it above';
+    copyBtn.dataset.state = ok ? 'copied' : 'failed';
+    window.clearTimeout(copyTimer);
+    copyTimer = window.setTimeout(() => {
+      if (copyLabel) copyLabel.textContent = 'Copy address';
+      delete copyBtn.dataset.state;
+    }, 2400);
+  });
+</script>
+
+<style>
+  .page-head {
+    padding-top: calc(var(--nav-top) + var(--nav-h) + 56px);
+  }
+
+  .contact-grid {
+    display: grid;
+    gap: 48px;
+  }
+  @media (min-width: 64rem) {
+    .contact-grid {
+      grid-template-columns: 7fr 4fr;
+      gap: 96px;
+      align-items: start;
+    }
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 560px;
+  }
+
+  .field { display: flex; flex-direction: column; }
+  .field-label {
+    font-size: var(--text-small);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .optional {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+  .field-help {
+    margin-top: 6px;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+
+  /* Error state: the `danger` token (form errors only), never a second brand accent. */
+  .field-error {
+    display: none;
+    margin-top: 6px;
+    font-size: var(--text-small);
+    font-weight: 500;
+    color: var(--color-danger);
+  }
+  [data-invalid='true'] .field-error { display: block; }
+  [data-invalid='true'] .input { border-color: var(--color-danger); }
+
+  .input {
+    width: 100%;
+    border: 1.5px solid var(--color-line);
+    border-radius: var(--radius-inset);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font: inherit;
+    font-size: var(--text-small);
+    line-height: 1.5;
+    padding: 10px 14px;
+    transition: border-color var(--d1) var(--ease-std);
+  }
+  .input:hover { border-color: var(--color-dash); }
+  textarea.input { resize: vertical; min-height: 120px; }
+
+  .select-wrap { position: relative; }
+  select.input {
+    appearance: none;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+  .select-caret {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--color-muted);
+  }
+
+  .form-notice {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 14px 16px;
+    border-radius: var(--radius-inset);
+    background: var(--color-graphic-tint);
+    font-size: var(--text-small);
+    color: var(--color-ink);
+  }
+  .form-notice svg { flex-shrink: 0; margin-top: 2px; color: var(--color-graphic-deep); }
+
+  .contact-aside {
+    background: var(--color-surface);
+    border-radius: var(--radius-media);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .aside-block { padding-block: 20px; }
+  .aside-block:first-child { padding-top: 4px; }
+  .aside-block:last-child { padding-bottom: 4px; }
+  .aside-block + .aside-block { border-top: 1px solid var(--color-line); }
+
+  .email-link {
+    display: block;
+    width: fit-content;
+    margin-top: 8px;
+    font-family: var(--font-mono);
+    font-size: var(--text-small);
+    color: var(--color-ink);
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+  }
+  .email-link:hover { text-decoration: underline; color: var(--color-primary); }
+
+  .expect-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: var(--text-small);
+    color: var(--color-muted);
+  }
+
+  [data-copy-email][data-state='copied'] {
+    box-shadow: inset 0 0 0 1.5px var(--color-graphic-deep);
+    color: var(--color-graphic-deep);
+  }
+</style>

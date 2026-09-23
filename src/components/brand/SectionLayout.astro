@@ -1,0 +1,75 @@
+---
+import Guide from './Guide.astro';
+import Spec from './Spec.astro';
+
+const rows = [
+  { token: '.shell', value: 'min(1200px, 100% - 2 * gutter)', use: 'The one content container. Everything centers in it.' },
+  { token: '--gutter', value: 'clamp(20px, 4vw, 24px)', use: 'Page padding: 20px at 390, 24px at 1440.' },
+  { token: 'columns', value: '12 cols, 24px gaps', use: 'Desktop grid inside the shell. Collapses to one column on phones.' },
+  { token: 'section rhythm', value: 'clamp(80px, 12vh, 128px)', use: 'Vertical space between sections.' },
+  { token: 'band padding', value: '64px', use: 'Inner padding of full-bleed bands (proof rail, closing CTA).' },
+  { token: 'spacing base', value: '4px', use: 'All gaps and padding are multiples of 4.' },
+];
+
+const breakpoints = [
+  { bp: '640px', what: 'Two-column grids form; do/don\'t pairs go side by side.' },
+  { bp: '768px', what: 'Spec tables gain columns; stat rows divide with hairlines.' },
+  { bp: '1024px', what: 'Split layouts (hero, guide index) activate.' },
+  { bp: '1280px', what: 'Full 12-column compositions and offsets.' },
+  { bp: '1360px', what: 'The left-gutter section wire renders. Never below this.' },
+];
+---
+
+<Guide
+  id="layout"
+  title="Layout"
+  intro="One 1200px shell, a 12-column grid, and a 4px spacing base. Verify every layout at 390, 768, 1024, and 1440."
+>
+  <Spec label=".shell + grid-cols-12" note="The 12 columns at 24px gaps, drawn live inside the shell.">
+    <div class="grid grid-cols-6 gap-3 sm:grid-cols-12 sm:gap-6" aria-hidden="true">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <div class:list={['h-14 rounded-[4px] bg-graphic-tint', i >= 6 && 'hidden sm:block']}></div>
+      ))}
+    </div>
+    <p class="mt-3 text-small text-muted">Phones see the same shell with the grid collapsed, not a different system.</p>
+  </Spec>
+
+  <div class="rounded-card border border-line">
+    {rows.map((r) => (
+      <div class="layout-row">
+        <code class="font-mono text-[0.8125rem] font-medium">{r.token}</code>
+        <code class="font-mono text-[0.75rem] text-dash-ink">{r.value}</code>
+        <span class="text-small text-muted">{r.use}</span>
+      </div>
+    ))}
+  </div>
+
+  <div>
+    <h3 class="text-h3">Breakpoints</h3>
+    <div class="mt-4 rounded-card border border-line">
+      {breakpoints.map((b) => (
+        <div class="layout-row bp-row">
+          <code class="font-mono text-[0.8125rem] font-medium">{b.bp}</code>
+          <span class="text-small text-muted">{b.what}</span>
+        </div>
+      ))}
+    </div>
+    <p class="mt-3 max-w-[65ch] text-small text-muted">
+      No horizontal overflow at any width. Wide specimens scroll inside their own frame instead of stretching the page.
+    </p>
+  </div>
+</Guide>
+
+<style>
+  .layout-row {
+    display: grid;
+    gap: 0.25rem 1.5rem;
+    padding: 0.875rem 1.25rem;
+    align-items: baseline;
+  }
+  .layout-row + .layout-row { border-top: 1px solid var(--color-line); }
+  @media (min-width: 48rem) {
+    .layout-row { grid-template-columns: 160px 240px minmax(0, 1fr); }
+    .bp-row { grid-template-columns: 160px minmax(0, 1fr); }
+  }
+</style>
