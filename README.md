@@ -1,5 +1,7 @@
 # Julienna Batten, portfolio
 
+Continuing this project on another machine? Start with [docs/handoff/HANDOFF.md](docs/handoff/HANDOFF.md).
+
 Static portfolio site built with Astro, Tailwind CSS v4, anime.js, and Phosphor icons. Deployed to GitHub Pages at `https://decoy-dev.github.io/julienna-portfolio/`.
 
 ## Develop

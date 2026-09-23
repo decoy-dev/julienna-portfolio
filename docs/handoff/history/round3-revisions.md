@@ -1,0 +1,27 @@
+# Round 3 revisions: Julienna Batten portfolio
+
+Project: ~/Documents/julienna-portfolio. Contracts: DESIGN.md, VOICE.md (first person, no AI sentence patterns), CONTENT-TODO.md (what is verified vs illustrative). Earlier rounds: local://PLAN.md, local://revisions.md, agent://Round2Designer. Live: https://decoy-dev.github.io/julienna-portfolio/.
+
+## User feedback (verbatim intent)
+1. The two pipelines are way too simple and linear now; nothing interesting to look at, and they look alike at a glance.
+2. The line from Marshall (timeline) overlaps the Freelance block.
+3. Role-node timing in the hero should be more offset from one another. Role-to-Julienna lines stay white/grey until a ball starts traveling along one, then that line turns green.
+4. The code block in "I use AI for the repetitive half" should be animated: realistic running code that writes out fast and produces a result at the end, tied to the "Nothing renders half set up" checklist, whose items check off as the code reaches them.
+5. Most if not all stat numbers across the page should count (lerp) up to their final value instead of being static.
+6. The "Who does what" block is plain and has a lot of white space.
+7. The left-gutter wire starts at the pipelines section, stops, and reappears at "How I ended up doing all of it". It should be one continuous wire that wraps around sections, weaving between them down the entire page, with a ball that follows the user's scroll to show progress, ending at the closing CTA.
+
+## Main's proposals (designer/advisor refine or overrule)
+- Pipelines: make each lane a different *shape* that matches what the pipeline does, so they read as two different machines.
+  - Ad generator = combine and fan out. Three input stacks on the left show the real choice sets (11 personas, ~40 brand kits, 5 templates) with the chosen one highlighted in each, plus a content input (copy, photo, logo). All four merge into a Render node (rules, no LLM), which fans out into the 8 deliverables (V1/V2 x Story/Post x static/animated). The animation cycles which persona/kit/template is picked, and the output frames re-tint per persona accent (persona colors are allowed inside rendered-output previews only).
+  - Photo intake = funnel and sort. A loose field of ~24-36 raw thumbnails on the left streams through a narrowing funnel (cull), survivors get a naming tag stamped on (name), and they drop into 4 labeled bins (/web, /ads, /social, /print). Intermediate steps remain marked as examples.
+  - Keep both visible at once, stacked; each animates when it enters view; finite (WCAG 2.2.2: total auto motion under 5s, or provide pause); Replay control; complete final state without JS / with reduced motion.
+- Timeline: route Marshall's edge into the "What I do now" node from below (down/up ports) so it never crosses the Freelance bar, or drop that edge; verify geometrically.
+- Hero: role edges idle in `line` grey; a traveling packet turns its edge graphic-deep, which fades back to grey after arrival. Wider randomization: first-cycle offsets spread over ~0-2.4s, fill 0.8-1.6s, idle 0.8-2.4s so two roles rarely fire together.
+- Code block: replace the static JSON with a short, realistic TypeScript render script (createCampaign → use persona / brandKit / template / content → render) that types out fast (~4ms/char), then a terminal output pane prints each gate check (persona, brand kit, template, content) and finally "8 files" with file names. Each gate check in the "Nothing renders half set up" cell ticks exactly when its output line prints. Mark it "Simplified from the real generator". Total under 5s; "Run again" control; reduced motion / no JS show the finished state.
+- Count-up: one small utility; any element with `data-countup` animates its first number from 0 to its value (keeps prefixes/suffixes/commas: ~40, +25%, 40%, 30,000+, 2,000+, ~320, 10M+) when it scrolls into view, once. Above-the-fold numbers are armed before first paint to avoid a flash. Server HTML keeps final values.
+- Who does what: make it a small three-column flow, not two text lists: "I decide" (concept, personas, Figma layouts) wired into "Tools handle" (template drafts with Claude, every size and version, naming and export) wired back into "I sign off" (final approval), with icons and edges; fills the full-width cell.
+- Page wire: one SVG overlay over <main> (≥1360px only, where gutters exist). The path starts at the pipelines heading in the left gutter, runs down beside each section, and in the whitespace between sections sweeps across to the opposite gutter (vertical-tangent S-curves), alternating sides, and finally enters the closing CTA panel from the left to join its existing wire into the "Get in touch" button. Ports mark each section heading. A ball rides the path at the point level with ~55% of the viewport, driven by a native ScrollTimeline (WAAPI keyframes that map scroll offset to offset-distance), and the path behind the ball fills teal. No scroll event listeners; if ScrollTimeline is unsupported or motion is reduced, show the static path with no ball.
+
+## Constraints that still hold
+No scroll locking; Lighthouse perf > 80 on mobile preset with GPU disabled; reduced motion / offscreen / hidden-tab gating; content visible without JS; one accent (teal) except client colors inside rendered-output previews; zero em/en dashes; first-person voice; responsive 320-1440+; Funnel Display / Funnel Sans / Spline Sans Mono (mono only for literal code, file names, paths).
